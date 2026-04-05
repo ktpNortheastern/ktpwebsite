@@ -103,3 +103,12 @@ The dev server hot-reloads — any file changes will instantly appear in the bro
 | `bun run build` | Create production build           |
 | `bun run start` | Serve production build            |
 | `bun run lint`  | Run ESLint                        |
+
+## Contributing
+
+1. **Pick an issue** from the [Issues tab](https://github.com/ktpNortheastern/ktpwebsite/issues)
+2. **Create a branch** off `main` (e.g., `feature/landing-pane` or `5-landing-pane`)
+3. **Do your work** on that branch, committing as you go
+4. **Push your branch** and open a **pull request** into `main`
+5. **Get a review** from a teammate and address any feedback
+6. **Merge** the PR once approved
