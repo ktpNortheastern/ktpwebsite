@@ -1,6 +1,4 @@
-# KTP Northeastern Website
-
-Website for the Northeastern University chapter of Kappa Theta Pi, the first technology-oriented professional fraternity in the nation.
+# KTP website!!!!!!!
 
 ## Tech Stack
 
