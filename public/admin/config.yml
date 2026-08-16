@@ -1,0 +1,154 @@
+backend:
+  name: github
+  repo: ktpNortheastern/ktpwebsite
+  branch: main
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  # Taxonomy collections — these exist so new options can be added from the
+  # CMS itself (e.g. next fall's pledge class) without a dev editing this file.
+  - name: "classes"
+    label: "Member Classes"
+    folder: "content/classes"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {
+          label: "Name",
+          name: "name",
+          widget: "string",
+          hint: "e.g. Epsilon, Delta, Executive Board",
+        }
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        hint: "Controls section order on the Members page, lower = higher up"
+
+  - name: "project_types"
+    label: "Project Types"
+    folder: "content/project-types"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {
+          label: "Name",
+          name: "name",
+          widget: "string",
+          hint: "e.g. App, Merch Collection, Initiative",
+        }
+
+  - name: "members"
+    label: "Members"
+    folder: "content/members"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - label: "Class"
+        name: "class"
+        widget: "relation"
+        collection: "classes"
+        search_fields: ["name"]
+        value_field: "name"
+        display_fields: ["name"]
+        hint: "Don't see the right class? Add it under 'Member Classes' first, then come back here."
+      - label: "Role"
+        name: "role"
+        widget: "string"
+        required: false
+        hint: "Exec board title, e.g. VP Tech Dev. Leave blank for general class members."
+      - { label: "Photo", name: "photo", widget: "image" }
+      - {
+          label: "LinkedIn",
+          name: "linkedin",
+          widget: "string",
+          required: false,
+        }
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        required: false
+        hint: "Controls sort position within the class grid"
+
+  - name: "rush_events"
+    label: "Rush Schedule"
+    folder: "content/rush-events"
+    create: true
+    slug: "{{fields.date}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Order", name: "order", widget: "number" }
+      - { label: "Description", name: "description", widget: "text" }
+      - {
+          label: "Date",
+          name: "date",
+          widget: "datetime",
+          date_format: "MMM D",
+          time_format: false,
+        }
+      - { label: "Time", name: "time", widget: "string", hint: "e.g. 6:30 PM" }
+      - { label: "Location", name: "location", widget: "string" }
+      - { label: "Image", name: "image", widget: "image", required: false }
+
+  - name: "faq"
+    label: "FAQ"
+    folder: "content/faq"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Question", name: "question", widget: "string" }
+      - { label: "Answer", name: "answer", widget: "text" }
+      - { label: "Order", name: "order", widget: "number" }
+
+  - name: "projects"
+    label: "Projects & Merch"
+    folder: "content/projects"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - label: "Type"
+        name: "type"
+        widget: "relation"
+        collection: "project_types"
+        search_fields: ["name"]
+        value_field: "name"
+        display_fields: ["name"]
+      - { label: "Image", name: "image", widget: "image" }
+      - {
+          label: "Description",
+          name: "description",
+          widget: "text",
+          required: false,
+        }
+      - { label: "Year", name: "year", widget: "string", required: false }
+      - { label: "Sponsor", name: "sponsor", widget: "string", required: false }
+      - { label: "Order", name: "order", widget: "number" }
+
+  - name: "network"
+    label: "Companies Network"
+    folder: "content/network"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Company Name", name: "name", widget: "string" }
+      - { label: "Logo", name: "logo", widget: "image", required: false }
+
+  - name: "gallery"
+    label: "Gallery"
+    folder: "content/gallery"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Image", name: "image", widget: "image" }
+      - { label: "Caption", name: "caption", widget: "string" }
+      - {
+          label: "Album/Tag",
+          name: "album",
+          widget: "string",
+          required: false,
+          hint: "e.g. KTP F25 Retreat",
+        }
+      - { label: "Order", name: "order", widget: "number", required: false }
