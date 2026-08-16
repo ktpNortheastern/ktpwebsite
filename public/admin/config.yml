@@ -54,6 +54,12 @@ collections:
         value_field: "name"
         display_fields: ["name"]
         hint: "Don't see the right class? Add it under 'Member Classes' first, then come back here."
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        options: ["Active", "Alumni"]
+        default: "Active"
+        hint: "Alumni always render in the Alumni section, regardless of their class"
       - label: "Role"
         name: "role"
         widget: "string"
