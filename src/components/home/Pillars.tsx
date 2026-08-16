@@ -44,7 +44,19 @@ export default function Pillars() {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    if (track.scrollWidth - section.clientWidth <= 0) return;
+    // section.clientWidth includes its own horizontal padding (px-[100px]
+    // each side), but the track only becomes visible inside that padded
+    // inset — subtracting clientWidth alone left the translate distance
+    // short by exactly the padding amount, clipping the last card. Read
+    // padding live (not hardcoded) so a future className change can't
+    // silently desync this again.
+    const visibleWidth = () => {
+      const style = getComputedStyle(section);
+      const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      return section.clientWidth - paddingX;
+    };
+
+    if (track.scrollWidth - visibleWidth() <= 0) return;
 
     // x/end read live layout on every evaluation rather than closing over
     // a single scrollDistance measured at mount — a window resize
@@ -52,12 +64,12 @@ export default function Pillars() {
     // otherwise leave the pin scrubbing against a stale distance from
     // whatever size the page happened to load at.
     const tween = gsap.to(track, {
-      x: () => -(track.scrollWidth - section.clientWidth),
+      x: () => -(track.scrollWidth - visibleWidth()),
       ease: "none",
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: () => `+=${track.scrollWidth - section.clientWidth}`,
+        end: () => `+=${track.scrollWidth - visibleWidth()}`,
         scrub: true,
         pin: true,
       },

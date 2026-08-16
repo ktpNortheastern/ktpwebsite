@@ -43,13 +43,13 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
 
       const points: number[] = [];
       const pinnedRanges: [number, number][] = [];
+      const allTriggers = ScrollTrigger.getAll();
 
       for (const section of sections) {
         // GSAP's `pin: true` wraps a pinned section in a `.pin-spacer` div
         // and sets the section itself to `position: fixed`, which zeroes
         // out its own `offsetTop` — the spacer holds the section's real
-        // document position (and, via its height, the full scrub range)
-        // so read from it when present.
+        // document position so read from it when present.
         const spacer = section.parentElement?.classList.contains("pin-spacer")
           ? section.parentElement
           : null;
@@ -57,11 +57,18 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
         const start = gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll);
         points.push(start);
         if (spacer) {
-          const end = gsap.utils.clamp(
-            0,
-            1,
-            (spacer.offsetTop + spacer.offsetHeight) / maxScroll
-          );
+          // Deliberately NOT spacer.offsetTop + spacer.offsetHeight: the
+          // spacer's height reserves room for both the pin's scrub distance
+          // AND the pinned element's own rendered height, so that sum always
+          // lands at the START of the NEXT section — overshooting the pin's
+          // real release point by about one viewport height. The section's
+          // own ScrollTrigger already knows its real release point (`end`,
+          // in the same window-scroll pixel space as maxScroll), so read it
+          // directly instead of re-deriving it from spacer geometry.
+          const ownTrigger = allTriggers.find((t) => t.trigger === section && t.pin);
+          const end = ownTrigger
+            ? gsap.utils.clamp(0, 1, ownTrigger.end / maxScroll)
+            : start;
           pinnedRanges.push([start, end]);
         }
       }
