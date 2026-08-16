@@ -34,9 +34,17 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       if (!sections.length) return;
 
       const maxScroll = content!.scrollHeight - window.innerHeight;
-      const snapPoints = sections.map((section) =>
-        maxScroll > 0 ? gsap.utils.clamp(0, 1, section.offsetTop / maxScroll) : 0
-      );
+      const snapPoints = sections.map((section) => {
+        // GSAP's `pin: true` wraps a pinned section in a `.pin-spacer` div and
+        // sets the section itself to `position: fixed`, which zeroes out its
+        // own `offsetTop` — the spacer is what actually holds the section's
+        // real document position, so read from it when present.
+        const positionedEl =
+          section.parentElement?.classList.contains("pin-spacer")
+            ? section.parentElement
+            : section;
+        return maxScroll > 0 ? gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll) : 0;
+      });
 
       snapTrigger = ScrollTrigger.create({
         trigger: content,
