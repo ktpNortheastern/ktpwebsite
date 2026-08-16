@@ -20,7 +20,7 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       content,
       smooth: 0.8,
       effects: false,
-      normalizeScroll: false,
+      normalizeScroll: true,
     });
 
     // Computes fresh every time it's called, rather than once at trigger-
@@ -30,22 +30,43 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
     // once easily races that and goes stale. Reading live DOM at the
     // moment the user actually stops scrolling sidesteps the race
     // entirely instead of trying to time a rebuild around it.
-    function getSnapPoints(): number[] {
+    //
+    // Also returns each pinned section's full scrub range (as fractions),
+    // not just its entry point — Pillars' horizontal scroll and Why Rush's
+    // step reveal are both driven by the user continuing to scroll through
+    // their pin, and naively snapping to the "nearest section" on every
+    // pause would yank them out mid-scrub before that finishes.
+    function getSnapInfo() {
       const sections = Array.from(content!.querySelectorAll<HTMLElement>("[data-snap-section]"));
       const maxScroll = ScrollTrigger.maxScroll(window);
-      if (maxScroll <= 0) return [0];
+      if (maxScroll <= 0) return { points: [0], pinnedRanges: [] as [number, number][] };
 
-      return sections.map((section) => {
+      const points: number[] = [];
+      const pinnedRanges: [number, number][] = [];
+
+      for (const section of sections) {
         // GSAP's `pin: true` wraps a pinned section in a `.pin-spacer` div
         // and sets the section itself to `position: fixed`, which zeroes
         // out its own `offsetTop` — the spacer holds the section's real
-        // document position, so read from it when present.
-        const positionedEl =
-          section.parentElement?.classList.contains("pin-spacer")
-            ? section.parentElement
-            : section;
-        return gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll);
-      });
+        // document position (and, via its height, the full scrub range)
+        // so read from it when present.
+        const spacer = section.parentElement?.classList.contains("pin-spacer")
+          ? section.parentElement
+          : null;
+        const positionedEl = spacer ?? section;
+        const start = gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll);
+        points.push(start);
+        if (spacer) {
+          const end = gsap.utils.clamp(
+            0,
+            1,
+            (spacer.offsetTop + spacer.offsetHeight) / maxScroll
+          );
+          pinnedRanges.push([start, end]);
+        }
+      }
+
+      return { points, pinnedRanges };
     }
 
     // ScrollSmoother has no built-in `snap` option — snapping to each
@@ -57,7 +78,14 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       end: "max",
       snap: {
         snapTo: (value) => {
-          const points = getSnapPoints();
+          const { points, pinnedRanges } = getSnapInfo();
+
+          // Inside a pin's own scrub range (not just at its very start) —
+          // don't snap, let the pin's scroll-driven animation keep going.
+          for (const [start, end] of pinnedRanges) {
+            if (value > start && value < end) return value;
+          }
+
           let closest = points[0];
           let min = Infinity;
           for (const point of points) {
