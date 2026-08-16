@@ -20,58 +20,72 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       content,
       smooth: 0.8,
       effects: false,
-      normalizeScroll: true,
+      normalizeScroll: false,
     });
 
-    // ScrollSmoother has no built-in `snap` option — snapping to each
-    // section is done via a plain ScrollTrigger whose `snapTo` points are
-    // each section's normalized scroll offset within the smoothed content.
-    let snapTrigger: ScrollTrigger | undefined;
-
-    function buildSnap() {
-      snapTrigger?.kill();
+    // Computes fresh every time it's called, rather than once at trigger-
+    // creation time — Pillars/WhyRush's own pin geometry (and thus the
+    // page's total scroll height) can still be settling shortly after
+    // mount (fonts swapping, layout not yet final), so a snapshot taken
+    // once easily races that and goes stale. Reading live DOM at the
+    // moment the user actually stops scrolling sidesteps the race
+    // entirely instead of trying to time a rebuild around it.
+    function getSnapPoints(): number[] {
       const sections = Array.from(content!.querySelectorAll<HTMLElement>("[data-snap-section]"));
-      if (!sections.length) return;
+      const maxScroll = ScrollTrigger.maxScroll(window);
+      if (maxScroll <= 0) return [0];
 
-      const maxScroll = content!.scrollHeight - window.innerHeight;
-      const snapPoints = sections.map((section) => {
-        // GSAP's `pin: true` wraps a pinned section in a `.pin-spacer` div and
-        // sets the section itself to `position: fixed`, which zeroes out its
-        // own `offsetTop` — the spacer is what actually holds the section's
-        // real document position, so read from it when present.
+      return sections.map((section) => {
+        // GSAP's `pin: true` wraps a pinned section in a `.pin-spacer` div
+        // and sets the section itself to `position: fixed`, which zeroes
+        // out its own `offsetTop` — the spacer holds the section's real
+        // document position, so read from it when present.
         const positionedEl =
           section.parentElement?.classList.contains("pin-spacer")
             ? section.parentElement
             : section;
-        return maxScroll > 0 ? gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll) : 0;
-      });
-
-      snapTrigger = ScrollTrigger.create({
-        trigger: content,
-        start: "top top",
-        end: "bottom bottom",
-        snap: {
-          snapTo: snapPoints,
-          duration: { min: 0.3, max: 0.6 },
-          ease: "power1.inOut",
-        },
+        return gsap.utils.clamp(0, 1, positionedEl.offsetTop / maxScroll);
       });
     }
 
-    buildSnap();
+    // ScrollSmoother has no built-in `snap` option — snapping to each
+    // section is done via a plain ScrollTrigger whose `snapTo` points are
+    // each section's normalized scroll offset within the smoothed content.
+    const snapTrigger = ScrollTrigger.create({
+      trigger: content,
+      start: "top top",
+      end: "max",
+      snap: {
+        snapTo: (value) => {
+          const points = getSnapPoints();
+          let closest = points[0];
+          let min = Infinity;
+          for (const point of points) {
+            const dist = Math.abs(point - value);
+            if (dist < min) {
+              min = dist;
+              closest = point;
+            }
+          }
+          return closest;
+        },
+        duration: { min: 0.3, max: 0.6 },
+        ease: "power1.inOut",
+      },
+    });
 
-    // Section offsets/scrollHeight are measured synchronously on mount,
-    // before self-hosted fonts have necessarily finished swapping in and
-    // reflowing the page (especially on a cold, uncached load) — rebuild
-    // once fonts are actually ready so snap points and ScrollTrigger's
-    // cached geometry reflect final layout, not a stale first-paint one.
+    // Section offsets/scrollHeight are measured on mount, before self-
+    // hosted fonts have necessarily finished swapping in and reflowing the
+    // page (especially on a cold, uncached load) — refresh once fonts are
+    // actually ready so every trigger's cached geometry (including the
+    // pins' pin-spacers that getSnapPoints reads from) reflects final
+    // layout, not a stale first-paint one.
     document.fonts.ready.then(() => {
-      buildSnap();
       ScrollTrigger.refresh();
     });
 
     return () => {
-      snapTrigger?.kill();
+      snapTrigger.kill();
       smoother.kill();
     };
   }, []);

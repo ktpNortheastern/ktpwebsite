@@ -44,16 +44,20 @@ export default function Pillars() {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const scrollDistance = track.scrollWidth - section.clientWidth;
-    if (scrollDistance <= 0) return;
+    if (track.scrollWidth - section.clientWidth <= 0) return;
 
+    // x/end read live layout on every evaluation rather than closing over
+    // a single scrollDistance measured at mount — a window resize
+    // (rotating a tablet, un-maximizing, a different monitor) would
+    // otherwise leave the pin scrubbing against a stale distance from
+    // whatever size the page happened to load at.
     const tween = gsap.to(track, {
-      x: -scrollDistance,
+      x: () => -(track.scrollWidth - section.clientWidth),
       ease: "none",
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: () => `+=${scrollDistance}`,
+        end: () => `+=${track.scrollWidth - section.clientWidth}`,
         scrub: true,
         pin: true,
       },
