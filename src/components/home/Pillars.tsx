@@ -74,7 +74,10 @@ export default function Pillars() {
       <h2 className="font-mono text-4xl text-white">Pillars</h2>
       <div ref={trackRef} className="mt-16 flex gap-16">
         {PILLARS.map((pillar, i) => (
-          <div key={pillar.title} className="w-[386px] shrink-0 border-t border-white/20 pt-8">
+          <div
+            key={pillar.title}
+            className="w-[386px] shrink-0 border-y border-white/20 py-8"
+          >
             <PlaceholderImage n={i + 4} className="h-[210px] w-full" />
             <p className="mt-6 font-mono text-sm text-white/60">
               {String(i + 1).padStart(2, "0")}
