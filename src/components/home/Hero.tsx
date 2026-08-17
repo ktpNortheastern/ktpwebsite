@@ -31,7 +31,13 @@ export default function Hero() {
       data-snap-section
       className="relative flex h-screen flex-col justify-center overflow-hidden bg-slate pt-[68px]"
     >
-      <div className="absolute inset-x-0 top-[68px] bottom-0 overflow-hidden">
+      {/* Real layout space (not an overlay) for the nav's big headline to
+          sit over at rest — sized to match NavBar's wordmark alignment.
+          Scrolls away normally with the rest of Hero, genuinely revealing
+          the photo underneath rather than faking it with an opacity fade. */}
+      <div className="absolute inset-x-0 top-[68px] h-[46vh] min-h-[320px] bg-navy md:h-[52vh] md:min-h-[400px]" />
+
+      <div className="absolute inset-x-0 top-[calc(68px+46vh)] bottom-0 overflow-hidden md:top-[calc(68px+52vh)]">
         <Image
           src="/images/delta_initiation.png"
           alt=""
@@ -40,7 +46,7 @@ export default function Hero() {
           className="object-cover blur-[4px]"
         />
       </div>
-      <div className="absolute inset-x-0 top-[68px] bottom-0 bg-black/40" />
+      <div className="absolute inset-x-0 top-[calc(68px+46vh)] bottom-0 bg-black/40 md:top-[calc(68px+52vh)]" />
 
       <div className="relative z-10 px-6 md:px-[60px]">
         <div className="flex items-center gap-4 md:gap-6">

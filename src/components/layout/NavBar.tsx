@@ -16,7 +16,14 @@ const links = [
   { label: "Gallery", href: "/gallery" },
 ];
 
-const NAVY = "#0a1d37";
+// Shared timeline shape so the headline's FLIP and the nav links' spread
+// FLIP — two separate gsap timelines, each normalized to its own total
+// duration by ScrollTrigger's scrub over the same scroll distance — land
+// on the same scroll position instead of drifting out of sync.
+const SCROLL_DISTANCE = "+=420";
+const HOLD = 1.6;
+const SHRINK = 2;
+const TOTAL = HOLD + SHRINK;
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -29,7 +36,7 @@ export default function NavBar() {
   const targetRef = useRef<HTMLDivElement>(null);
   const navLinksRef = useRef<HTMLDivElement>(null);
 
-  // Only the home page opens on the big navy "Kappa Theta Pi" headline —
+  // Only the home page opens on the big white "Kappa Theta Pi" headline —
   // every other page has no hero moment to shrink from, so it renders
   // straight into the compact/scrolled nav state.
   useEffect(() => {
@@ -67,29 +74,31 @@ export default function NavBar() {
       const scale = smallRect.height / bigRect.height;
       const deltaX = smallRect.left - bigRect.left;
       const deltaY = smallRect.top - bigRect.top;
-      const dropY = 28; // how far the headline drifts before it starts shrinking
+      const dropY = 48; // how far the headline drifts before it starts shrinking
+      const blendOnAt = HOLD * 0.15; // how soon the mask kicks in as the real hero photo scrolls into view behind it
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: "body",
           start: "top top",
-          end: "+=280",
+          end: SCROLL_DISTANCE,
           scrub: 0.3,
         },
       });
 
-      tl.set(wordmark, { x: 0, y: 0, scale: 1, color: NAVY, mixBlendMode: "difference" }, 0)
-        // Phase 1: the headline holds its size and just follows the
-        // scroll down a little — it does NOT start shrinking immediately.
-        .to(wordmark, { y: dropY, duration: 1, ease: "none" }, 0)
+      tl.set(wordmark, { x: 0, y: 0, scale: 1, color: "#ffffff", mixBlendMode: "normal" }, 0)
+        // Phase 1: the headline holds its full size and just drifts down a
+        // little — it does NOT start shrinking immediately. It sits fixed
+        // in the nav while the real navy block in Hero (not an overlay)
+        // scrolls away underneath it at normal speed, so almost as soon as
+        // scrolling starts, the actual hero photo is what's behind the
+        // text — that's when the difference-blend mask switches on.
+        .set(wordmark, { mixBlendMode: "difference" }, blendOnAt)
+        .to(wordmark, { y: dropY, duration: HOLD, ease: "none" }, 0)
         // Phase 2: it shrinks and slides into the corner, losing the
-        // difference-blend mask and settling to white over the navy bar.
-        .to(
-          wordmark,
-          { x: deltaX, y: deltaY, scale, color: "#ffffff", duration: 2, ease: "none" },
-          1,
-        )
-        .set(wordmark, { mixBlendMode: "normal" }, 2.6);
+        // difference-blend mask right before it lands on the navy bar.
+        .to(wordmark, { x: deltaX, y: deltaY, scale, duration: SHRINK, ease: "none" }, HOLD)
+        .set(wordmark, { mixBlendMode: "normal" }, TOTAL - SHRINK * 0.2);
 
       return tl;
     }
@@ -124,13 +133,22 @@ export default function NavBar() {
           scrollTrigger: {
             trigger: "body",
             start: "top top",
-            end: "+=280",
+            end: SCROLL_DISTANCE,
             scrub: 0.3,
           },
         });
+        // `.set()` at 0 then `.to()` at HOLD, not a single `.fromTo()` at
+        // HOLD — a fromTo positioned later in the timeline only applies its
+        // "from" value once the playhead reaches it, so scrubbing through
+        // 0→HOLD would've shown the links already at their natural
+        // (clustered) position instead of spread out.
         items.forEach((el, i) => {
-          tl.fromTo(el, { x: deltas[i] }, { x: 0, duration: 1, ease: "none" }, 0);
+          tl.set(el, { x: deltas[i] }, 0).to(el, { x: 0, duration: SHRINK, ease: "none" }, HOLD);
         });
+        // Zero-duration marker to pad the timeline's total length out to
+        // TOTAL, matching the headline timeline so both stay in lockstep
+        // even though ScrollTrigger normalizes each one independently.
+        tl.set(items[0], {}, TOTAL);
         return tl;
       }
 
@@ -187,16 +205,22 @@ export default function NavBar() {
         {isHome && "Kappa Theta Pi"}
       </div>
 
+      {/* Positioned to exactly cover Hero's real navy block (same top
+          offset and height — see Hero.tsx) so the headline reads as part
+          of that block at rest, even though the block itself is normal
+          page content that scrolls away underneath this fixed text. */}
       {isHome && (
-        <Link
-          ref={wordmarkRef}
-          href="/"
-          className="pointer-events-auto absolute left-6 right-6 top-[74px] whitespace-nowrap font-sans text-[9vw] font-bold leading-none md:left-[38px] md:right-[38px]"
-        >
-          <span ref={wordmarkInnerRef} className="inline-block">
-            Kappa Theta Pi
-          </span>
-        </Link>
+        <div className="pointer-events-none absolute inset-x-0 top-[68px] flex h-[46vh] min-h-[320px] items-center px-6 md:h-[52vh] md:min-h-[400px] md:px-[38px]">
+          <Link
+            ref={wordmarkRef}
+            href="/"
+            className="pointer-events-auto block w-full whitespace-nowrap font-sans text-[13vw] font-bold leading-none text-white"
+          >
+            <span ref={wordmarkInnerRef} className="inline-block">
+              Kappa Theta Pi
+            </span>
+          </Link>
+        </div>
       )}
 
       <nav
