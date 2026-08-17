@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCursor } from "@/components/motion/CustomCursor";
 
@@ -30,8 +31,16 @@ export default function Hero() {
       data-snap-section
       className="relative flex h-screen flex-col justify-center overflow-hidden bg-slate pt-[68px]"
     >
-      {/* swappable hero media background — defaults to a translucent panel until real image/video is supplied */}
-      <div className="absolute inset-x-0 top-[68px] bottom-0 bg-[rgba(192,192,192,0.3)]" />
+      <div className="absolute inset-x-0 top-[68px] bottom-0 overflow-hidden">
+        <Image
+          src="/images/delta_initiation.png"
+          alt=""
+          fill
+          priority
+          className="object-cover blur-[4px]"
+        />
+      </div>
+      <div className="absolute inset-x-0 top-[68px] bottom-0 bg-black/40" />
 
       <div className="relative z-10 px-6 md:px-[60px]">
         <div className="flex items-center gap-4 md:gap-6">
