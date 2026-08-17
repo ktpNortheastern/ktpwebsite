@@ -16,110 +16,192 @@ const links = [
   { label: "Gallery", href: "/gallery" },
 ];
 
-const GOLD = "#c9a24a";
+const NAVY = "#0a1d37";
 
 export default function NavBar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [open, setOpen] = useState(false);
 
+  const headerRef = useRef<HTMLElement>(null);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
-  const brandMarkRef = useRef<HTMLAnchorElement>(null);
+  const wordmarkInnerRef = useRef<HTMLSpanElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
   const navLinksRef = useRef<HTMLDivElement>(null);
 
-  // Only the home page opens on the big gold "Kappa Theta Pi" wordmark —
+  // Only the home page opens on the big navy "Kappa Theta Pi" headline —
   // every other page has no hero moment to shrink from, so it renders
-  // straight into the compact/scrolled nav state. Desktop-only (matchMedia
-  // below): mobile keeps the compact mark + hamburger from first paint,
-  // matching how SnapScrollContainer skips its own desktop-only scroll
-  // rig below `md` rather than shipping a degraded version of it.
+  // straight into the compact/scrolled nav state.
   useEffect(() => {
     if (!isHome) return;
+    const header = headerRef.current;
     const wordmark = wordmarkRef.current;
-    const brandMark = brandMarkRef.current;
+    const inner = wordmarkInnerRef.current;
+    const target = targetRef.current;
     const navLinks = navLinksRef.current;
-    if (!wordmark || !brandMark || !navLinks) return;
+    if (!header || !wordmark || !inner || !target || !navLinks) return;
 
+    gsap.set(inner, { transformOrigin: "0% 0%" });
+    gsap.set(wordmark, { transformOrigin: "0% 0%" });
+
+    // Stretches the headline to the exact edge-to-edge width of its
+    // container (matching header's own padding) regardless of viewport
+    // or how many characters the phrase has, the same "full-bleed
+    // wordmark" trick sienna.framer.media uses for its hero title.
+    function fitWidth() {
+      gsap.set(inner!, { scaleX: 1 });
+      const natural = inner!.getBoundingClientRect().width;
+      const container = wordmark!.clientWidth;
+      gsap.set(inner!, { scaleX: container / natural });
+    }
+
+    // Manual FLIP against an invisible same-text target sitting in the
+    // compact nav slot: measuring both rects and scrubbing the delta
+    // between them makes the SAME element slide from the big edge-to-edge
+    // headline down into the small corner mark, instead of crossfading
+    // between two independently-styled elements.
+    function buildTimeline() {
+      fitWidth();
+      const bigRect = wordmark!.getBoundingClientRect();
+      const smallRect = target!.getBoundingClientRect();
+      const scale = smallRect.height / bigRect.height;
+      const deltaX = smallRect.left - bigRect.left;
+      const deltaY = smallRect.top - bigRect.top;
+      const dropY = 28; // how far the headline drifts before it starts shrinking
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "+=280",
+          scrub: 0.3,
+        },
+      });
+
+      tl.set(wordmark, { x: 0, y: 0, scale: 1, color: NAVY, mixBlendMode: "difference" }, 0)
+        // Phase 1: the headline holds its size and just follows the
+        // scroll down a little — it does NOT start shrinking immediately.
+        .to(wordmark, { y: dropY, duration: 1, ease: "none" }, 0)
+        // Phase 2: it shrinks and slides into the corner, losing the
+        // difference-blend mask and settling to white over the navy bar.
+        .to(
+          wordmark,
+          { x: deltaX, y: deltaY, scale, color: "#ffffff", duration: 2, ease: "none" },
+          1,
+        )
+        .set(wordmark, { mixBlendMode: "normal" }, 2.6);
+
+      return tl;
+    }
+
+    // Desktop-only: the nav links spread edge-to-edge like Sienna's at
+    // rest, then relayout into their normal clustered/right-aligned group
+    // as the headline reaches the corner. Skipped on mobile, where the
+    // links are hidden behind the hamburger anyway.
     const mm = gsap.matchMedia();
-
     mm.add("(min-width: 768px)", () => {
-      gsap.set(wordmark, { transformOrigin: "0% 0%" });
+      const items = Array.from(navLinks.children) as HTMLElement[];
 
-      // Manual FLIP: measure the big wordmark against the small brand
-      // mark it's morphing into, then scrub a translate+scale delta
-      // between them so the same element visibly slides from the big
-      // full-width headline down into the nav corner, rather than
-      // jumping between two independently-styled states.
-      function buildTimeline() {
-        const bigRect = wordmark!.getBoundingClientRect();
-        const smallRect = brandMark!.getBoundingClientRect();
-        const scale = smallRect.height / bigRect.height;
-        const deltaX = smallRect.left - bigRect.left;
-        const deltaY = smallRect.top - bigRect.top;
+      function buildNavSpread() {
+        const headerRect = header!.getBoundingClientRect();
+        const targetRect = target!.getBoundingClientRect();
 
-        return gsap.timeline({
+        const naturalRects = items.map((el) => el.getBoundingClientRect());
+        const startX = targetRect.right + 80;
+        const endX = headerRect.right - 24;
+        const span = Math.max(endX - startX, 0);
+        const n = items.length;
+
+        return naturalRects.map((rect, i) => {
+          const spreadLeft = n > 1 ? startX + (span * i) / (n - 1) : startX;
+          return spreadLeft - rect.left;
+        });
+      }
+
+      function buildNavTimeline() {
+        const deltas = buildNavSpread();
+        const tl = gsap.timeline({
           scrollTrigger: {
             trigger: "body",
             start: "top top",
-            end: "+=220",
+            end: "+=280",
             scrub: 0.3,
           },
-        })
-          .fromTo(
-            wordmark,
-            { x: 0, y: 0, scale: 1, color: GOLD },
-            { x: deltaX, y: deltaY, scale, color: "#ffffff", duration: 1, ease: "none" },
-            0,
-          )
-          .to(brandMark, { autoAlpha: 1, duration: 0.3, ease: "none" }, 0.75)
-          .to(wordmark, { autoAlpha: 0, duration: 0.25, ease: "none" }, 0.75)
-          .to(navLinks, { autoAlpha: 1, x: 0, duration: 1, ease: "none" }, 0);
+        });
+        items.forEach((el, i) => {
+          tl.fromTo(el, { x: deltas[i] }, { x: 0, duration: 1, ease: "none" }, 0);
+        });
+        return tl;
       }
 
-      let tl = buildTimeline();
-      const onResize = () => {
-        tl.scrollTrigger?.kill();
-        tl.kill();
-        gsap.set(wordmark, { clearProps: "transform,color,opacity,visibility" });
-        gsap.set(navLinks, { clearProps: "transform,opacity,visibility" });
-        gsap.set(brandMark, { clearProps: "opacity,visibility" });
-        tl = buildTimeline();
+      let navTl = buildNavTimeline();
+      const onNavResize = () => {
+        navTl.scrollTrigger?.kill();
+        navTl.kill();
+        gsap.set(items, { clearProps: "transform" });
+        navTl = buildNavTimeline();
       };
-      window.addEventListener("resize", onResize);
+      window.addEventListener("resize", onNavResize);
 
       return () => {
-        window.removeEventListener("resize", onResize);
-        tl.scrollTrigger?.kill();
-        tl.kill();
+        window.removeEventListener("resize", onNavResize);
+        navTl.scrollTrigger?.kill();
+        navTl.kill();
       };
     });
 
-    return () => mm.revert();
+    let tl = buildTimeline();
+    const onResize = () => {
+      tl.scrollTrigger?.kill();
+      tl.kill();
+      gsap.set(wordmark, { clearProps: "transform,color,opacity,mixBlendMode" });
+      tl = buildTimeline();
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", onResize);
+    document.fonts?.ready?.then(() => {
+      tl.scrollTrigger?.kill();
+      tl.kill();
+      tl = buildTimeline();
+    });
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      tl.scrollTrigger?.kill();
+      tl.kill();
+      mm.revert();
+    };
   }, [isHome]);
 
   return (
-    <header className="fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px]">
-      <Link
-        ref={brandMarkRef}
-        href="/"
-        className={`font-serif font-semibold text-2xl text-white ${isHome ? "md:invisible" : ""}`}
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px]"
+    >
+      <div
+        ref={targetRef}
+        className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
+        aria-hidden={isHome}
       >
-        ΚΘΠ
-      </Link>
+        {!isHome && <Link href="/">Kappa Theta Pi</Link>}
+        {isHome && "Kappa Theta Pi"}
+      </div>
 
       {isHome && (
         <Link
           ref={wordmarkRef}
           href="/"
-          className="pointer-events-auto absolute left-6 top-[74px] hidden whitespace-nowrap font-sans text-[11vw] font-bold italic leading-none text-[#c9a24a] md:block md:left-[38px]"
+          className="pointer-events-auto absolute left-6 right-6 top-[74px] whitespace-nowrap font-sans text-[9vw] font-bold leading-none md:left-[38px] md:right-[38px]"
         >
-          Kappa Theta Pi
+          <span ref={wordmarkInnerRef} className="inline-block">
+            Kappa Theta Pi
+          </span>
         </Link>
       )}
 
       <nav
         ref={navLinksRef}
-        className={`hidden items-center gap-10 md:flex ${isHome ? "invisible translate-x-6" : ""}`}
+        className="hidden items-center gap-10 md:flex"
       >
         {links.map((link) => (
           <Link
