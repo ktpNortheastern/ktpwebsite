@@ -91,6 +91,13 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
           }
         }
 
+        // Footer renders after the last `[data-snap-section]` (FAQ preview)
+        // but isn't one itself, so without an explicit point here the
+        // snap range covering it (end: "max" below) has no valid resting
+        // spot inside the footer — any pause there finds FAQ's start as
+        // the nearest known point and gets pulled back up out of it.
+        points.push(1);
+
         return { points, pinnedRanges };
       }
 
