@@ -14,10 +14,10 @@ export default function PresidentialWelcome() {
   return (
     <section
       data-snap-section
-      className="flex h-screen items-center gap-16 bg-navy px-[100px] pt-[68px]"
+      className="flex min-h-screen flex-col items-center gap-10 bg-navy px-6 py-16 pt-[100px] md:h-screen md:flex-row md:gap-16 md:px-[100px] md:py-0 md:pt-[68px]"
     >
-      <PlaceholderImage n={1} className="h-[500px] w-[380px] shrink-0" />
-      <div className="max-w-[622px]">
+      <PlaceholderImage n={1} className="h-[260px] w-full shrink-0 md:h-[500px] md:w-[380px]" />
+      <div className="md:max-w-[622px]">
         <h2 className="font-mono text-2xl font-bold text-white">Presidential Welcome</h2>
         <div className="mt-8 flex flex-col gap-4 whitespace-pre-line font-sans text-[15px] leading-relaxed text-white/80">
           {LETTER}

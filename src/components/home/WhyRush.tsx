@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
+import { isMobileViewport } from "@/lib/isMobileViewport";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,57 +34,90 @@ export default function WhyRush() {
     const cards = cardRefs.current;
     if (!section || !header || !cards.length) return;
 
-    gsap.set(cards.slice(1), { opacity: 0, y: 40 });
+    // Below `md`, the pin + crossfade is skipped entirely — pinning eats
+    // most of a phone's vertical space for not much payoff on 3 short text
+    // blocks, so mobile just gets header-then-cards in normal stacked
+    // flow (see className: `static` instead of `absolute inset-0`).
+    // Re-checked on resize so crossing the breakpoint tears down or spins
+    // up the pin/crossfade cleanly.
+    let cleanupDesktop: (() => void) | undefined;
+    let isDesktopActive = false;
 
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: "top top",
-      end: () => `+=${(cards.length - 1) * 400 + 300}`,
-      pin: true,
-      onUpdate: (self) => {
-        const step = 1 / cards.length;
-        const activeIndex = Math.min(
-          cards.length - 1,
-          Math.floor(self.progress / step)
-        );
-        // Set (not tween) each card's state directly from the current
-        // scroll progress every frame, rather than firing an independent
-        // gsap.to() per card. Independent tweens can get skipped past
-        // (a fast scroll jumping activeIndex by more than one step) or
-        // left stuck mid-fade if interrupted before completing — since
-        // the correct visual state is a pure function of progress, setting
-        // it directly is self-correcting on every single update no matter
-        // how big a jump happens between frames. The CSS `transition`
-        // classes on each card (see JSX) supply the smoothing instead.
-        cards.forEach((card, i) => {
-          gsap.set(card, {
-            opacity: i === activeIndex ? 1 : 0,
-            y: i === activeIndex ? 0 : 40,
+    function setupDesktop() {
+      gsap.set(cards.slice(1), { opacity: 0, y: 40 });
+
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: () => `+=${(cards.length - 1) * 400 + 300}`,
+        pin: true,
+        onUpdate: (self) => {
+          const step = 1 / cards.length;
+          const activeIndex = Math.min(
+            cards.length - 1,
+            Math.floor(self.progress / step)
+          );
+          // Set (not tween) each card's state directly from the current
+          // scroll progress every frame, rather than firing an independent
+          // gsap.to() per card. Independent tweens can get skipped past
+          // (a fast scroll jumping activeIndex by more than one step) or
+          // left stuck mid-fade if interrupted before completing — since
+          // the correct visual state is a pure function of progress, setting
+          // it directly is self-correcting on every single update no matter
+          // how big a jump happens between frames. The CSS `transition`
+          // classes on each card (see JSX) supply the smoothing instead.
+          cards.forEach((card, i) => {
+            gsap.set(card, {
+              opacity: i === activeIndex ? 1 : 0,
+              y: i === activeIndex ? 0 : 40,
+            });
           });
-        });
 
-        // in the final stretch of the pin, shrink/slide the header up
-        // as the section hands off to Network below.
-        const exitProgress = gsap.utils.clamp(0, 1, (self.progress - 0.85) / 0.15);
-        gsap.set(header, {
-          yPercent: -exitProgress * 20,
-          scale: 1 - exitProgress * 0.15,
-        });
-      },
-    });
+          // in the final stretch of the pin, shrink/slide the header up
+          // as the section hands off to Network below.
+          const exitProgress = gsap.utils.clamp(0, 1, (self.progress - 0.85) / 0.15);
+          gsap.set(header, {
+            yPercent: -exitProgress * 20,
+            scale: 1 - exitProgress * 0.15,
+          });
+        },
+      });
 
-    return () => st.kill();
+      cleanupDesktop = () => {
+        st.kill();
+        gsap.set(cards, { clearProps: "opacity,transform" });
+        gsap.set(header, { clearProps: "transform" });
+      };
+    }
+
+    function sync() {
+      const shouldBeDesktop = !isMobileViewport();
+      if (shouldBeDesktop === isDesktopActive) return;
+
+      cleanupDesktop?.();
+      cleanupDesktop = undefined;
+      isDesktopActive = shouldBeDesktop;
+      if (shouldBeDesktop) setupDesktop();
+    }
+
+    sync();
+    window.addEventListener("resize", sync);
+
+    return () => {
+      window.removeEventListener("resize", sync);
+      cleanupDesktop?.();
+    };
   }, []);
 
   return (
     <section
       ref={sectionRef}
       data-snap-section
-      className="flex h-screen items-center gap-16 bg-navy px-[100px]"
+      className="flex min-h-screen flex-col items-start gap-10 bg-navy px-6 py-16 md:h-screen md:flex-row md:items-center md:gap-16 md:px-[100px] md:py-0"
     >
       <div
         ref={headerRef}
-        className="flex w-[275px] shrink-0 flex-col gap-8 transition-transform duration-200 ease-out"
+        className="flex w-full shrink-0 flex-col gap-8 transition-transform duration-200 ease-out md:w-[275px]"
       >
         <h2 className="font-mono text-6xl font-bold leading-none text-white">
           Why
@@ -93,14 +127,14 @@ export default function WhyRush() {
         <Button href="/members">Meet Our Brothers</Button>
       </div>
 
-      <div className="relative h-[400px] flex-1 max-w-[770px]">
+      <div className="relative flex w-full flex-col gap-10 md:h-[400px] md:max-w-[770px] md:flex-1 md:gap-0">
         {REASONS.map((reason, i) => (
           <div
             key={reason.title}
             ref={(el) => {
               if (el) cardRefs.current[i] = el;
             }}
-            className="absolute inset-0 flex flex-col gap-6 transition-[opacity,transform] duration-300 ease-out"
+            className="static flex flex-col gap-6 transition-[opacity,transform] duration-300 ease-out md:absolute md:inset-0"
           >
             <div className="flex items-center gap-4">
               <span className="font-mono text-sm text-white/50">

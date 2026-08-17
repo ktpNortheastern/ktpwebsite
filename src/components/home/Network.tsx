@@ -12,7 +12,7 @@ export default function Network() {
   return (
     <section
       data-snap-section
-      className="flex flex-col bg-white px-[130px] py-32"
+      className="flex flex-col bg-white px-6 py-20 md:px-[130px] md:py-32"
     >
       <p className="font-mono text-sm text-black/50">( Network )</p>
       <div className="mt-2 border-t border-black/20" />
@@ -20,7 +20,7 @@ export default function Network() {
         Companies we&apos;ve brought value to
       </h2>
 
-      <div className="mt-10 grid grid-cols-4 border border-black/20">
+      <div className="mt-10 grid grid-cols-2 border border-black/20 md:grid-cols-4">
         {companies.map((company, i) => (
           <div
             key={company.slug}

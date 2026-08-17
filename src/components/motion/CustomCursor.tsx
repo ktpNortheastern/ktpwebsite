@@ -24,6 +24,13 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
     const dot = dotRef.current;
     if (!dot) return;
 
+    // Touch-primary devices have no cursor to track — `pointermove` still
+    // fires on touch drags, so without this the dot would intermittently
+    // jump to touch positions. Bail before attaching anything (not just
+    // hiding the dot) so there's no listener or quickTo tween running at
+    // all on mobile.
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
     const quickX = gsap.quickTo(dot, "x", { duration: 0.25, ease: "power3" });
     const quickY = gsap.quickTo(dot, "y", { duration: 0.25, ease: "power3" });
 

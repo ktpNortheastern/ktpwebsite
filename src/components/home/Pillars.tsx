@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import PlaceholderImage from "@/components/ui/PlaceholderImage";
+import { isMobileViewport } from "@/lib/isMobileViewport";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,40 +45,70 @@ export default function Pillars() {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    // section.clientWidth includes its own horizontal padding (px-[100px]
-    // each side), but the track only becomes visible inside that padded
-    // inset — subtracting clientWidth alone left the translate distance
-    // short by exactly the padding amount, clipping the last card. Read
-    // padding live (not hardcoded) so a future className change can't
-    // silently desync this again.
-    const visibleWidth = () => {
-      const style = getComputedStyle(section);
-      const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-      return section.clientWidth - paddingX;
-    };
+    // Below `md`, the pinned scroll-jack is skipped entirely — the track
+    // is a plain `overflow-x-auto` element instead (see className) and the
+    // browser's native touch scrolling + CSS scroll-snap handles it. Touch
+    // users swiping the cards directly is a much better fit than having
+    // vertical scroll hijacked to drive horizontal motion. Re-checked on
+    // resize so crossing the breakpoint tears down or spins up the pin.
+    let cleanupDesktop: (() => void) | undefined;
+    let isDesktopActive = false;
 
-    if (track.scrollWidth - visibleWidth() <= 0) return;
+    function setupDesktop() {
+      // section.clientWidth includes its own horizontal padding (px-[100px]
+      // each side), but the track only becomes visible inside that padded
+      // inset — subtracting clientWidth alone left the translate distance
+      // short by exactly the padding amount, clipping the last card. Read
+      // padding live (not hardcoded) so a future className change can't
+      // silently desync this again.
+      const visibleWidth = () => {
+        const style = getComputedStyle(section!);
+        const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+        return section!.clientWidth - paddingX;
+      };
 
-    // x/end read live layout on every evaluation rather than closing over
-    // a single scrollDistance measured at mount — a window resize
-    // (rotating a tablet, un-maximizing, a different monitor) would
-    // otherwise leave the pin scrubbing against a stale distance from
-    // whatever size the page happened to load at.
-    const tween = gsap.to(track, {
-      x: () => -(track.scrollWidth - visibleWidth()),
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: () => `+=${track.scrollWidth - visibleWidth()}`,
-        scrub: true,
-        pin: true,
-      },
-    });
+      if (track!.scrollWidth - visibleWidth() <= 0) return;
+
+      // x/end read live layout on every evaluation rather than closing over
+      // a single scrollDistance measured at mount — a window resize
+      // (rotating a tablet, un-maximizing, a different monitor) would
+      // otherwise leave the pin scrubbing against a stale distance from
+      // whatever size the page happened to load at.
+      const tween = gsap.to(track, {
+        x: () => -(track!.scrollWidth - visibleWidth()),
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => `+=${track!.scrollWidth - visibleWidth()}`,
+          scrub: true,
+          pin: true,
+        },
+      });
+
+      cleanupDesktop = () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+        gsap.set(track, { clearProps: "transform" });
+      };
+    }
+
+    function sync() {
+      const shouldBeDesktop = !isMobileViewport();
+      if (shouldBeDesktop === isDesktopActive) return;
+
+      cleanupDesktop?.();
+      cleanupDesktop = undefined;
+      isDesktopActive = shouldBeDesktop;
+      if (shouldBeDesktop) setupDesktop();
+    }
+
+    sync();
+    window.addEventListener("resize", sync);
 
     return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
+      window.removeEventListener("resize", sync);
+      cleanupDesktop?.();
     };
   }, []);
 
@@ -85,14 +116,17 @@ export default function Pillars() {
     <section
       ref={sectionRef}
       data-snap-section
-      className="flex h-screen flex-col justify-center overflow-hidden bg-navy px-[100px] py-16"
+      className="flex min-h-screen flex-col justify-center overflow-hidden bg-navy px-6 py-16 md:h-screen md:px-[100px]"
     >
       <h2 className="font-mono text-4xl text-white">Pillars</h2>
-      <div ref={trackRef} className="mt-16 flex gap-16">
+      <div
+        ref={trackRef}
+        className="-mx-6 mt-16 flex gap-16 overflow-x-auto px-6 pb-4 [scrollbar-width:none] snap-x snap-mandatory md:mx-0 md:overflow-visible md:px-0 md:pb-0 md:snap-none"
+      >
         {PILLARS.map((pillar, i) => (
           <div
             key={pillar.title}
-            className="w-[386px] shrink-0 border-y border-white/20 py-8"
+            className="w-[386px] shrink-0 snap-center border-y border-white/20 py-8"
           >
             <PlaceholderImage n={i + 4} className="h-[210px] w-full" />
             <p className="mt-6 font-mono text-sm text-white/60">

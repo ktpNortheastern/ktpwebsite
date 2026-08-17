@@ -3,24 +3,43 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --navy: #0a1d37;
+  --slate: #3e4a5e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-navy: var(--navy);
+  --color-slate: var(--slate);
+  --font-sans: var(--font-satoshi);
+  --font-mono: var(--font-anonymous-pro);
+  --font-serif: var(--font-eb-garamond);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Plain, unpositioned by default so mobile (which never mounts
+   ScrollSmoother) renders normal document flow from first paint — no
+   flash of a broken fixed-position layout while JS decides desktop vs
+   mobile. SnapScrollContainer adds `.smoother-active` only after it
+   confirms ScrollSmoother actually initialized. */
+#smooth-wrapper.smoother-active {
+  overflow: hidden;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+#smooth-content {
+  width: 100%;
+}
+
+#smooth-wrapper.smoother-active #smooth-content {
+  overflow: visible;
 }
