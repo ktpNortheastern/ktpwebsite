@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
 import { isMobileViewport } from "@/lib/isMobileViewport";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,7 +29,7 @@ export default function WhyRush() {
   const headerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const section = sectionRef.current;
     const header = headerRef.current;
     const cards = cardRefs.current;
