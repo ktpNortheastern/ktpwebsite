@@ -59,6 +59,14 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
         const maxScroll = ScrollTrigger.maxScroll(window);
         if (maxScroll <= 0) return { points: [0], pinnedRanges: [] as [number, number][] };
 
+        // Pages with no `[data-snap-section]` markers at all (e.g. a plain
+        // content page like FAQ) aren't opting into section-snap — falling
+        // through to the code below would leave `points` holding only the
+        // trailing `1` pushed for the footer, which forces every scroll to
+        // settle at the very bottom of the page. `null` here tells the
+        // snapTo callback to leave scrolling unsnapped instead.
+        if (sections.length === 0) return { points: null, pinnedRanges: [] as [number, number][] };
+
         const points: number[] = [];
         const pinnedRanges: [number, number][] = [];
         const allTriggers = ScrollTrigger.getAll();
@@ -111,6 +119,7 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
         snap: {
           snapTo: (value) => {
             const { points, pinnedRanges } = getSnapInfo();
+            if (!points) return value;
 
             // Inside a pin's own scrub range (not just at its very start) —
             // don't snap, let the pin's scroll-driven animation keep going.
