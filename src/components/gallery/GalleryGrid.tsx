@@ -63,7 +63,7 @@ function MasonryColumns({
   return (
     <div className={wrapperClassName}>
       {columns.map((column, ci) => (
-        <div key={ci} className="flex flex-1 flex-col gap-6">
+        <div key={ci} className="flex flex-1 flex-col gap-10">
           {column.map(({ item, index }) => (
             <GalleryCard
               key={item.slug}
@@ -135,21 +135,21 @@ export default function GalleryGrid({ items }: { items: GalleryEntry[] }) {
         <MasonryColumns
           items={items}
           columnCount={2}
-          wrapperClassName="flex gap-6 px-6 pt-12 pb-32 md:hidden"
+          wrapperClassName="flex gap-10 px-6 pt-12 pb-32 md:hidden"
           revealedSlug={revealedSlug}
           onToggleReveal={toggleReveal}
         />
         <MasonryColumns
           items={items}
           columnCount={3}
-          wrapperClassName="hidden gap-6 px-[38px] pt-12 pb-32 md:flex lg:hidden"
+          wrapperClassName="hidden gap-10 px-[38px] pt-12 pb-32 md:flex lg:hidden"
           revealedSlug={revealedSlug}
           onToggleReveal={toggleReveal}
         />
         <MasonryColumns
           items={items}
           columnCount={4}
-          wrapperClassName="hidden gap-6 px-[38px] pt-12 pb-32 lg:flex"
+          wrapperClassName="hidden gap-10 px-[38px] pt-12 pb-32 lg:flex"
           revealedSlug={revealedSlug}
           onToggleReveal={toggleReveal}
         />
