@@ -1,6 +1,6 @@
 ---
-image: ""
-caption: "Info session wrap-up with the new class"
+image: "/images/uploads/rush-week-03.jpg"
+caption: ""
 album: "RUSH WEEK"
 order: 100
 ---

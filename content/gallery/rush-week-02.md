@@ -1,6 +1,6 @@
 ---
-image: ""
-caption: "Rushees at the co-op panel Q&A"
+image: "/images/uploads/rush-week-02.jpg"
+caption: ""
 album: "RUSH WEEK"
 order: 90
 ---

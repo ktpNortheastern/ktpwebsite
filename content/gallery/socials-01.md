@@ -1,6 +1,6 @@
 ---
-image: ""
-caption: "Brothers grabbing dinner after a general meeting"
+image: "/images/uploads/socials-01.jpg"
+caption: ""
 album: "SOCIAL EVENTS"
 order: 110
 ---

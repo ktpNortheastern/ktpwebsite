@@ -1,6 +1,6 @@
 ---
-image: ""
-caption: "Sunrise hike on the first morning of retreat"
+image: "/images/uploads/f25-retreat-01.jpg"
+caption: ""
 album: "KTP F25 RETREAT"
 order: 10
 ---

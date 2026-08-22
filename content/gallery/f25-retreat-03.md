@@ -1,6 +1,6 @@
 ---
-image: ""
-caption: "Team-building relay during the afternoon activities"
+image: "/images/uploads/f25-retreat-03.jpg"
+caption: ""
 album: "KTP F25 RETREAT"
 order: 30
 ---
