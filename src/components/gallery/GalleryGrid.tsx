@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import AlbumTag from "@/components/gallery/AlbumTag";
+import { useEffect, useState } from "react";
 import GalleryCard from "@/components/gallery/GalleryCard";
 
 type GalleryFrontmatter = {
@@ -75,8 +74,6 @@ function MasonryColumns({
 
 export default function GalleryGrid({ items }: { items: GalleryEntry[] }) {
   const [revealedSlug, setRevealedSlug] = useState("");
-  const [activeAlbum, setActiveAlbum] = useState<string | null>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const toggleReveal = (slug: string) =>
     setRevealedSlug((current) => (current === slug ? "" : slug));
@@ -93,61 +90,32 @@ export default function GalleryGrid({ items }: { items: GalleryEntry[] }) {
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
-  // Tracks which album's photos are centered in the viewport, independent of
-  // GSAP/ScrollSmoother — IntersectionObserver reads real bounding boxes, so
-  // it stays correct whether the page scrolls natively or via the
-  // transform-based smoother. The hidden breakpoint variants above never
-  // intersect (no layout box), so only the visible one is ever counted.
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-
-    const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-gallery-card]"));
-    if (cards.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.find((entry) => entry.isIntersecting);
-        if (visible) {
-          setActiveAlbum((visible.target as HTMLElement).dataset.album ?? null);
-        }
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-    );
-
-    cards.forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
-  }, [items]);
-
   return (
     <>
-      <div ref={gridRef}>
-        <MasonryColumns
-          items={items}
-          columnCount={2}
-          columnGapClassName="gap-16"
-          wrapperClassName="flex gap-16 px-6 pt-12 pb-32 md:hidden"
-          revealedSlug={revealedSlug}
-          onToggleReveal={toggleReveal}
-        />
-        <MasonryColumns
-          items={items}
-          columnCount={2}
-          columnGapClassName="gap-20"
-          wrapperClassName="hidden gap-20 px-[38px] pt-12 pb-32 md:flex lg:hidden"
-          revealedSlug={revealedSlug}
-          onToggleReveal={toggleReveal}
-        />
-        <MasonryColumns
-          items={items}
-          columnCount={3}
-          columnGapClassName="gap-24"
-          wrapperClassName="hidden gap-24 px-[38px] pt-12 pb-32 lg:flex"
-          revealedSlug={revealedSlug}
-          onToggleReveal={toggleReveal}
-        />
-      </div>
-      <AlbumTag album={activeAlbum} />
+      <MasonryColumns
+        items={items}
+        columnCount={2}
+        columnGapClassName="gap-16"
+        wrapperClassName="flex gap-16 px-6 pt-12 pb-32 md:hidden"
+        revealedSlug={revealedSlug}
+        onToggleReveal={toggleReveal}
+      />
+      <MasonryColumns
+        items={items}
+        columnCount={2}
+        columnGapClassName="gap-20"
+        wrapperClassName="hidden gap-20 px-[38px] pt-12 pb-32 md:flex lg:hidden"
+        revealedSlug={revealedSlug}
+        onToggleReveal={toggleReveal}
+      />
+      <MasonryColumns
+        items={items}
+        columnCount={3}
+        columnGapClassName="gap-24"
+        wrapperClassName="hidden gap-24 px-[38px] pt-12 pb-32 lg:flex"
+        revealedSlug={revealedSlug}
+        onToggleReveal={toggleReveal}
+      />
     </>
   );
 }
