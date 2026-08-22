@@ -52,10 +52,14 @@ export default function GalleryCard({
       }}
     >
       {image ? (
+        // Full width, auto height — the image keeps its own natural aspect
+        // ratio instead of being cropped to fill a forced box (the old
+        // `aspect-*` + `object-cover` pairing), which is what makes the
+        // floating-gallery look read as uncropped, real photos.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt={caption} className="size-full object-cover" />
+        <img src={image} alt={caption} className="block h-auto w-full" />
       ) : (
-        <PlaceholderImage n={index + 1} className="size-full" />
+        <PlaceholderImage n={index + 1} className="aspect-[4/5] w-full" />
       )}
       <figcaption className="sr-only">{caption}</figcaption>
 

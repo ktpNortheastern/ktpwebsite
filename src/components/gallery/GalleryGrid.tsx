@@ -13,23 +13,12 @@ type GalleryFrontmatter = {
 
 export type GalleryEntry = GalleryFrontmatter & { slug: string };
 
-// Cycled by index so card sizes vary (matches the Figma's portrait/landscape
-// mix) without needing per-entry layout data — purely deterministic, so
-// server and client render identical markup and adding a new content entry
-// never requires touching this file.
-const ASPECT_VARIANTS = [
-  "aspect-[215/250]",
-  "aspect-[378/250]",
-  "aspect-square",
-  "aspect-[215/250]",
-];
-
 // Deterministic pseudo-random stagger per index (never Math.random() — that
 // would render differently on the server vs. the client and break
 // hydration). Gives the scattered "floating" feel instead of a rigid grid.
 function staggerPx(index: number) {
   const fraction = Math.abs(Math.sin(index * 12.9898) * 43758.5453) % 1;
-  return Math.round(fraction * 40);
+  return Math.round(fraction * 160);
 }
 
 // Splits items round-robin across N flex columns, each with its own
@@ -44,12 +33,14 @@ function staggerPx(index: number) {
 function MasonryColumns({
   items,
   columnCount,
+  columnGapClassName,
   wrapperClassName,
   revealedSlug,
   onToggleReveal,
 }: {
   items: GalleryEntry[];
   columnCount: number;
+  columnGapClassName: string;
   wrapperClassName: string;
   revealedSlug: string;
   onToggleReveal: (slug: string) => void;
@@ -63,7 +54,7 @@ function MasonryColumns({
   return (
     <div className={wrapperClassName}>
       {columns.map((column, ci) => (
-        <div key={ci} className="flex flex-1 flex-col gap-10">
+        <div key={ci} className={`flex flex-1 flex-col ${columnGapClassName}`}>
           {column.map(({ item, index }) => (
             <GalleryCard
               key={item.slug}
@@ -71,7 +62,6 @@ function MasonryColumns({
               image={item.image}
               caption={item.caption}
               album={item.album}
-              className={ASPECT_VARIANTS[index % ASPECT_VARIANTS.length]}
               style={{ marginTop: staggerPx(index) }}
               revealed={revealedSlug === item.slug}
               onToggleReveal={() => onToggleReveal(item.slug)}
@@ -135,21 +125,24 @@ export default function GalleryGrid({ items }: { items: GalleryEntry[] }) {
         <MasonryColumns
           items={items}
           columnCount={2}
-          wrapperClassName="flex gap-10 px-6 pt-12 pb-32 md:hidden"
+          columnGapClassName="gap-16"
+          wrapperClassName="flex gap-16 px-6 pt-12 pb-32 md:hidden"
+          revealedSlug={revealedSlug}
+          onToggleReveal={toggleReveal}
+        />
+        <MasonryColumns
+          items={items}
+          columnCount={2}
+          columnGapClassName="gap-20"
+          wrapperClassName="hidden gap-20 px-[38px] pt-12 pb-32 md:flex lg:hidden"
           revealedSlug={revealedSlug}
           onToggleReveal={toggleReveal}
         />
         <MasonryColumns
           items={items}
           columnCount={3}
-          wrapperClassName="hidden gap-10 px-[38px] pt-12 pb-32 md:flex lg:hidden"
-          revealedSlug={revealedSlug}
-          onToggleReveal={toggleReveal}
-        />
-        <MasonryColumns
-          items={items}
-          columnCount={4}
-          wrapperClassName="hidden gap-10 px-[38px] pt-12 pb-32 lg:flex"
+          columnGapClassName="gap-24"
+          wrapperClassName="hidden gap-24 px-[38px] pt-12 pb-32 lg:flex"
           revealedSlug={revealedSlug}
           onToggleReveal={toggleReveal}
         />
