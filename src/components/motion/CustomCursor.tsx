@@ -59,7 +59,7 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
         style={{ opacity: ready ? 1 : 0 }}
       >
         {state === "caption" ? (
-          <div className="rounded-full bg-navy px-3 py-1.5 font-mono text-xs font-bold whitespace-nowrap text-white">
+          <div className="bg-black px-3 py-1.5 font-mono text-base font-bold whitespace-nowrap text-white">
             <ScrambleText key={caption} text={caption} trigger="immediate" />
           </div>
         ) : (
