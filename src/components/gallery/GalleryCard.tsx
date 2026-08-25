@@ -10,7 +10,6 @@ type GalleryCardProps = {
   index: number;
   image?: string;
   caption: string;
-  album?: string;
   className?: string;
   style?: CSSProperties;
   revealed: boolean;
@@ -27,7 +26,6 @@ export default function GalleryCard({
   index,
   image,
   caption,
-  album,
   className = "",
   style,
   revealed,
@@ -38,7 +36,6 @@ export default function GalleryCard({
   return (
     <figure
       data-gallery-card
-      data-album={album}
       className={`relative overflow-hidden bg-[#c0c0c0] ${className}`}
       style={style}
       onPointerEnter={() => {

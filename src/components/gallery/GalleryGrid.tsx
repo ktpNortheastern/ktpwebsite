@@ -6,7 +6,6 @@ import GalleryCard from "@/components/gallery/GalleryCard";
 type GalleryFrontmatter = {
   image?: string;
   caption: string;
-  album?: string;
   order?: number;
 };
 
@@ -60,7 +59,6 @@ function MasonryColumns({
               index={index}
               image={item.image}
               caption={item.caption}
-              album={item.album}
               style={{ marginTop: staggerPx(index) }}
               revealed={revealedSlug === item.slug}
               onToggleReveal={() => onToggleReveal(item.slug)}
