@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/rush-week-02.jpg"
+image: "/images/uploads/img-68.jpg"
 caption: ""
 album: "RUSH WEEK"
 order: 90

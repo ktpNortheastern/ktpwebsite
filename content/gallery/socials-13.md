@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/socials-13.jpg"
+image: "/images/uploads/img-86.jpg"
 caption: ""
 album: "SOCIAL EVENTS"
 order: 4110

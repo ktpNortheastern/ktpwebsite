@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/chapter-photo-19.jpg"
+image: "/images/uploads/img-19.jpg"
 caption: ""
 order: 5180
 ---

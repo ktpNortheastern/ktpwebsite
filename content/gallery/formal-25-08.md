@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/formal-25-08.jpg"
+image: "/images/uploads/img-58.jpg"
 caption: ""
 album: "FORMAL 2025"
 order: 2040

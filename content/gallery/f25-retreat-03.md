@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/f25-retreat-03.jpg"
+image: "/images/uploads/img-36.jpg"
 caption: ""
 album: "KTP F25 RETREAT"
 order: 30
