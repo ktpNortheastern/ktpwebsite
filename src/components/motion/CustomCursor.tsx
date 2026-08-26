@@ -74,20 +74,34 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
       {/* `mix-blend-mode` only blends against content painted in the same
           stacking context — nesting this inside a separately-transformed
           wrapper div would isolate it from the page behind it and it'd just
-          render its raw color everywhere. So the dot carries its own
+          render its raw color everywhere. So the badge carries its own
           position/transform directly instead of living inside one. White +
           difference inverts against whatever's underneath, reading as a
-          black dot on light sections and a white dot on dark ones (Hero,
-          Footer) without needing to know which section it's over. */}
+          black badge on light sections and a white badge on dark ones
+          (Hero, Footer) without needing to know which section it's over.
+          The inner dot reuses the same white + difference combo: it blends
+          against the badge's *already-inverted* pixels, so it inverts a
+          second time and always lands as the opposite tone of the badge
+          around it (dark dot on a light badge, light dot on a dark one) —
+          matching the squircle-with-dot cursor on rekorderstudios.com. */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference transition-[width,height,opacity] duration-200"
+        className="pointer-events-none fixed top-0 left-0 z-[100] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white mix-blend-difference transition-[width,height,border-radius,opacity] duration-200"
         style={{
           opacity: ready && state !== "caption" ? 1 : 0,
-          width: isSmall ? 8 : 16,
-          height: isSmall ? 8 : 16,
+          width: isSmall ? 32 : 56,
+          height: isSmall ? 32 : 56,
+          borderRadius: isSmall ? 10 : 16,
         }}
-      />
+      >
+        <div
+          className="rounded-full bg-white mix-blend-difference transition-[width,height] duration-200"
+          style={{
+            width: isSmall ? 8 : 14,
+            height: isSmall ? 8 : 14,
+          }}
+        />
+      </div>
       <div
         ref={captionRef}
         className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-black px-3 py-1.5 font-mono text-base font-bold text-white transition-opacity duration-200"
