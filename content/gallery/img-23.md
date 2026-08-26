@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-23.jpg"
-caption: ""
+caption: "KΘΠ F25 INITIATION"
 order: 5220
 ---

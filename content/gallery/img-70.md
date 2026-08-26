@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-70.jpg"
-caption: ""
+caption: "KΘΠ CHAPTER MEETING"
 order: 3000
 ---

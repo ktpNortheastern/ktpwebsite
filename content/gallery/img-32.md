@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-32.jpg"
-caption: ""
+caption: "KΘΠ F25 FORMAL"
 order: 5310
 ---

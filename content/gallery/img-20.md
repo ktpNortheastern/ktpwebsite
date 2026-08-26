@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-20.jpg"
-caption: ""
+caption: "F25 BIG LITTLE PADDLES"
 order: 5190
 ---

@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-83.jpg"
-caption: ""
+caption: "F25 BAKE SALE"
 order: 4080
 ---

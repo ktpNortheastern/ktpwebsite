@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-75.jpg"
-caption: ""
+caption: "KΘΠ F25 PHILANTHROPY EVENT"
 order: 4000
 ---

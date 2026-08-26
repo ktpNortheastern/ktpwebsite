@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-55.jpg"
-caption: ""
+caption: "BROTHER BONDING"
 order: 2010
 ---

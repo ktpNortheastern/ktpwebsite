@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-33.jpg"
-caption: ""
+caption: "PROFESSIONAL DEVELOPMENT"
 order: 5320
 ---

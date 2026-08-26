@@ -1,5 +1,5 @@
 ---
 image: "/images/uploads/img-71.jpg"
-caption: ""
+caption: "KΘΠ COOP PANEL"
 order: 3010
 ---
