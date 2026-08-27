@@ -76,17 +76,9 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
 
   return (
     <CursorContext.Provider value={{ setState }}>
-      {/* `mix-blend-mode` only blends against content painted in the same
-          stacking context — nesting this inside a separately-transformed
-          wrapper div would isolate it from the page behind it and it'd just
-          render its raw color everywhere. So the dot carries its own
-          position/transform directly instead of living inside one. White +
-          difference inverts against whatever's underneath, reading as a
-          black dot on light sections and a white dot on dark ones (Hero,
-          Footer) without needing to know which section it's over. */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference transition-[width,height,opacity] duration-200"
+        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black transition-[width,height,opacity] duration-200"
         style={{
           opacity: ready && state !== "caption" ? 1 : 0,
           width: isSmall ? HOVER_SIZE : DEFAULT_SIZE,
