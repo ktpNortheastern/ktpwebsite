@@ -18,6 +18,10 @@ type ScrambleTextProps = {
   text: string;
   className?: string;
   as?: "p" | "h1" | "h2" | "h3";
+  // "scroll" (default) decodes on scroll-into-view, once. "immediate" decodes
+  // as soon as the element mounts — for hover/tap-triggered captions, pass a
+  // `key` that changes with the text so React remounts and re-triggers it.
+  trigger?: "scroll" | "immediate";
 };
 
 /**
@@ -30,6 +34,7 @@ export default function ScrambleText({
   text,
   className = "",
   as: Tag = "p",
+  trigger = "scroll",
 }: ScrambleTextProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -37,9 +42,14 @@ export default function ScrambleText({
     const el = ref.current;
     if (!el) return;
 
+    if (trigger === "immediate") {
+      const cancel = scramble(el, text);
+      return cancel;
+    }
+
     let cancel: (() => void) | undefined;
 
-    const trigger = ScrollTrigger.create({
+    const scrollTrigger = ScrollTrigger.create({
       trigger: el,
       start: "top 80%",
       once: true,
@@ -49,10 +59,10 @@ export default function ScrambleText({
     });
 
     return () => {
-      trigger.kill();
+      scrollTrigger.kill();
       cancel?.();
     };
-  }, [text]);
+  }, [text, trigger]);
 
   return (
     // @ts-expect-error dynamic tag ref typing

@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { gsap } from "gsap";
+import ScrambleText from "@/components/motion/ScrambleText";
 
-type CursorState = "default" | "small";
+type CursorState = "default" | "small" | "caption";
 
 const CursorContext = createContext<{
-  setState: (state: CursorState) => void;
+  setState: (state: CursorState, caption?: string) => void;
 } | null>(null);
 
 export function useCursor() {
@@ -16,9 +17,15 @@ export function useCursor() {
 }
 
 export function CustomCursorProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<CursorState>("default");
+  const [state, setStateRaw] = useState<CursorState>("default");
+  const [caption, setCaption] = useState("");
   const [ready, setReady] = useState(false);
   const dotRef = useRef<HTMLDivElement>(null);
+
+  const setState = (next: CursorState, nextCaption = "") => {
+    setStateRaw(next);
+    setCaption(nextCaption);
+  };
 
   useEffect(() => {
     const dot = dotRef.current;
@@ -48,13 +55,23 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
     <CursorContext.Provider value={{ setState }}>
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white mix-blend-difference transition-[width,height,opacity] duration-200"
-        style={{
-          width: state === "small" ? 12 : 32,
-          height: state === "small" ? 12 : 32,
-          opacity: ready ? 1 : 0,
-        }}
-      />
+        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200"
+        style={{ opacity: ready ? 1 : 0 }}
+      >
+        {state === "caption" ? (
+          <div className="bg-black px-3 py-1.5 font-mono text-base font-bold whitespace-nowrap text-white">
+            <ScrambleText key={caption} text={caption} trigger="immediate" />
+          </div>
+        ) : (
+          <div
+            className="rounded-full border border-white mix-blend-difference transition-[width,height] duration-200"
+            style={{
+              width: state === "small" ? 12 : 32,
+              height: state === "small" ? 12 : 32,
+            }}
+          />
+        )}
+      </div>
       {children}
     </CursorContext.Provider>
   );

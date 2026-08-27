@@ -150,11 +150,4 @@ collections:
     fields:
       - { label: "Image", name: "image", widget: "image" }
       - { label: "Caption", name: "caption", widget: "string" }
-      - {
-          label: "Album/Tag",
-          name: "album",
-          widget: "string",
-          required: false,
-          hint: "e.g. KTP F25 Retreat",
-        }
       - { label: "Order", name: "order", widget: "number", required: false }
