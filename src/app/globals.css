@@ -22,6 +22,14 @@ body {
   color: var(--foreground);
 }
 
+/* `cursor-none` on <body> (layout.tsx) doesn't reach interactive elements —
+   the UA stylesheet sets `cursor: pointer` directly on <a>/<button>, which
+   wins over the inherited value. Override universally so the OS pointer
+   never appears anywhere in favor of the custom dot (CustomCursor.tsx). */
+* {
+  cursor: none !important;
+}
+
 /* Plain, unpositioned by default so mobile (which never mounts
    ScrollSmoother) renders normal document flow from first paint — no
    flash of a broken fixed-position layout while JS decides desktop vs
