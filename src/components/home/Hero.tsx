@@ -33,8 +33,11 @@ export default function Hero() {
     >
       {/* No spacer here — the photo starts immediately below the header,
           and NavBar's fixed wordmark overlay sits directly on top of it
-          (no reserved navy region in between). */}
-      <div className="relative flex-1 overflow-hidden">
+          (no reserved navy region in between). data-hero-photo: NavBar
+          reads this element's live rect to know whether the wordmark is
+          still actually over the photo right now, rather than guessing
+          from a fixed scroll-timeline fraction. */}
+      <div data-hero-photo className="relative flex-1 overflow-hidden">
         <Image
           src="/images/homepage.png"
           alt=""

@@ -31,6 +31,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   const headerRef = useRef<HTMLElement>(null);
+  const wordmarkWrapperRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
   const wordmarkInnerRef = useRef<HTMLSpanElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -42,11 +43,12 @@ export default function NavBar() {
   useEffect(() => {
     if (!isHome) return;
     const header = headerRef.current;
+    const wordmarkWrapper = wordmarkWrapperRef.current;
     const wordmark = wordmarkRef.current;
     const inner = wordmarkInnerRef.current;
     const target = targetRef.current;
     const navLinks = navLinksRef.current;
-    if (!header || !wordmark || !inner || !target || !navLinks) return;
+    if (!header || !wordmarkWrapper || !wordmark || !inner || !target || !navLinks) return;
 
     gsap.set(inner, { transformOrigin: "0% 0%" });
     gsap.set(wordmark, { transformOrigin: "0% 0%" });
@@ -60,6 +62,35 @@ export default function NavBar() {
       const natural = inner!.getBoundingClientRect().width;
       const container = wordmark!.clientWidth;
       gsap.set(inner!, { scaleX: container / natural });
+    }
+
+    // Blend is on the WRAPPER div, not the Link — the wrapper is what
+    // actually carries mix-blend-difference (a stacking-context
+    // requirement, see the JSX comment below). A blended parent flattens
+    // all of its descendant paint into one buffer before compositing that
+    // buffer against its own backdrop, so setting mixBlendMode on a child
+    // Link alone wouldn't exempt it — the parent's blend still applies to
+    // the flattened result. Toggling the actual blended element is the
+    // only thing that works.
+    //
+    // The on/off decision itself is a live rect-intersection test against
+    // Hero's photo (data-hero-photo), not a guessed fraction of the
+    // scroll-timeline's duration — the wordmark starts entirely over the
+    // photo (no spacer) and ends up over the header's opaque navy in the
+    // corner slot, but exactly when it crosses from one to the other
+    // depends on real geometry (target position, photo height, viewport
+    // size) that a fixed timeline fraction can't account for. A fixed
+    // fraction either turned it white while still visibly over the photo,
+    // or left it blended after it had already reached solid navy,
+    // depending on viewport. Checking actual overlap every frame is
+    // self-correcting regardless.
+    function updateWordmarkBlend() {
+      const photo = document.querySelector<HTMLElement>("[data-hero-photo]");
+      if (!photo) return;
+      const wordmarkRect = wordmark!.getBoundingClientRect();
+      const photoRect = photo.getBoundingClientRect();
+      const overPhoto = wordmarkRect.bottom > photoRect.top && wordmarkRect.top < photoRect.bottom;
+      gsap.set(wordmarkWrapper, { mixBlendMode: overPhoto ? "difference" : "normal" });
     }
 
     // Manual FLIP against an invisible same-text target sitting in the
@@ -82,13 +113,12 @@ export default function NavBar() {
           start: "top top",
           end: SCROLL_DISTANCE,
           scrub: 0.3,
+          onUpdate: updateWordmarkBlend,
         },
       });
 
-      // Sienna's reference wordmark is a plain fixed-position element whose
-      // size is scrubbed directly by scroll — no blend-mode compositing
-      // against the photo underneath. Matches that here: a single
-      // translate+scale FLIP, held briefly then shrunk into the corner.
+      // A single translate+scale FLIP, held briefly then shrunk into the
+      // corner — the blend state itself is handled separately, above.
       tl.set(wordmark, { x: 0, y: 0, scale: 1, color: "#ffffff" }, 0)
         .to(wordmark, { y: dropY, duration: HOLD, ease: "none" }, 0)
         .to(wordmark, { x: deltaX, y: deltaY, scale, duration: SHRINK, ease: "none" }, HOLD);
@@ -185,11 +215,18 @@ export default function NavBar() {
     });
 
     let tl = buildTimeline();
+    // onUpdate only fires on an actual scroll/refresh event, not at
+    // creation time — without this, the wordmark sits unblended at rest
+    // until the user scrolls once, even though it starts directly over
+    // the photo.
+    updateWordmarkBlend();
     const onResize = () => {
       tl.scrollTrigger?.kill();
       tl.kill();
-      gsap.set(wordmark, { clearProps: "transform,color,opacity,mixBlendMode" });
+      gsap.set(wordmark, { clearProps: "transform,color,opacity" });
+      gsap.set(wordmarkWrapper, { clearProps: "mixBlendMode" });
       tl = buildTimeline();
+      updateWordmarkBlend();
       ScrollTrigger.refresh();
     };
     window.addEventListener("resize", onResize);
@@ -197,6 +234,7 @@ export default function NavBar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       tl = buildTimeline();
+      updateWordmarkBlend();
     });
 
     return () => {
@@ -219,9 +257,20 @@ export default function NavBar() {
           subtree, which has nothing painted where the wordmark visually
           sits — it rendered as plain unblended white. Keeping it as its
           own element also means <header> (nav strip, links, Rush Now)
-          never carries the blend and always stays solid navy/white. */}
+          never carries the blend and always stays solid navy/white.
+
+          No static mix-blend-difference class here — updateWordmarkBlend
+          (above) toggles it on this exact element every scroll frame,
+          based on whether the wordmark's live rect still actually
+          overlaps Hero's photo, so it turns off once the wordmark lands
+          in the header's corner slot (blending against opaque navy would
+          read as a stuck cream tint instead of plain white nav
+          branding). */}
       {isHome && (
-        <div className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference">
+        <div
+          ref={wordmarkWrapperRef}
+          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)]"
+        >
           <Link
             ref={wordmarkRef}
             href="/"

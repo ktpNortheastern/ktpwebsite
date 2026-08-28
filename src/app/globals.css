@@ -9,31 +9,15 @@
   /* Single source of truth for the nav strip / Hero wordmark system —
      NavBar.tsx and Hero.tsx both read these instead of each redeclaring
      its own 68px / 13vw / padding number. Previously every fix to one of
-     these values (the navbar reading too tall, the wordmark/photo overlap
-     proportion, the nav-spread padding) required hunting down every place
-     that number was independently retyped, and each edit risked drifting
-     out of sync with the others at some untested viewport width.
-
-     --wordmark-h assumes rendered text height is ~1:1 with font-size for
-     this font at leading-none/font-bold — measured directly (not
-     assumed): 0.99997 at 1920px, 1.00004 at 1024px, 1.0 at 400px viewport
-     width, via an isolated iframe rendering the actual wordmark span at
-     each width. Confirmed width-independent, as expected for a font
-     metric rather than a layout effect, so this is safe to build on.
-
-     --wordmark-box-h is what actually controls the rest-state overlap
-     with Hero's photo: with NavBar's items-start alignment, the text's
-     bottom edge sits (textHeight - boxHeight) below the photo's top edge.
-     At 0, the box has no height at all, so the photo starts exactly where
-     the text starts and the whole wordmark sits over the photo, none of
-     it over the spacer/navy — tune the multiplier alone to change the
-     proportion; nothing else needs to change since both sides derive from
-     --wordmark-fs. */
+     these values (the navbar reading too tall, the nav-spread padding)
+     required hunting down every place that number was independently
+     retyped, and each edit risked drifting out of sync with the others at
+     some untested viewport width. There's no separate wordmark-height
+     derivation here — Hero has no spacer to size, so the wordmark just
+     sits at its own natural height directly over the photo. */
   --nav-h: 68px;
   --nav-pad-x: 24px;
   --wordmark-fs: 13vw;
-  --wordmark-h: calc(var(--wordmark-fs) * 1);
-  --wordmark-box-h: calc(var(--wordmark-h) * 0);
 }
 
 @media (min-width: 768px) {
