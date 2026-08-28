@@ -106,6 +106,10 @@ export default function NavBar() {
 
       function buildNavSpread() {
         const headerRect = header!.getBoundingClientRect();
+        // Reads the same --nav-pad-x custom property the header's own
+        // horizontal padding uses, rather than a separate hardcoded 24
+        // that used to just coincidentally match it.
+        const navPadX = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-pad-x"));
 
         const naturalRects = items.map((el) => el.getBoundingClientRect());
         // Spread from the header's own inner-left edge, not the invisible
@@ -115,14 +119,14 @@ export default function NavBar() {
         // width ever changed. This is a pure function of the header's own
         // current width instead, so the spread always fills the real
         // available space.
-        const startX = headerRect.left + 24;
+        const startX = headerRect.left + navPadX;
         // Target the LAST item's own right edge landing at the header's
         // inner edge, not its left edge — otherwise the evenly-spaced
         // left-edge interpolation below plants the final item's left edge
-        // 24px from the header boundary and its own width (e.g. the Rush
-        // Now button) pushes its right edge off-screen.
+        // navPadX from the header boundary and its own width (e.g. the
+        // Rush Now button) pushes its right edge off-screen.
         const lastWidth = naturalRects[naturalRects.length - 1]?.width ?? 0;
-        const endX = headerRect.right - 24 - lastWidth;
+        const endX = headerRect.right - navPadX - lastWidth;
         const span = Math.max(endX - startX, 0);
         const n = items.length;
 
@@ -217,11 +221,11 @@ export default function NavBar() {
           own element also means <header> (nav strip, links, Rush Now)
           never carries the blend and always stays solid navy/white. */}
       {isHome && (
-        <div className="pointer-events-none fixed inset-x-0 top-[68px] z-[60] flex h-[var(--hero-headline-h)] min-h-[var(--hero-headline-min-h)] items-center px-6 mix-blend-difference md:px-[38px]">
+        <div className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference">
           <Link
             ref={wordmarkRef}
             href="/"
-            className="pointer-events-auto block w-full whitespace-nowrap font-sans text-[13vw] font-bold leading-none text-white"
+            className="pointer-events-auto block w-full whitespace-nowrap font-sans text-[length:var(--wordmark-fs)] font-bold leading-none text-white"
           >
             <span ref={wordmarkInnerRef} className="inline-block">
               Kappa Theta Pi
@@ -232,7 +236,7 @@ export default function NavBar() {
 
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px]"
+        className="fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between bg-navy px-[var(--nav-pad-x)] py-5"
       >
         <div
           ref={targetRef}
