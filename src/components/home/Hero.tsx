@@ -44,7 +44,7 @@ export default function Hero() {
 
       <div className="relative flex-1 overflow-hidden">
         <Image
-          src="/images/delta_initiation.png"
+          src="/images/homepage.png"
           alt=""
           fill
           priority
