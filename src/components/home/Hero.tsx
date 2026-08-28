@@ -48,7 +48,7 @@ export default function Hero() {
           alt=""
           fill
           priority
-          className="object-cover blur-[4px]"
+          className="object-cover object-top blur-[4px]"
         />
         <div className="absolute inset-0 bg-black/40" />
 
