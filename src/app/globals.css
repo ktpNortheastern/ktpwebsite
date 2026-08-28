@@ -5,6 +5,20 @@
   --foreground: #171717;
   --navy: #0a1d37;
   --slate: #3e4a5e;
+
+  /* Single source of truth for the Hero headline's rest-state height —
+     Hero's spacer and NavBar's fixed wordmark overlay both read this so
+     they can never drift out of sync the way independently-hardcoded
+     values did before. */
+  --hero-headline-h: 46vh;
+  --hero-headline-min-h: 320px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --hero-headline-h: 52vh;
+    --hero-headline-min-h: 400px;
+  }
 }
 
 @theme inline {

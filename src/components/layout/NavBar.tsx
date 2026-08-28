@@ -75,7 +75,6 @@ export default function NavBar() {
       const deltaX = smallRect.left - bigRect.left;
       const deltaY = smallRect.top - bigRect.top;
       const dropY = 48; // how far the headline drifts before it starts shrinking
-      const blendOnAt = HOLD * 0.15; // how soon the mask kicks in as the real hero photo scrolls into view behind it
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -86,19 +85,13 @@ export default function NavBar() {
         },
       });
 
-      tl.set(wordmark, { x: 0, y: 0, scale: 1, color: "#ffffff", mixBlendMode: "normal" }, 0)
-        // Phase 1: the headline holds its full size and just drifts down a
-        // little — it does NOT start shrinking immediately. It sits fixed
-        // in the nav while the real navy block in Hero (not an overlay)
-        // scrolls away underneath it at normal speed, so almost as soon as
-        // scrolling starts, the actual hero photo is what's behind the
-        // text — that's when the difference-blend mask switches on.
-        .set(wordmark, { mixBlendMode: "difference" }, blendOnAt)
+      // Sienna's reference wordmark is a plain fixed-position element whose
+      // size is scrubbed directly by scroll — no blend-mode compositing
+      // against the photo underneath. Matches that here: a single
+      // translate+scale FLIP, held briefly then shrunk into the corner.
+      tl.set(wordmark, { x: 0, y: 0, scale: 1, color: "#ffffff" }, 0)
         .to(wordmark, { y: dropY, duration: HOLD, ease: "none" }, 0)
-        // Phase 2: it shrinks and slides into the corner, losing the
-        // difference-blend mask right before it lands on the navy bar.
-        .to(wordmark, { x: deltaX, y: deltaY, scale, duration: SHRINK, ease: "none" }, HOLD)
-        .set(wordmark, { mixBlendMode: "normal" }, TOTAL - SHRINK * 0.2);
+        .to(wordmark, { x: deltaX, y: deltaY, scale, duration: SHRINK, ease: "none" }, HOLD);
 
       return tl;
     }
@@ -194,7 +187,16 @@ export default function NavBar() {
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px]"
+      // mix-blend-difference is applied to the header itself, not the
+      // wordmark inside it — mix-blend-mode only composites against paint
+      // within the same stacking context, and putting it on the wordmark
+      // alone left it blending against nothing (Hero's navy/photo live in
+      // a separate subtree). On the header, it composites the whole fixed
+      // bar (including nav links) against whatever real content is
+      // scrolling past underneath — matching sienna.framer.media, whose
+      // equivalent fixed wordmark container carries this same constant
+      // property rather than toggling it on/off with scroll.
+      className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px] ${isHome ? "mix-blend-difference" : ""}`}
     >
       <div
         ref={targetRef}
@@ -205,12 +207,13 @@ export default function NavBar() {
         {isHome && "Kappa Theta Pi"}
       </div>
 
-      {/* Positioned to exactly cover Hero's real navy block (same top
-          offset and height — see Hero.tsx) so the headline reads as part
-          of that block at rest, even though the block itself is normal
-          page content that scrolls away underneath this fixed text. */}
+      {/* Positioned to exactly cover Hero's spacer (same
+          --hero-headline-h/--hero-headline-min-h custom properties — see
+          Hero.tsx and globals.css) so the headline reads as part of that
+          space at rest, even though the spacer itself is normal page
+          content that scrolls away underneath this fixed text. */}
       {isHome && (
-        <div className="pointer-events-none absolute inset-x-0 top-[68px] flex h-[46vh] min-h-[320px] items-center px-6 md:h-[52vh] md:min-h-[400px] md:px-[38px]">
+        <div className="pointer-events-none absolute inset-x-0 top-[68px] flex h-[var(--hero-headline-h)] min-h-[var(--hero-headline-min-h)] items-center px-6 md:px-[38px]">
           <Link
             ref={wordmarkRef}
             href="/"
