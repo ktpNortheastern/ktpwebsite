@@ -106,11 +106,23 @@ export default function NavBar() {
 
       function buildNavSpread() {
         const headerRect = header!.getBoundingClientRect();
-        const targetRect = target!.getBoundingClientRect();
 
         const naturalRects = items.map((el) => el.getBoundingClientRect());
-        const startX = targetRect.right + 80;
-        const endX = headerRect.right - 24;
+        // Spread from the header's own inner-left edge, not the invisible
+        // compact mark's width — the old version tied startX to the
+        // mark's rendered width, which left "Home" starting indented
+        // rather than genuinely edge-to-edge, and wouldn't adapt if that
+        // width ever changed. This is a pure function of the header's own
+        // current width instead, so the spread always fills the real
+        // available space.
+        const startX = headerRect.left + 24;
+        // Target the LAST item's own right edge landing at the header's
+        // inner edge, not its left edge — otherwise the evenly-spaced
+        // left-edge interpolation below plants the final item's left edge
+        // 24px from the header boundary and its own width (e.g. the Rush
+        // Now button) pushes its right edge off-screen.
+        const lastWidth = naturalRects[naturalRects.length - 1]?.width ?? 0;
+        const endX = headerRect.right - 24 - lastWidth;
         const span = Math.max(endX - startX, 0);
         const n = items.length;
 
@@ -120,44 +132,51 @@ export default function NavBar() {
         });
       }
 
-      function buildNavTimeline() {
+      // A ScrollTrigger with onUpdate setting `x` directly from
+      // self.progress every frame, not a gsap.timeline of independent
+      // per-item `.to()` tweens — the same fix as WhyRush's crossfade
+      // (see git history). Confirmed live: scrubbing this timeline's own
+      // clock manually (tl.time(t, true)) produced perfectly linear
+      // motion, but real scroll-driven playback wrote the DOM transform
+      // exactly once, straight to its end value, well before the scrubbed
+      // progress reached the tween's end — independent tweens riding a
+      // shared `scrub` ScrollTrigger aren't guaranteed to actually play
+      // through their intermediate frames. Deriving the value directly
+      // from progress every update is self-correcting regardless.
+      function buildNavScrollTrigger() {
         const deltas = buildNavSpread();
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: "body",
-            start: "top top",
-            end: SCROLL_DISTANCE,
-            scrub: 0.3,
-          },
+        function applyProgress(progress: number) {
+          const t = progress * TOTAL;
+          const shrinkProgress = gsap.utils.clamp(0, 1, (t - HOLD) / SHRINK);
+          items.forEach((el, i) => {
+            gsap.set(el, { x: deltas[i] * (1 - shrinkProgress) });
+          });
+        }
+        const st = ScrollTrigger.create({
+          trigger: "body",
+          start: "top top",
+          end: SCROLL_DISTANCE,
+          scrub: 0.3,
+          onUpdate: (self) => applyProgress(self.progress),
         });
-        // `.set()` at 0 then `.to()` at HOLD, not a single `.fromTo()` at
-        // HOLD — a fromTo positioned later in the timeline only applies its
-        // "from" value once the playhead reaches it, so scrubbing through
-        // 0→HOLD would've shown the links already at their natural
-        // (clustered) position instead of spread out.
-        items.forEach((el, i) => {
-          tl.set(el, { x: deltas[i] }, 0).to(el, { x: 0, duration: SHRINK, ease: "none" }, HOLD);
-        });
-        // Zero-duration marker to pad the timeline's total length out to
-        // TOTAL, matching the headline timeline so both stay in lockstep
-        // even though ScrollTrigger normalizes each one independently.
-        tl.set(items[0], {}, TOTAL);
-        return tl;
+        // onUpdate only fires on an actual scroll/refresh event, not at
+        // creation time — without this, links sit untransformed (at their
+        // natural clustered position) at rest until the user scrolls once.
+        applyProgress(st.progress);
+        return st;
       }
 
-      let navTl = buildNavTimeline();
+      let navTrigger = buildNavScrollTrigger();
       const onNavResize = () => {
-        navTl.scrollTrigger?.kill();
-        navTl.kill();
+        navTrigger.kill();
         gsap.set(items, { clearProps: "transform" });
-        navTl = buildNavTimeline();
+        navTrigger = buildNavScrollTrigger();
       };
       window.addEventListener("resize", onNavResize);
 
       return () => {
         window.removeEventListener("resize", onNavResize);
-        navTl.scrollTrigger?.kill();
-        navTl.kill();
+        navTrigger.kill();
       };
     });
 
@@ -185,35 +204,20 @@ export default function NavBar() {
   }, [isHome]);
 
   return (
-    <header
-      ref={headerRef}
-      // mix-blend-difference is applied to the header itself, not the
-      // wordmark inside it — mix-blend-mode only composites against paint
-      // within the same stacking context, and putting it on the wordmark
-      // alone left it blending against nothing (Hero's navy/photo live in
-      // a separate subtree). On the header, it composites the whole fixed
-      // bar (including nav links) against whatever real content is
-      // scrolling past underneath — matching sienna.framer.media, whose
-      // equivalent fixed wordmark container carries this same constant
-      // property rather than toggling it on/off with scroll.
-      className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px] ${isHome ? "mix-blend-difference" : ""}`}
-    >
-      <div
-        ref={targetRef}
-        className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
-        aria-hidden={isHome}
-      >
-        {!isHome && <Link href="/">Kappa Theta Pi</Link>}
-        {isHome && "Kappa Theta Pi"}
-      </div>
-
-      {/* Positioned to exactly cover Hero's spacer (same
-          --hero-headline-h/--hero-headline-min-h custom properties — see
-          Hero.tsx and globals.css) so the headline reads as part of that
-          space at rest, even though the spacer itself is normal page
-          content that scrolls away underneath this fixed text. */}
+    <>
+      {/* A separate fixed element from <header>, deliberately — not a
+          styling choice, a stacking-context requirement. mix-blend-mode
+          only searches for backdrop within the nearest ancestor stacking
+          context; a blend on an element that is ITSELF a stacking-context
+          root (position:fixed here) searches one level further out (the
+          page), which is what lets it reach Hero's real photo. Nesting it
+          inside <header> instead confined the search to header's own
+          subtree, which has nothing painted where the wordmark visually
+          sits — it rendered as plain unblended white. Keeping it as its
+          own element also means <header> (nav strip, links, Rush Now)
+          never carries the blend and always stays solid navy/white. */}
       {isHome && (
-        <div className="pointer-events-none absolute inset-x-0 top-[68px] flex h-[var(--hero-headline-h)] min-h-[var(--hero-headline-min-h)] items-center px-6 md:px-[38px]">
+        <div className="pointer-events-none fixed inset-x-0 top-[68px] z-[60] flex h-[var(--hero-headline-h)] min-h-[var(--hero-headline-min-h)] items-center px-6 mix-blend-difference md:px-[38px]">
           <Link
             ref={wordmarkRef}
             href="/"
@@ -226,54 +230,65 @@ export default function NavBar() {
         </div>
       )}
 
-      <nav
-        ref={navLinksRef}
-        className="hidden items-center gap-10 md:flex"
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between bg-navy px-6 py-5 md:px-[38px]"
       >
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="font-sans text-base text-white"
-          >
-            {link.label}
-          </Link>
-        ))}
-        <Button href="/rush">Rush Now</Button>
-      </nav>
+        <div
+          ref={targetRef}
+          className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
+          aria-hidden={isHome}
+        >
+          {!isHome && <Link href="/">Kappa Theta Pi</Link>}
+          {isHome && "Kappa Theta Pi"}
+        </div>
 
-      <button
-        type="button"
-        aria-label={open ? "Close menu" : "Open menu"}
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
-      >
-        <span
-          className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
-        />
-        <span
-          className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
-        />
-      </button>
-
-      {open && (
-        <nav className="absolute top-full left-0 flex w-full flex-col gap-6 bg-navy px-6 py-8 md:hidden">
+        <nav ref={navLinksRef} className="hidden items-center gap-10 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setOpen(false)}
-              className="font-sans text-lg text-white"
+              className="font-sans text-base text-white"
             >
               {link.label}
             </Link>
           ))}
-          <Button href="/rush" className="self-start">
-            Rush Now
-          </Button>
+          <Button href="/rush">Rush Now</Button>
         </nav>
-      )}
-    </header>
+
+        <button
+          type="button"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
+        >
+          <span
+            className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
+          />
+          <span
+            className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
+          />
+        </button>
+
+        {open && (
+          <nav className="absolute top-full left-0 flex w-full flex-col gap-6 bg-navy px-6 py-8 md:hidden">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="font-sans text-lg text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Button href="/rush" className="self-start">
+              Rush Now
+            </Button>
+          </nav>
+        )}
+      </header>
+    </>
   );
 }
