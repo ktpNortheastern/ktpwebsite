@@ -24,15 +24,18 @@ export default function PresidentialWelcome() {
   return (
     <section
       data-snap-section
-      className="flex min-h-screen flex-col items-center justify-center gap-10 bg-navy px-6 py-16 pt-[100px] md:flex-row md:items-stretch md:gap-16 md:px-[100px] md:py-24 md:pt-[100px]"
+      className="flex min-h-screen flex-col items-center justify-center gap-10 bg-navy px-6 py-16 pt-[100px] md:flex-row md:items-stretch md:gap-16 md:px-[100px] md:py-10 md:pt-[100px]"
     >
       {/* items-stretch on the row (set below) makes this match the text
           block's actual rendered height instead of a hardcoded value that
-          would drift out of sync with the (now much longer) real letter. */}
+          would drift out of sync with the (now much longer) real letter.
+          leading-snug + text-sm (down from leading-relaxed/text-[15px]):
+          the full letter overflowed a 1080p viewport at the looser
+          spacing, needing an extra scroll just to clear one section. */}
       <PlaceholderImage n={1} className="h-[260px] w-full shrink-0 md:h-auto md:w-[380px]" />
       <div className="md:max-w-[622px]">
         <h2 className="font-mono text-2xl font-bold text-white">Presidential Welcome</h2>
-        <div className="mt-8 flex flex-col gap-4 whitespace-pre-line font-sans text-[15px] leading-relaxed text-white/80">
+        <div className="mt-5 whitespace-pre-line font-sans text-sm leading-snug text-white/80">
           {LETTER}
         </div>
       </div>
