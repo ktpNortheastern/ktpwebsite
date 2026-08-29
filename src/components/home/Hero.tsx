@@ -34,20 +34,55 @@ export default function Hero() {
   // text first, then NavBar" ordering. NavBar's own wordmark/header
   // intro (in NavBar.tsx) runs on a fixed delay tuned to start after
   // this timeline is done, since the two components don't share state.
+  //
+  // The hint isn't a hover affordance — it's a self-playing idle
+  // indicator (like most "scroll to explore" cues), bobbing continuously
+  // once it's settled in, and fading away as soon as the user actually
+  // starts scrolling (reversing if they scroll back up to the very top).
   useIsomorphicLayoutEffect(() => {
     const tagline = taglineRef.current;
     const hint = scrollHintRef.current;
-    if (!tagline || !hint) return;
+    const section = sectionRef.current;
+    if (!tagline || !hint || !section) return;
 
     const lines = Array.from(tagline.children);
+    let bobTween: gsap.core.Tween | undefined;
+
     const tl = gsap.timeline({ delay: 0.15 });
     tl.set(lines, { autoAlpha: 0, y: 16 })
       .set(hint, { autoAlpha: 0 })
       .to(lines, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.15 })
-      .to(hint, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, "+=0.1");
+      .to(hint, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, "+=0.1")
+      .call(() => {
+        // Started only once the reveal tween above is done with `y` on
+        // this element — running both at once would have them fighting
+        // over the same transform property.
+        bobTween = gsap.to(hint, { y: -6, duration: 1, ease: "sine.inOut", repeat: -1, yoyo: true });
+      });
+
+    // onEnterBack, not onLeaveBack: this trigger starts at "top top" —
+    // the very top of the page — so leaving it backward would require
+    // scrolling to a negative scroll position, which never happens.
+    // onEnterBack (scrolling back up into this 80px zone from below) is
+    // the reachable equivalent of "back near the top" here.
+    const fadeTrigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: "+=80",
+      onEnter: () => {
+        bobTween?.pause();
+        gsap.to(hint, { autoAlpha: 0, duration: 0.3, ease: "power1.out" });
+      },
+      onEnterBack: () => {
+        gsap.to(hint, { autoAlpha: 1, duration: 0.3, ease: "power1.out" });
+        bobTween?.resume();
+      },
+    });
 
     return () => {
       tl.kill();
+      bobTween?.kill();
+      fadeTrigger.kill();
     };
   }, []);
 
@@ -90,8 +125,7 @@ export default function Hero() {
 
         <p
           ref={scrollHintRef}
-          data-cursor-hover
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-white opacity-80 transition-[transform,opacity] duration-200 hover:-translate-y-1 hover:opacity-100"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-white"
         >
           vv scroll down to learn more vv
         </p>
