@@ -125,7 +125,7 @@ export default function Hero() {
 
         <p
           ref={scrollHintRef}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-white"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 will-change-transform font-mono text-sm font-bold text-white"
         >
           vv scroll down to learn more vv
         </p>
