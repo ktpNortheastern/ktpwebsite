@@ -30,22 +30,23 @@ export default function NavBar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [open, setOpen] = useState(false);
-  // Whether the Greek "ΚΘΠ" corner label is currently showing (English
-  // hidden) vs. the plain blended English wordmark. A simple discrete
-  // state, not a continuously-computed value — see the effect below for
-  // why.
+  // Whether the Greek "ΚΘΠ" corner label is mounted/visible. Purely a
+  // function of scroll progress (see updateWordmarkCorner below) — no
+  // timer, so it can never desync from where the wordmark actually is:
+  // scrolling up even briefly recomputes it from the current progress on
+  // the very next scroll frame, same as everything else in this file.
   const [showGreek, setShowGreek] = useState(false);
   const showGreekRef = useRef(false);
-  // Gates mounting the ScrambleText Greek label — set true (once, forever)
-  // the first time it's shown, so the decode animation plays exactly
-  // once, in sync with that first reveal, rather than replaying every
-  // time the user parks in the corner again.
-  const [hasEnteredCorner, setHasEnteredCorner] = useState(false);
-  const hasEnteredCornerRef = useRef(false);
-  // Pending "show Greek" timer id, or null if none is scheduled.
-  const cornerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bumped on every transition INTO the Greek state (never on the way
+  // out) and used as ScrambleText's `key` — React only replays a mount
+  // effect when the key actually changes, so a plain boolean "has this
+  // ever shown" gate only replays the decode once, ever. A counter that
+  // increments on every reveal gives every single downward pass a fresh
+  // key, so it remounts (and re-decodes) every time, not just the first.
+  const [greekRevealCount, setGreekRevealCount] = useState(0);
 
   const headerRef = useRef<HTMLElement>(null);
+  const wordmarkWrapperRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
   const wordmarkInnerRef = useRef<HTMLSpanElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -57,11 +58,12 @@ export default function NavBar() {
   useEffect(() => {
     if (!isHome) return;
     const header = headerRef.current;
+    const wordmarkWrapper = wordmarkWrapperRef.current;
     const wordmark = wordmarkRef.current;
     const inner = wordmarkInnerRef.current;
     const target = targetRef.current;
     const navLinks = navLinksRef.current;
-    if (!header || !wordmark || !inner || !target || !navLinks) return;
+    if (!header || !wordmarkWrapper || !wordmark || !inner || !target || !navLinks) return;
 
     gsap.set(inner, { transformOrigin: "0% 0%" });
     gsap.set(wordmark, { transformOrigin: "0% 0%" });
@@ -78,59 +80,61 @@ export default function NavBar() {
     }
 
     // mix-blend-difference is a permanent, always-on class on the wrapper
-    // (see JSX below), never touched by JS.
+    // (see JSX below), never touched by JS — only its OPACITY is animated,
+    // continuously, from the same scroll progress driving the FLIP itself.
+    // That opacity fade is the actual fix for the cream-tint bug: the
+    // wordmark is invisible by the time it would be sitting over the
+    // header's opaque navy, so there's no blended element left to show a
+    // stuck cream tint in the first place. A scramble effect can't do this
+    // job — scrambled characters are still rendered, still blended, still
+    // cream over navy — so this element only ever fades, never scrambles.
     //
-    // The Greek corner label used to be driven by a live rect-intersection
-    // measurement against Hero's photo, fading in/out continuously as the
-    // wordmark's geometry crossed the photo boundary. That turned out
-    // wrong in practice, not just in tuning: this Hero section is exactly
-    // one snap-scroll section, and its section-snap point sits at its own
-    // top (scroll 0) — any scroll release short of roughly the section's
-    // own midpoint springs back to that top, and the photo-overlap
-    // crossing this was keyed to happens well before that midpoint. So
-    // the geometry-based fade was never actually reachable as a settled,
-    // visible state — only as a flicker during a scroll gesture that kept
-    // moving, which read as broken/choppy rather than intentional.
-    //
-    // Replaced with a plain discrete rule instead: once the wordmark has
-    // been sitting fully shrunk in the corner for a couple of seconds
-    // (i.e. the user has actually stopped scrolling there, not just
-    // transited through), swap to the Greek label. The instant the user
-    // scrolls back up at all, swap back to English immediately — well
-    // before the wordmark would ever near the photo again on the way back
-    // up, so there's no risk of it still reading as Greek by the time the
-    // blend-over-photo effect is relevant again.
-    const CORNER_DELAY_MS = 2500;
+    // FADE_START_PROGRESS is where the fade begins, deliberately expressed
+    // as a fraction of the SAME progress (0–1 over SCROLL_DISTANCE) that
+    // drives the FLIP's x/y/scale, not a separate photo-rect measurement
+    // or a timer. A rect-intersection version of this fade shipped
+    // earlier and was correct in isolation (verified via direct
+    // scrollTrigger.scroll() stepping) but practically broken: it only
+    // ever became visible during a scroll gesture that kept moving, never
+    // as a state a user could actually settle on, because the section's
+    // snap-back point sits well after where that fade completed. Keying
+    // off progress instead ties it to the one signal that's always
+    // synchronized with the wordmark's own position, in both directions,
+    // on every scroll frame — same as HOLD/SHRINK below.
+    const FADE_START_PROGRESS = 0.85; // last 15% of the FLIP's total progress
 
     function showGreekLabel() {
-      cornerTimerRef.current = null;
+      if (showGreekRef.current) return;
       showGreekRef.current = true;
       setShowGreek(true);
-      if (!hasEnteredCornerRef.current) {
-        hasEnteredCornerRef.current = true;
-        setHasEnteredCorner(true);
-      }
+      // Bumps the ScrambleText key so THIS reveal gets its own fresh
+      // mount and decodes again, not just the very first one ever.
+      setGreekRevealCount((c) => c + 1);
     }
 
-    function revertToEnglish() {
-      if (cornerTimerRef.current !== null) {
-        clearTimeout(cornerTimerRef.current);
-        cornerTimerRef.current = null;
-      }
-      if (showGreekRef.current) {
-        showGreekRef.current = false;
-        setShowGreek(false);
-      }
+    function hideGreekLabel() {
+      if (!showGreekRef.current) return;
+      showGreekRef.current = false;
+      setShowGreek(false);
     }
 
+    // Runs every scroll frame — cheap (a couple of gsap.set calls and,
+    // at most, one boundary-crossing state update), and being purely a
+    // function of the current progress means scrolling up mid-transition
+    // recomputes correctly on the very next frame instead of racing
+    // against anything scheduled earlier.
     function updateWordmarkCorner(progress: number) {
-      const atCorner = progress >= 0.999;
-      if (atCorner) {
-        if (!showGreekRef.current && cornerTimerRef.current === null) {
-          cornerTimerRef.current = setTimeout(showGreekLabel, CORNER_DELAY_MS);
-        }
-      } else {
-        revertToEnglish();
+      const englishOpacity = gsap.utils.clamp(0, 1, (1 - progress) / (1 - FADE_START_PROGRESS));
+      gsap.set(wordmarkWrapper, { opacity: englishOpacity, pointerEvents: englishOpacity > 0.5 ? "auto" : "none" });
+
+      if (progress >= 1) {
+        showGreekLabel();
+      } else if (progress < FADE_START_PROGRESS) {
+        // Only reverts once comfortably clear of the fade zone (not the
+        // instant progress dips below 1) — otherwise a single scrub frame
+        // landing at, say, 0.995 while still easing toward the corner
+        // would flip Greek on and straight back off again.
+        hideGreekLabel();
       }
     }
 
@@ -264,8 +268,10 @@ export default function NavBar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       gsap.set(wordmark, { clearProps: "transform,color" });
-      revertToEnglish();
+      gsap.set(wordmarkWrapper, { clearProps: "opacity,pointerEvents" });
+      hideGreekLabel();
       tl = buildTimeline();
+      updateWordmarkCorner(tl.scrollTrigger?.progress ?? 0);
       ScrollTrigger.refresh();
     };
     window.addEventListener("resize", onResize);
@@ -273,16 +279,13 @@ export default function NavBar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       tl = buildTimeline();
+      updateWordmarkCorner(tl.scrollTrigger?.progress ?? 0);
     });
 
     return () => {
       window.removeEventListener("resize", onResize);
       tl.scrollTrigger?.kill();
       tl.kill();
-      if (cornerTimerRef.current !== null) {
-        clearTimeout(cornerTimerRef.current);
-        cornerTimerRef.current = null;
-      }
       mm.revert();
     };
   }, [isHome]);
@@ -302,16 +305,19 @@ export default function NavBar() {
           never carries the blend and always stays solid navy/white.
 
           mix-blend-difference is a permanent, static class here — no
-          longer toggled by JS. Once this element's FLIP shrink carries it
-          into the header's corner slot and it's sat there for a couple of
-          seconds, showGreek swaps it out for the plain-white "ΚΘΠ" label
-          below instead (a discrete CSS opacity swap, not a continuous
-          fade) — the blended element being hidden by then is what fixes
-          the old cream-tint bug, not a state it has to correctly guess
-          and toggle out of. */}
+          longer toggled by JS. Only its opacity is, continuously, from
+          updateWordmarkCorner (via a plain ref, not a CSS class — a CSS
+          transition fighting a per-frame gsap.set would fight/lag against
+          it) so it fades away before it's fully sitting over the
+          header's opaque navy in the corner slot. That fade is what
+          fixes the old cream-tint bug — the blended element being hidden
+          by then, not a state it has to correctly guess and toggle out
+          of. showGreek's pointer-events/aria/tabIndex still reflect
+          whether it's currently the interactive element. */}
       {isHome && (
         <div
-          className={`pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference transition-opacity duration-300 ${showGreek ? "opacity-0" : "opacity-100"}`}
+          ref={wordmarkWrapperRef}
+          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference"
         >
           <Link
             ref={wordmarkRef}
@@ -347,16 +353,21 @@ export default function NavBar() {
           </div>
 
           {/* Greek corner label — overlaid exactly on the probe above
-              (same box via inset-0). Plain white, never blended: this is
-              what actually shows once showGreek flips true, a plain CSS
-              opacity swap complementary to the big wordmark's own class
-              above (never both fully visible at once). The ScrambleText
-              decode only mounts once ever (hasEnteredCorner, set the first
-              time showGreek goes true) — later reveals just crossfade in
-              a static "ΚΘΠ", no repeat scramble. */}
+              (same box via inset-0). Plain white, never blended. No
+              opacity transition here (unlike the wordmark above) —
+              deliberately: this element's own reveal IS the ScrambleText
+              decode, not a fade, so it just snaps to opacity-100 the
+              instant showGreek goes true and lets the character-flip
+              animation do the actual revealing while the wordmark
+              dissolves away above it. The decode replays on EVERY reveal,
+              not just the first ever — ScrambleText's "immediate" trigger
+              only re-runs when it remounts, and React only remounts on a
+              key change, so the key is greekRevealCount (bumped once per
+              transition into Greek, see showGreekLabel above) rather than
+              a fixed string. */}
           {isHome && (
             <div
-              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white transition-opacity duration-300 ${showGreek ? "opacity-100" : "opacity-0"}`}
+              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white ${showGreek ? "opacity-100" : "opacity-0"}`}
             >
               <Link
                 href="/"
@@ -364,8 +375,8 @@ export default function NavBar() {
                 aria-hidden={!showGreek}
                 className={showGreek ? "pointer-events-auto" : "pointer-events-none"}
               >
-                {hasEnteredCorner ? (
-                  <ScrambleText key="corner-greek" text="ΚΘΠ" trigger="immediate" as="span" />
+                {greekRevealCount > 0 ? (
+                  <ScrambleText key={greekRevealCount} text="ΚΘΠ" trigger="immediate" as="span" />
                 ) : (
                   "ΚΘΠ"
                 )}
