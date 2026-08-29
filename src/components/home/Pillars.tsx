@@ -68,20 +68,22 @@ export default function Pillars() {
         return section!.clientWidth - paddingX;
       };
 
-      if (track!.scrollWidth - visibleWidth() <= 0) return;
+      // Computed once per setupDesktop() call, not as a function re-run by
+      // GSAP on every scrubbed scroll frame — that was forcing a
+      // getComputedStyle + layout read on every single frame while this
+      // section was pinned, a real source of scroll jank. A resize still
+      // gets a fresh measurement: sync() below tears down and calls
+      // setupDesktop() again from scratch on that event.
+      const distance = track!.scrollWidth - visibleWidth();
+      if (distance <= 0) return;
 
-      // x/end read live layout on every evaluation rather than closing over
-      // a single scrollDistance measured at mount — a window resize
-      // (rotating a tablet, un-maximizing, a different monitor) would
-      // otherwise leave the pin scrubbing against a stale distance from
-      // whatever size the page happened to load at.
       const tween = gsap.to(track, {
-        x: () => -(track!.scrollWidth - visibleWidth()),
+        x: -distance,
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => `+=${track!.scrollWidth - visibleWidth()}`,
+          end: `+=${distance}`,
           scrub: true,
           pin: true,
         },
