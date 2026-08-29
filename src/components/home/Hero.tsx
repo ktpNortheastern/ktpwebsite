@@ -2,11 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCursor } from "@/components/motion/CustomCursor";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLParagraphElement>(null);
   const { setState } = useCursor();
 
   useEffect(() => {
@@ -24,6 +28,28 @@ export default function Hero() {
 
     return () => trigger.kill();
   }, [setState]);
+
+  // Load-in sequence: the tagline lines settle first, then the scroll
+  // hint — this is the "home page text" half of the requested "hero
+  // text first, then NavBar" ordering. NavBar's own wordmark/header
+  // intro (in NavBar.tsx) runs on a fixed delay tuned to start after
+  // this timeline is done, since the two components don't share state.
+  useIsomorphicLayoutEffect(() => {
+    const tagline = taglineRef.current;
+    const hint = scrollHintRef.current;
+    if (!tagline || !hint) return;
+
+    const lines = Array.from(tagline.children);
+    const tl = gsap.timeline({ delay: 0.15 });
+    tl.set(lines, { autoAlpha: 0, y: 16 })
+      .set(hint, { autoAlpha: 0 })
+      .to(lines, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.15 })
+      .to(hint, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, "+=0.1");
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
 
   return (
     <section
@@ -50,13 +76,23 @@ export default function Hero() {
         {/* Anchored to the photo's own box rather than sharing space with
             the headline, so NavBar's wordmark — confined to its own
             natural height — never reaches far enough down to cross over
-            this text. */}
-        <div className="absolute inset-x-0 bottom-16 flex flex-col gap-1 px-6 font-mono text-base font-bold text-white md:bottom-20 md:px-[60px] md:text-[30px]">
+            this text. Pulled up from bottom-16/20 to bottom-32/40 per
+            design feedback, and leading-none + a smaller gap tighten the
+            space between the two lines (most of the old gap was each
+            line's own default line-height, not the flex gap). */}
+        <div
+          ref={taglineRef}
+          className="absolute inset-x-0 bottom-32 flex flex-col gap-0.5 px-6 font-mono text-base leading-none font-bold text-white md:bottom-40 md:px-[60px] md:text-[30px]"
+        >
           <p>omega chapter @ northeastern university</p>
           <p>the premiere technology fraternity in the nation</p>
         </div>
 
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-white">
+        <p
+          ref={scrollHintRef}
+          data-cursor-hover
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-white opacity-80 transition-[transform,opacity] duration-200 hover:-translate-y-1 hover:opacity-100"
+        >
           vv scroll down to learn more vv
         </p>
       </div>
