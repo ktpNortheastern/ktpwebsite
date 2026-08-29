@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
 import ScrambleText from "@/components/motion/ScrambleText";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -55,7 +56,15 @@ export default function NavBar() {
   // Only the home page opens on the big white "Kappa Theta Pi" headline —
   // every other page has no hero moment to shrink from, so it renders
   // straight into the compact/scrolled nav state.
-  useEffect(() => {
+  //
+  // useIsomorphicLayoutEffect, not useEffect: a plain useEffect's initial
+  // tl.set()/updateWordmarkCorner() calls run AFTER the first paint, so on
+  // every mount of this component (including a client-side nav back to "/"
+  // — NavBar itself never unmounts, but this effect's own dependency on
+  // isHome means it re-runs) the wordmark would flash in its default,
+  // untransformed CSS state for one frame before GSAP applies its initial
+  // transform. Running synchronously before paint removes that flash.
+  useIsomorphicLayoutEffect(() => {
     if (!isHome) return;
     const header = headerRef.current;
     const wordmarkWrapper = wordmarkWrapperRef.current;
