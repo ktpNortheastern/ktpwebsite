@@ -1,5 +1,5 @@
 ---
 name: "LinkedIn"
-logo: "/images/logos/linkedin.svg"
+logo: "/images/logos/linkedin.png"
 order: 9
 ---

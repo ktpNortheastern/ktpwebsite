@@ -1,5 +1,5 @@
 ---
 name: "Millennium"
-logo: "/images/logos/millennium.svg"
+logo: "/images/logos/millennium.jpg"
 order: 23
 ---

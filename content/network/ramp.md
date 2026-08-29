@@ -1,5 +1,5 @@
 ---
 name: "Ramp"
-logo: "/images/logos/ramp.svg"
+logo: "/images/logos/ramp.png"
 order: 8
 ---

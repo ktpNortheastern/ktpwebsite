@@ -1,5 +1,5 @@
 ---
 name: "SharkNinja"
-logo: "/images/logos/sharkninja.svg"
+logo: "/images/logos/sharkninja.png"
 order: 37
 ---
