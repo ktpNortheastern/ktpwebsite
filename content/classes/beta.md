@@ -1,4 +1,4 @@
 ---
-name: "Beta"
+name: "Beta Class"
 order: 40
 ---

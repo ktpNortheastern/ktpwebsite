@@ -1,4 +1,4 @@
 ---
-name: "Delta"
+name: "Delta Class"
 order: 20
 ---

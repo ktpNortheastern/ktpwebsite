@@ -1,4 +1,4 @@
 ---
-name: "Founding"
+name: "Founding Class"
 order: 60
 ---

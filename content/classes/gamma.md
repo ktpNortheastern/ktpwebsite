@@ -1,4 +1,4 @@
 ---
-name: "Gamma"
+name: "Gamma Class"
 order: 30
 ---
