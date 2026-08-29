@@ -44,34 +44,49 @@ collections:
     folder: "content/members"
     create: true
     slug: "{{slug}}"
+    identifier_field: "name"
     fields:
       - { label: "Name", name: "name", widget: "string" }
+      - {
+          label: "Photo",
+          name: "photo",
+          widget: "image",
+          required: false,
+          hint: "Leave blank to show a numbered placeholder instead",
+        }
+      - { label: "Major", name: "major", widget: "string" }
+      - {
+          label: "Class Year",
+          name: "classYear",
+          widget: "string",
+          hint: "e.g. 27 — rendered on the card as \"Class of 27\"",
+        }
       - label: "Class"
         name: "class"
         widget: "relation"
         collection: "classes"
         search_fields: ["name"]
-        value_field: "name"
+        value_field: "{{slug}}"
         display_fields: ["name"]
-        hint: "Don't see the right class? Add it under 'Member Classes' first, then come back here."
+        hint: "Don't see the right class? Add it under 'Member Classes' first, then come back here. This is their permanent record — it doesn't change if they later become an Alumni below."
       - label: "Status"
         name: "status"
         widget: "select"
         options: ["Active", "Alumni"]
         default: "Active"
-        hint: "Alumni always render in the Alumni section, regardless of their class"
+        hint: "Alumni always render in the Alumni section, regardless of their class above"
       - label: "Role"
         name: "role"
         widget: "string"
         required: false
         hint: "Exec board title, e.g. VP Tech Dev. Leave blank for general class members."
-      - { label: "Photo", name: "photo", widget: "image" }
       - {
-          label: "LinkedIn",
+          label: "LinkedIn URL",
           name: "linkedin",
           widget: "string",
           required: false,
         }
+      - { label: "Email", name: "email", widget: "string", required: false }
       - label: "Order"
         name: "order"
         widget: "number"
