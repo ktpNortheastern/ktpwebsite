@@ -27,14 +27,14 @@ export default function History() {
       data-snap-section
       className="relative flex min-h-screen flex-col justify-center gap-10 bg-navy bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:16px_16px] px-6 py-16 md:h-screen md:gap-16 md:px-[100px]"
     >
-      <div className="flex flex-col items-start gap-8 md:flex-row">
+      <div className="flex flex-col items-center gap-8 md:flex-row">
         <HistoryCard
           title="Who We Are"
           body="Our members are passionate about technology and are dedicated to making a positive impact on the world. We are a community of like-minded individuals who share a love for technology and a desire to learn, grow, excel, and succeed together. Our community is made up of individuals from all across campus. The strength of KTP lies in our shared enthusiasm for technology and the way our diverse experiences blend into a unified whole."
         />
         <PlaceholderImage n={2} className="h-[180px] w-full shrink-0 md:w-[280px]" />
       </div>
-      <div className="flex flex-col items-start gap-8 md:flex-row">
+      <div className="flex flex-col items-center gap-8 md:flex-row">
         <PlaceholderImage n={3} className="h-[180px] w-full shrink-0 md:w-[280px]" />
         <HistoryCard title="The Omega Chapter" body={OMEGA_CHAPTER_COPY} />
       </div>
