@@ -5,6 +5,7 @@ import NavBar from "@/components/layout/NavBar";
 import Footer from "@/components/layout/Footer";
 import { CustomCursorProvider } from "@/components/motion/CustomCursor";
 import SnapScrollContainer from "@/components/motion/SnapScrollContainer";
+import PageTransition from "@/components/motion/PageTransition";
 import "./globals.css";
 
 const satoshi = localFont({
@@ -50,6 +51,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col cursor-none">
         <CustomCursorProvider>
+          <PageTransition />
           <NavBar />
           <SnapScrollContainer>
             {children}

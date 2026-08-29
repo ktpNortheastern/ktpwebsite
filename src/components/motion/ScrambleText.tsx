@@ -22,6 +22,12 @@ type ScrambleTextProps = {
   // as soon as the element mounts — for hover/tap-triggered captions, pass a
   // `key` that changes with the text so React remounts and re-triggers it.
   trigger?: "scroll" | "immediate";
+  // Fires once, when the decode reaches its final frame and settles on
+  // `text` — not on unmount/interruption (see the cancel() path in
+  // scramble() below, which stops the rAF loop before this ever runs).
+  // Lets a caller key real work off "the animation actually finished"
+  // instead of guessing a matching duration.
+  onComplete?: () => void;
 };
 
 /**
@@ -35,15 +41,26 @@ export default function ScrambleText({
   className = "",
   as: Tag = "p",
   trigger = "scroll",
+  onComplete,
 }: ScrambleTextProps) {
   const ref = useRef<HTMLElement>(null);
+  // Read through a ref rather than putting onComplete in the effect's own
+  // deps below — callers (e.g. PageTransition) pass an inline callback
+  // that's a new function every render, and this effect must only re-run
+  // (restarting the decode) when text/trigger actually change, not on
+  // every render of the caller.
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const fireComplete = () => onCompleteRef.current?.();
 
     if (trigger === "immediate") {
-      const cancel = scramble(el, text);
+      const cancel = scramble(el, text, fireComplete);
       return cancel;
     }
 
@@ -54,7 +71,7 @@ export default function ScrambleText({
       start: "top 80%",
       once: true,
       onEnter: () => {
-        cancel = scramble(el, text);
+        cancel = scramble(el, text, fireComplete);
       },
     });
 
@@ -72,7 +89,7 @@ export default function ScrambleText({
   );
 }
 
-function scramble(el: HTMLElement, finalText: string) {
+function scramble(el: HTMLElement, finalText: string, onComplete?: () => void) {
   const chars = finalText.split("");
   const total = chars.length;
   const startTimes = chars.map((_, i) => (i / total) * (SWEEP_MS - SETTLE_MS));
@@ -105,6 +122,7 @@ function scramble(el: HTMLElement, finalText: string) {
       raf = requestAnimationFrame(frame);
     } else {
       el.textContent = finalText;
+      onComplete?.();
     }
   }
 
