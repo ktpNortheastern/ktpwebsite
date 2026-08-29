@@ -335,7 +335,17 @@ export default function NavBar() {
       {isHome && (
         <div
           ref={wordmarkWrapperRef}
-          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference"
+          // z-40, deliberately BELOW header's z-50: despite this wrapper's
+          // own layout box sitting well below the header (top: --nav-h),
+          // its permanent mix-blend-difference forces it onto its own
+          // compositing layer for the cross-stacking-context blend (see the
+          // header comment above) — Chromium's hit-testing for that layer
+          // was found (empirically, via elementFromPoint at the nav links'
+          // real coordinates) to win over the header's own nav links
+          // whenever it outranked header in z-order, even though their
+          // layout boxes don't overlap. The header is opaque navy regardless,
+          // so painting this one layer below it costs nothing visually.
+          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-40 flex px-[var(--nav-pad-x)] mix-blend-difference"
         >
           <Link
             ref={wordmarkRef}
@@ -353,20 +363,28 @@ export default function NavBar() {
 
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between bg-navy px-[var(--nav-pad-x)] py-5"
+        className={`fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between px-[var(--nav-pad-x)] py-5 ${
+          isHome ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"
+        }`}
       >
         <div className="relative">
-          {/* Invisible geometry probe — buildTimeline() measures this
-              element's rect to compute where the big wordmark shrinks to.
-              Text must stay "Kappa Theta Pi" (matching the shrinking
-              wordmark itself), not whatever corner label happens to be
-              showing, so its box never depends on that. */}
+          {/* Invisible geometry probe on home (buildTimeline() measures
+              this element's rect to compute where the big wordmark shrinks
+              to — text must stay "Kappa Theta Pi" there, matching the
+              shrinking wordmark itself). On every other page there's no
+              hero to shrink from, so this renders as the real, visible
+              logo instead: the Figma navBar component's "ΚΘΠ" in EB
+              Garamond Semibold, not the English wordmark. */}
           <div
             ref={targetRef}
-            className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
+            className={
+              isHome
+                ? "invisible font-sans text-2xl font-bold text-white"
+                : "font-serif text-4xl font-semibold text-navy"
+            }
             aria-hidden={isHome}
           >
-            {!isHome && <Link href="/">Kappa Theta Pi</Link>}
+            {!isHome && <Link href="/">ΚΘΠ</Link>}
             {isHome && "Kappa Theta Pi"}
           </div>
 
@@ -382,10 +400,12 @@ export default function NavBar() {
               it remounts, and React only remounts on a key change, so the
               key is greekRevealCount (bumped once per transition into
               Greek, see showGreekLabel above) rather than a fixed
-              string. */}
+              string. font-serif/font-semibold matches the Figma navBar
+              component's actual "ΚΘΠ" logo treatment (EB Garamond
+              Semibold) instead of the Satoshi sans used elsewhere here. */}
           {isHome && (
             <div
-              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white transition-opacity duration-300 ease-out ${showGreek ? "opacity-100" : "opacity-0"}`}
+              className={`pointer-events-none absolute inset-0 flex items-center font-serif text-4xl font-semibold text-white transition-opacity duration-300 ease-out ${showGreek ? "opacity-100" : "opacity-0"}`}
             >
               <Link
                 href="/"
@@ -408,12 +428,14 @@ export default function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className="font-sans text-base text-white"
+              className={`font-sans text-base ${isHome ? "text-white" : "text-black"}`}
             >
               {link.label}
             </Link>
           ))}
-          <Button href="/rush">Rush Now</Button>
+          <Button href="/rush" variant={isHome ? "light" : "dark"}>
+            Rush Now
+          </Button>
         </nav>
 
         <button
@@ -424,26 +446,30 @@ export default function NavBar() {
           className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
         >
           <span
-            className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
+            className={`h-px w-6 transition-transform duration-200 ${isHome ? "bg-white" : "bg-black"} ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
           />
           <span
-            className={`h-px w-6 bg-white transition-transform duration-200 ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
+            className={`h-px w-6 transition-transform duration-200 ${isHome ? "bg-white" : "bg-black"} ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
           />
         </button>
 
         {open && (
-          <nav className="absolute top-full left-0 flex w-full flex-col gap-6 bg-navy px-6 py-8 md:hidden">
+          <nav
+            className={`absolute top-full left-0 flex w-full flex-col gap-6 px-6 py-8 md:hidden ${
+              isHome ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"
+            }`}
+          >
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="font-sans text-lg text-white"
+                className={`font-sans text-lg ${isHome ? "text-white" : "text-black"}`}
               >
                 {link.label}
               </Link>
             ))}
-            <Button href="/rush" className="self-start">
+            <Button href="/rush" variant={isHome ? "light" : "dark"} className="self-start">
               Rush Now
             </Button>
           </nav>
