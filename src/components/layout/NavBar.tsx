@@ -77,6 +77,29 @@ export default function NavBar() {
     gsap.set(inner, { transformOrigin: "0% 0%" });
     gsap.set(wordmark, { transformOrigin: "0% 0%" });
 
+    // Home-page load-in: the big headline fades in first, and only once
+    // it (and Hero's own tagline/scroll-hint, animated independently in
+    // Hero.tsx) has had time to settle does the actual nav chrome —
+    // links, Rush Now, hamburger — slide/fade into place. A fixed delay
+    // rather than an onComplete callback, since Hero is a separate,
+    // decoupled component with its own timeline; keep the ~1.5s total
+    // here roughly in sync with Hero's intro if that one's timing changes.
+    //
+    // inner's own intro is opacity-only, deliberately no y-translate:
+    // fitWidth() below drives inner's scaleX via gsap.set on every
+    // buildTimeline() call (mount, resize, fonts.ready), and GSAP bundles
+    // all CSS transform properties (translate/scale/rotate) on an element
+    // into one internal cache — a separate y-tween here got silently
+    // killed the instant fitWidth's scaleX set() ran, verified by reading
+    // inner's computed style stuck at the tween's START values. Keeping
+    // this tween off the transform property entirely sidesteps that.
+    const introTl = gsap.timeline();
+    introTl
+      .set(inner, { autoAlpha: 0 })
+      .set(header, { autoAlpha: 0, y: -20 })
+      .to(inner, { autoAlpha: 1, duration: 0.7, ease: "power2.out", delay: 0.15 })
+      .to(header, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "+=0.5");
+
     // Stretches the headline to the exact edge-to-edge width of its
     // container (matching header's own padding) regardless of viewport
     // or how many characters the phrase has, the same "full-bleed
@@ -314,6 +337,12 @@ export default function NavBar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       mm.revert();
+      // header is a permanent, never-unmounted element (unlike wordmark/
+      // inner, which live inside the isHome-only JSX block below and get
+      // torn down by React regardless) — clear its intro-tween props so
+      // leaving home doesn't leave it stuck invisible on other pages.
+      introTl.kill();
+      gsap.set(header, { clearProps: "opacity,visibility,transform" });
     };
   }, [isHome]);
 
