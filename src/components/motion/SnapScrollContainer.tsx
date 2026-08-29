@@ -96,6 +96,17 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
               ? gsap.utils.clamp(0, 1, ownTrigger.end / maxScroll)
               : start;
             pinnedRanges.push([start, end]);
+          } else if (section.hasAttribute("data-snap-through")) {
+            // Opt-in for a tall, non-pinned section (e.g. Network's 42-logo
+            // grid): its own start is still a valid point to settle on
+            // arriving from above, but its body shouldn't pull the scroll
+            // back out to whichever neighboring point happens to be
+            // closest while the user is still scrolling through it — same
+            // "don't snap, let it keep going" treatment as a pinned
+            // section's scrub range, just derived from its own rendered
+            // height instead of a ScrollTrigger.
+            const end = gsap.utils.clamp(0, 1, (positionedEl.offsetTop + positionedEl.offsetHeight) / maxScroll);
+            pinnedRanges.push([start, end]);
           }
         }
 
