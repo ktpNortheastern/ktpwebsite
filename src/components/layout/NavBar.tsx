@@ -102,6 +102,22 @@ export default function NavBar() {
     // synchronized with the wordmark's own position, in both directions,
     // on every scroll frame — same as HOLD/SHRINK below.
     const FADE_START_PROGRESS = 0.85; // last 15% of the FLIP's total progress
+    // Greek starts appearing slightly BEFORE English's fade fully
+    // completes (which still finishes exactly at progress 1, unchanged —
+    // that's the line that actually matters for the cream-tint bug).
+    // This overlap is only safe on Greek's side: it's never blended, so
+    // there's no tint risk in it becoming visible a little early. Without
+    // it, the two elements swapped in the same instant — each fade read
+    // fine in isolation, but the handoff between them still landed as a
+    // hard cut rather than a transition.
+    const GREEK_APPEAR_PROGRESS = 0.95;
+    // Applied to the fade-out, not left linear — linear made the wordmark
+    // stay substantially visible right up to the end and then disappear
+    // all at once. Easing the LOSS of opacity (power2.out: fast at first,
+    // tapering as it approaches 0) means it's already faint well before
+    // progress 1, so what's left to lose right at the end is small —
+    // reads as dissolving rather than being cut off.
+    const fadeEase = gsap.parseEase("power2.out");
 
     function showGreekLabel() {
       if (showGreekRef.current) return;
@@ -124,16 +140,18 @@ export default function NavBar() {
     // recomputes correctly on the very next frame instead of racing
     // against anything scheduled earlier.
     function updateWordmarkCorner(progress: number) {
-      const englishOpacity = gsap.utils.clamp(0, 1, (1 - progress) / (1 - FADE_START_PROGRESS));
+      const fadeT = gsap.utils.clamp(0, 1, (progress - FADE_START_PROGRESS) / (1 - FADE_START_PROGRESS));
+      const englishOpacity = 1 - fadeEase(fadeT);
       gsap.set(wordmarkWrapper, { opacity: englishOpacity, pointerEvents: englishOpacity > 0.5 ? "auto" : "none" });
 
-      if (progress >= 1) {
+      if (progress >= GREEK_APPEAR_PROGRESS) {
         showGreekLabel();
       } else if (progress < FADE_START_PROGRESS) {
         // Only reverts once comfortably clear of the fade zone (not the
-        // instant progress dips below 1) — otherwise a single scrub frame
-        // landing at, say, 0.995 while still easing toward the corner
-        // would flip Greek on and straight back off again.
+        // instant progress dips below GREEK_APPEAR_PROGRESS) — otherwise
+        // a single scrub frame landing right at the boundary while still
+        // easing toward the corner would flip Greek on and straight back
+        // off again.
         hideGreekLabel();
       }
     }
@@ -353,21 +371,21 @@ export default function NavBar() {
           </div>
 
           {/* Greek corner label — overlaid exactly on the probe above
-              (same box via inset-0). Plain white, never blended. No
-              opacity transition here (unlike the wordmark above) —
-              deliberately: this element's own reveal IS the ScrambleText
-              decode, not a fade, so it just snaps to opacity-100 the
-              instant showGreek goes true and lets the character-flip
-              animation do the actual revealing while the wordmark
-              dissolves away above it. The decode replays on EVERY reveal,
-              not just the first ever — ScrambleText's "immediate" trigger
-              only re-runs when it remounts, and React only remounts on a
-              key change, so the key is greekRevealCount (bumped once per
-              transition into Greek, see showGreekLabel above) rather than
-              a fixed string. */}
+              (same box via inset-0). Plain white, never blended. A short
+              CSS fade-in (duration-300, plain time-based — no tint risk
+              here so it doesn't need to be tied to scroll progress like
+              the wordmark's own fade does) so it arrives softly rather
+              than snapping to full opacity, with the ScrambleText decode
+              continuing to play underneath/through that fade-in. The
+              decode itself replays on EVERY reveal, not just the first
+              ever — ScrambleText's "immediate" trigger only re-runs when
+              it remounts, and React only remounts on a key change, so the
+              key is greekRevealCount (bumped once per transition into
+              Greek, see showGreekLabel above) rather than a fixed
+              string. */}
           {isHome && (
             <div
-              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white ${showGreek ? "opacity-100" : "opacity-0"}`}
+              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white transition-opacity duration-300 ease-out ${showGreek ? "opacity-100" : "opacity-0"}`}
             >
               <Link
                 href="/"
