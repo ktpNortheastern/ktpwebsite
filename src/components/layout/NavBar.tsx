@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
+import ScrambleText from "@/components/motion/ScrambleText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,9 +30,22 @@ export default function NavBar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [open, setOpen] = useState(false);
+  // Whether the Greek "ΚΘΠ" corner label is currently showing (English
+  // hidden) vs. the plain blended English wordmark. A simple discrete
+  // state, not a continuously-computed value — see the effect below for
+  // why.
+  const [showGreek, setShowGreek] = useState(false);
+  const showGreekRef = useRef(false);
+  // Gates mounting the ScrambleText Greek label — set true (once, forever)
+  // the first time it's shown, so the decode animation plays exactly
+  // once, in sync with that first reveal, rather than replaying every
+  // time the user parks in the corner again.
+  const [hasEnteredCorner, setHasEnteredCorner] = useState(false);
+  const hasEnteredCornerRef = useRef(false);
+  // Pending "show Greek" timer id, or null if none is scheduled.
+  const cornerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const headerRef = useRef<HTMLElement>(null);
-  const wordmarkWrapperRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
   const wordmarkInnerRef = useRef<HTMLSpanElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -43,12 +57,11 @@ export default function NavBar() {
   useEffect(() => {
     if (!isHome) return;
     const header = headerRef.current;
-    const wordmarkWrapper = wordmarkWrapperRef.current;
     const wordmark = wordmarkRef.current;
     const inner = wordmarkInnerRef.current;
     const target = targetRef.current;
     const navLinks = navLinksRef.current;
-    if (!header || !wordmarkWrapper || !wordmark || !inner || !target || !navLinks) return;
+    if (!header || !wordmark || !inner || !target || !navLinks) return;
 
     gsap.set(inner, { transformOrigin: "0% 0%" });
     gsap.set(wordmark, { transformOrigin: "0% 0%" });
@@ -64,33 +77,61 @@ export default function NavBar() {
       gsap.set(inner!, { scaleX: container / natural });
     }
 
-    // Blend is on the WRAPPER div, not the Link — the wrapper is what
-    // actually carries mix-blend-difference (a stacking-context
-    // requirement, see the JSX comment below). A blended parent flattens
-    // all of its descendant paint into one buffer before compositing that
-    // buffer against its own backdrop, so setting mixBlendMode on a child
-    // Link alone wouldn't exempt it — the parent's blend still applies to
-    // the flattened result. Toggling the actual blended element is the
-    // only thing that works.
+    // mix-blend-difference is a permanent, always-on class on the wrapper
+    // (see JSX below), never touched by JS.
     //
-    // The on/off decision itself is a live rect-intersection test against
-    // Hero's photo (data-hero-photo), not a guessed fraction of the
-    // scroll-timeline's duration — the wordmark starts entirely over the
-    // photo (no spacer) and ends up over the header's opaque navy in the
-    // corner slot, but exactly when it crosses from one to the other
-    // depends on real geometry (target position, photo height, viewport
-    // size) that a fixed timeline fraction can't account for. A fixed
-    // fraction either turned it white while still visibly over the photo,
-    // or left it blended after it had already reached solid navy,
-    // depending on viewport. Checking actual overlap every frame is
-    // self-correcting regardless.
-    function updateWordmarkBlend() {
-      const photo = document.querySelector<HTMLElement>("[data-hero-photo]");
-      if (!photo) return;
-      const wordmarkRect = wordmark!.getBoundingClientRect();
-      const photoRect = photo.getBoundingClientRect();
-      const overPhoto = wordmarkRect.bottom > photoRect.top && wordmarkRect.top < photoRect.bottom;
-      gsap.set(wordmarkWrapper, { mixBlendMode: overPhoto ? "difference" : "normal" });
+    // The Greek corner label used to be driven by a live rect-intersection
+    // measurement against Hero's photo, fading in/out continuously as the
+    // wordmark's geometry crossed the photo boundary. That turned out
+    // wrong in practice, not just in tuning: this Hero section is exactly
+    // one snap-scroll section, and its section-snap point sits at its own
+    // top (scroll 0) — any scroll release short of roughly the section's
+    // own midpoint springs back to that top, and the photo-overlap
+    // crossing this was keyed to happens well before that midpoint. So
+    // the geometry-based fade was never actually reachable as a settled,
+    // visible state — only as a flicker during a scroll gesture that kept
+    // moving, which read as broken/choppy rather than intentional.
+    //
+    // Replaced with a plain discrete rule instead: once the wordmark has
+    // been sitting fully shrunk in the corner for a couple of seconds
+    // (i.e. the user has actually stopped scrolling there, not just
+    // transited through), swap to the Greek label. The instant the user
+    // scrolls back up at all, swap back to English immediately — well
+    // before the wordmark would ever near the photo again on the way back
+    // up, so there's no risk of it still reading as Greek by the time the
+    // blend-over-photo effect is relevant again.
+    const CORNER_DELAY_MS = 2500;
+
+    function showGreekLabel() {
+      cornerTimerRef.current = null;
+      showGreekRef.current = true;
+      setShowGreek(true);
+      if (!hasEnteredCornerRef.current) {
+        hasEnteredCornerRef.current = true;
+        setHasEnteredCorner(true);
+      }
+    }
+
+    function revertToEnglish() {
+      if (cornerTimerRef.current !== null) {
+        clearTimeout(cornerTimerRef.current);
+        cornerTimerRef.current = null;
+      }
+      if (showGreekRef.current) {
+        showGreekRef.current = false;
+        setShowGreek(false);
+      }
+    }
+
+    function updateWordmarkCorner(progress: number) {
+      const atCorner = progress >= 0.999;
+      if (atCorner) {
+        if (!showGreekRef.current && cornerTimerRef.current === null) {
+          cornerTimerRef.current = setTimeout(showGreekLabel, CORNER_DELAY_MS);
+        }
+      } else {
+        revertToEnglish();
+      }
     }
 
     // Manual FLIP against an invisible same-text target sitting in the
@@ -113,12 +154,12 @@ export default function NavBar() {
           start: "top top",
           end: SCROLL_DISTANCE,
           scrub: 0.3,
-          onUpdate: updateWordmarkBlend,
+          onUpdate: (self) => updateWordmarkCorner(self.progress),
         },
       });
 
       // A single translate+scale FLIP, held briefly then shrunk into the
-      // corner — the blend state itself is handled separately, above.
+      // corner — the Greek corner label swap is handled separately, above.
       tl.set(wordmark, { x: 0, y: 0, scale: 1, color: "#ffffff" }, 0)
         .to(wordmark, { y: dropY, duration: HOLD, ease: "none" }, 0)
         .to(wordmark, { x: deltaX, y: deltaY, scale, duration: SHRINK, ease: "none" }, HOLD);
@@ -216,17 +257,15 @@ export default function NavBar() {
 
     let tl = buildTimeline();
     // onUpdate only fires on an actual scroll/refresh event, not at
-    // creation time — without this, the wordmark sits unblended at rest
-    // until the user scrolls once, even though it starts directly over
-    // the photo.
-    updateWordmarkBlend();
+    // creation time — matters here mainly for the (rare) case of a
+    // restored mid-page scroll position on reload.
+    updateWordmarkCorner(tl.scrollTrigger?.progress ?? 0);
     const onResize = () => {
       tl.scrollTrigger?.kill();
       tl.kill();
-      gsap.set(wordmark, { clearProps: "transform,color,opacity" });
-      gsap.set(wordmarkWrapper, { clearProps: "mixBlendMode" });
+      gsap.set(wordmark, { clearProps: "transform,color" });
+      revertToEnglish();
       tl = buildTimeline();
-      updateWordmarkBlend();
       ScrollTrigger.refresh();
     };
     window.addEventListener("resize", onResize);
@@ -234,13 +273,16 @@ export default function NavBar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       tl = buildTimeline();
-      updateWordmarkBlend();
     });
 
     return () => {
       window.removeEventListener("resize", onResize);
       tl.scrollTrigger?.kill();
       tl.kill();
+      if (cornerTimerRef.current !== null) {
+        clearTimeout(cornerTimerRef.current);
+        cornerTimerRef.current = null;
+      }
       mm.revert();
     };
   }, [isHome]);
@@ -259,22 +301,24 @@ export default function NavBar() {
           own element also means <header> (nav strip, links, Rush Now)
           never carries the blend and always stays solid navy/white.
 
-          No static mix-blend-difference class here — updateWordmarkBlend
-          (above) toggles it on this exact element every scroll frame,
-          based on whether the wordmark's live rect still actually
-          overlaps Hero's photo, so it turns off once the wordmark lands
-          in the header's corner slot (blending against opaque navy would
-          read as a stuck cream tint instead of plain white nav
-          branding). */}
+          mix-blend-difference is a permanent, static class here — no
+          longer toggled by JS. Once this element's FLIP shrink carries it
+          into the header's corner slot and it's sat there for a couple of
+          seconds, showGreek swaps it out for the plain-white "ΚΘΠ" label
+          below instead (a discrete CSS opacity swap, not a continuous
+          fade) — the blended element being hidden by then is what fixes
+          the old cream-tint bug, not a state it has to correctly guess
+          and toggle out of. */}
       {isHome && (
         <div
-          ref={wordmarkWrapperRef}
-          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)]"
+          className={`pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-[60] flex px-[var(--nav-pad-x)] mix-blend-difference transition-opacity duration-300 ${showGreek ? "opacity-0" : "opacity-100"}`}
         >
           <Link
             ref={wordmarkRef}
             href="/"
-            className="pointer-events-auto block w-full whitespace-nowrap font-sans text-[length:var(--wordmark-fs)] font-bold leading-none text-white"
+            tabIndex={showGreek ? -1 : undefined}
+            aria-hidden={showGreek}
+            className={`block w-full whitespace-nowrap font-sans text-[length:var(--wordmark-fs)] font-bold leading-none text-white ${showGreek ? "pointer-events-none" : "pointer-events-auto"}`}
           >
             <span ref={wordmarkInnerRef} className="inline-block">
               Kappa Theta Pi
@@ -287,13 +331,47 @@ export default function NavBar() {
         ref={headerRef}
         className="fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between bg-navy px-[var(--nav-pad-x)] py-5"
       >
-        <div
-          ref={targetRef}
-          className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
-          aria-hidden={isHome}
-        >
-          {!isHome && <Link href="/">Kappa Theta Pi</Link>}
-          {isHome && "Kappa Theta Pi"}
+        <div className="relative">
+          {/* Invisible geometry probe — buildTimeline() measures this
+              element's rect to compute where the big wordmark shrinks to.
+              Text must stay "Kappa Theta Pi" (matching the shrinking
+              wordmark itself), not whatever corner label happens to be
+              showing, so its box never depends on that. */}
+          <div
+            ref={targetRef}
+            className={`font-sans font-bold text-2xl text-white ${isHome ? "invisible" : ""}`}
+            aria-hidden={isHome}
+          >
+            {!isHome && <Link href="/">Kappa Theta Pi</Link>}
+            {isHome && "Kappa Theta Pi"}
+          </div>
+
+          {/* Greek corner label — overlaid exactly on the probe above
+              (same box via inset-0). Plain white, never blended: this is
+              what actually shows once showGreek flips true, a plain CSS
+              opacity swap complementary to the big wordmark's own class
+              above (never both fully visible at once). The ScrambleText
+              decode only mounts once ever (hasEnteredCorner, set the first
+              time showGreek goes true) — later reveals just crossfade in
+              a static "ΚΘΠ", no repeat scramble. */}
+          {isHome && (
+            <div
+              className={`pointer-events-none absolute inset-0 font-sans font-bold text-2xl text-white transition-opacity duration-300 ${showGreek ? "opacity-100" : "opacity-0"}`}
+            >
+              <Link
+                href="/"
+                tabIndex={showGreek ? undefined : -1}
+                aria-hidden={!showGreek}
+                className={showGreek ? "pointer-events-auto" : "pointer-events-none"}
+              >
+                {hasEnteredCorner ? (
+                  <ScrambleText key="corner-greek" text="ΚΘΠ" trigger="immediate" as="span" />
+                ) : (
+                  "ΚΘΠ"
+                )}
+              </Link>
+            </div>
+          )}
         </div>
 
         <nav ref={navLinksRef} className="hidden items-center gap-10 md:flex">

@@ -17,7 +17,7 @@ const FLICKER_INTERVAL_MS = 45;
 type ScrambleTextProps = {
   text: string;
   className?: string;
-  as?: "p" | "h1" | "h2" | "h3";
+  as?: "p" | "h1" | "h2" | "h3" | "span";
   // "scroll" (default) decodes on scroll-into-view, once. "immediate" decodes
   // as soon as the element mounts — for hover/tap-triggered captions, pass a
   // `key` that changes with the text so React remounts and re-triggers it.
