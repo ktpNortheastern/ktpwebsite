@@ -174,7 +174,19 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Company Name", name: "name", widget: "string" }
-      - { label: "Logo", name: "logo", widget: "image", required: false }
+      - {
+          label: "Logo",
+          name: "logo",
+          widget: "image",
+          required: false,
+          hint: "SVG wordmark — leave blank and a placeholder shows the company name until it's uploaded",
+        }
+      - {
+          label: "Order",
+          name: "order",
+          widget: "number",
+          hint: "Controls display order in the grid",
+        }
 
   - name: "gallery"
     label: "Gallery"
