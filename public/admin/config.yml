@@ -97,20 +97,39 @@ collections:
     label: "Rush Schedule"
     folder: "content/rush-events"
     create: true
-    slug: "{{fields.date}}-{{slug}}"
+    slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Order", name: "order", widget: "number" }
       - { label: "Description", name: "description", widget: "text" }
+      - label: "Invite Only"
+        name: "inviteOnly"
+        widget: "boolean"
+        default: false
+        hint: "Hides Date/Time/Location and shows a single 'Details Found Within Invite' chip instead — use for events like Interviews or invite-only rounds."
       - {
           label: "Date",
           name: "date",
           widget: "datetime",
           date_format: "MMM D",
           time_format: false,
+          required: false,
+          hint: "Leave blank if Invite Only is checked",
         }
-      - { label: "Time", name: "time", widget: "string", hint: "e.g. 6:30 PM" }
-      - { label: "Location", name: "location", widget: "string" }
+      - {
+          label: "Time",
+          name: "time",
+          widget: "string",
+          required: false,
+          hint: "e.g. 6:30 PM — leave blank if Invite Only is checked",
+        }
+      - {
+          label: "Location",
+          name: "location",
+          widget: "string",
+          required: false,
+          hint: "Leave blank if Invite Only is checked",
+        }
       - { label: "Image", name: "image", widget: "image", required: false }
 
   - name: "faq"
