@@ -16,12 +16,22 @@ function logoFileExists(logoPath: string): boolean {
   return fs.existsSync(path.join(process.cwd(), "public", logoPath));
 }
 
+// A few sourced files arrived with a baked-in background instead of
+// transparency — CSS-only fix rather than re-exporting the assets.
+// jefferies.png is solid black with white text: invert flips it to a
+// white background the multiply below can then drop out. cbai.png's
+// background is a light off-white (not true white), which multiply
+// alone drops out against the section's white background.
+const COLOR_KEY_CLASSES: Record<string, string> = {
+  jefferies: "invert mix-blend-multiply",
+  cbai: "mix-blend-multiply",
+};
+
 export default function Network() {
   const companies = getCollection<NetworkEntry>("network");
 
   return (
     <section
-      data-snap-section
       className="flex flex-col bg-white px-6 py-20 md:px-[130px] md:py-32"
     >
       <p className="font-mono text-sm text-black/50">( Network )</p>
@@ -49,7 +59,7 @@ export default function Network() {
                 <img
                   src={company.logo}
                   alt={company.name}
-                  className="h-auto max-h-10 w-auto max-w-[70%] object-contain"
+                  className={`h-auto max-h-16 w-auto max-w-[80%] object-contain ${COLOR_KEY_CLASSES[company.slug] ?? ""}`}
                 />
               ) : (
                 // Shows the actual company name, not just a numbered
