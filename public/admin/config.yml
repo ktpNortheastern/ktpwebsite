@@ -187,6 +187,14 @@ collections:
           widget: "number",
           hint: "Controls display order in the grid",
         }
+      - {
+          label: "Scale",
+          name: "scale",
+          widget: "number",
+          value_type: "float",
+          required: false,
+          hint: "Size multiplier, default 1. Bump above 1 for logos that read small because the source file has a lot of built-in whitespace around the mark (e.g. 1.3, 1.5).",
+        }
 
   - name: "gallery"
     label: "Gallery"

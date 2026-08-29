@@ -6,6 +6,14 @@ type NetworkEntry = {
   name: string;
   logo?: string;
   order?: number;
+  // Multiplier on the base bounding box (BASE_MAX_HEIGHT / BASE_MAX_WIDTH_PCT
+  // below). Source files vary wildly in how much of their own canvas the
+  // visible mark actually fills — some (Sony Music, JPMorgan) are a small
+  // wordmark centered in a mostly-empty square — so this is a per-entry,
+  // content-editable knob rather than a hardcoded list in code, since
+  // which logos need it (and by how much) will keep changing as more are
+  // sourced.
+  scale?: number;
 };
 
 // Entries are seeded with their eventual /images/logos/<slug>.svg path
@@ -27,12 +35,17 @@ const COLOR_KEY_CLASSES: Record<string, string> = {
   cbai: "mix-blend-multiply",
 };
 
+const BASE_MAX_HEIGHT = 64; // px
+const BASE_MAX_WIDTH_PCT = 80; // % of the cell
+
 export default function Network() {
   const companies = getCollection<NetworkEntry>("network");
 
   return (
     <section
-      className="flex flex-col bg-white px-6 py-20 md:px-[130px] md:py-32"
+      data-snap-section
+      data-snap-through
+      className="flex flex-col bg-white px-6 pt-20 pb-12 md:px-[130px] md:pt-32 md:pb-16"
     >
       <p className="font-mono text-sm text-black/50">( Network )</p>
       <div className="mt-2 border-t border-black/20" />
@@ -43,23 +56,33 @@ export default function Network() {
       <div className="mt-10 grid grid-cols-2 border border-black/20 md:grid-cols-4">
         {companies.map((company) => {
           const hasLogo = !!company.logo && logoFileExists(company.logo);
+          const scale = company.scale ?? 1;
           return (
             <div
               key={company.slug}
-              className="flex h-[120px] items-center justify-center border border-black/20 p-4"
+              className="flex h-[120px] items-center justify-center overflow-hidden border border-black/20 p-4"
             >
               {hasLogo ? (
-                // Bounded on both axes (not just object-contain on a fixed
-                // box) so a wide wordmark (e.g. Google) and a near-square
-                // mark (e.g. IBM) both read at a comparable visual size —
-                // capping only height would let a wide logo run edge to
-                // edge, capping only width would let a tall one dwarf its
-                // neighbors.
+                // Bounded on both axes via inline style, not Tailwind
+                // classes — the per-entry `scale` is a content-editable
+                // number, and Tailwind can't generate CSS for a class name
+                // built from a runtime value. Bounding both axes (not just
+                // object-contain in a fixed box) so a wide wordmark (e.g.
+                // Google) and a near-square mark (e.g. IBM) read at a
+                // comparable size — capping only height would let a wide
+                // logo run edge to edge, capping only width would let a
+                // tall one dwarf its neighbors. overflow-hidden on the
+                // cell (above) is a backstop against a scale value large
+                // enough to blow out the fixed cell height.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={company.logo}
                   alt={company.name}
-                  className={`h-auto max-h-16 w-auto max-w-[80%] object-contain ${COLOR_KEY_CLASSES[company.slug] ?? ""}`}
+                  style={{
+                    maxHeight: BASE_MAX_HEIGHT * scale,
+                    maxWidth: `${Math.min(BASE_MAX_WIDTH_PCT * scale, 100)}%`,
+                  }}
+                  className={`h-auto w-auto object-contain ${COLOR_KEY_CLASSES[company.slug] ?? ""}`}
                 />
               ) : (
                 // Shows the actual company name, not just a numbered
