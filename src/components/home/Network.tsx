@@ -63,26 +63,29 @@ export default function Network() {
               className="flex h-[120px] items-center justify-center overflow-hidden border border-black/20 p-4"
             >
               {hasLogo ? (
-                // Bounded on both axes via inline style, not Tailwind
-                // classes — the per-entry `scale` is a content-editable
-                // number, and Tailwind can't generate CSS for a class name
-                // built from a runtime value. Bounding both axes (not just
-                // object-contain in a fixed box) so a wide wordmark (e.g.
-                // Google) and a near-square mark (e.g. IBM) read at a
-                // comparable size — capping only height would let a wide
-                // logo run edge to edge, capping only width would let a
-                // tall one dwarf its neighbors. overflow-hidden on the
-                // cell (above) is a backstop against a scale value large
-                // enough to blow out the fixed cell height.
+                // Explicit height + width (not max-height/max-width) is
+                // deliberate: max-* only ever caps size, it never scales a
+                // small image UP to fill the box, so a tightly-cropped
+                // logo (see the SVG viewBox crops and sharp .trim() calls
+                // this content went through) would render at its own tiny
+                // intrinsic size instead of matching its neighbors.
+                // object-contain on a box with real dimensions is what
+                // actually makes every logo target the same HEIGHT while
+                // letting width vary with aspect ratio — a wide wordmark
+                // (Google) and a near-square mark (IBM) both read at a
+                // comparable size instead of one dwarfing the other.
+                // overflow-hidden on the cell (above) is a backstop
+                // against a scale value large enough to blow out the
+                // fixed cell height.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={company.logo}
                   alt={company.name}
                   style={{
-                    maxHeight: BASE_MAX_HEIGHT * scale,
-                    maxWidth: `${Math.min(BASE_MAX_WIDTH_PCT * scale, 100)}%`,
+                    height: BASE_MAX_HEIGHT * scale,
+                    width: `${Math.min(BASE_MAX_WIDTH_PCT * scale, 100)}%`,
                   }}
-                  className={`h-auto w-auto object-contain ${COLOR_KEY_CLASSES[company.slug] ?? ""}`}
+                  className={`object-contain ${COLOR_KEY_CLASSES[company.slug] ?? ""}`}
                 />
               ) : (
                 // Shows the actual company name, not just a numbered
