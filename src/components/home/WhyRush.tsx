@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
+import PlaceholderImage from "@/components/ui/PlaceholderImage";
 import { isMobileViewport } from "@/lib/isMobileViewport";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
@@ -13,14 +14,17 @@ const REASONS = [
   {
     title: "A Community That Shows Up",
     body: "Kappa Theta Pi brothers strive to foster academic growth and excellence for each other. We provide a supportive network filled with some of the brightest tech minds at the university that members can always rely on for help in classes and extracurricular activities.",
+    image: 1,
   },
   {
     title: "A Network That Lasts",
     body: "Our alumni are spread out across the world and work on cutting-edge technologies at companies ranging from Microsoft, Amazon, and Google to startups, consulting firms, and financial technology firms.",
+    image: 2,
   },
   {
     title: "Real Professional Growth",
     body: "Through events like interview training, resume building, one-on-one mentorship, and private company recruiting, KTP prepares members for success in any technology-related career.",
+    image: 3,
   },
 ];
 
@@ -135,8 +139,9 @@ export default function WhyRush() {
             ref={(el) => {
               if (el) cardRefs.current[i] = el;
             }}
-            className="static flex flex-col gap-6 transition-[opacity,transform] duration-300 ease-out md:absolute md:inset-0"
+            className="static flex flex-col gap-4 transition-[opacity,transform] duration-300 ease-out md:absolute md:inset-0"
           >
+            <PlaceholderImage n={reason.image} className="h-[140px] w-full shrink-0" />
             <div className="flex items-center gap-4">
               <span className="font-mono text-sm text-white/50">
                 ({String(i + 1).padStart(2, "0")})
