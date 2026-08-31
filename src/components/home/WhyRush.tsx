@@ -139,7 +139,7 @@ export default function WhyRush() {
             ref={(el) => {
               if (el) cardRefs.current[i] = el;
             }}
-            className="static flex flex-col gap-4 transition-[opacity,transform] duration-300 ease-out md:absolute md:inset-0"
+            className="static flex flex-col gap-4 transition-[opacity,transform] duration-500 ease-out md:absolute md:inset-0"
           >
             <PlaceholderImage n={reason.image} className="h-[140px] w-full shrink-0" />
             <div className="flex items-center gap-4">
