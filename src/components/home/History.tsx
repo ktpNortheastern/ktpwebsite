@@ -25,11 +25,11 @@ export default function History() {
   return (
     <section
       data-snap-section
-      className="relative flex min-h-screen flex-col justify-center gap-10 overflow-hidden bg-navy px-6 py-16 md:h-screen md:gap-16 md:px-[100px]"
+      className="relative isolate flex min-h-screen flex-col justify-center gap-10 overflow-hidden bg-navy px-6 py-16 md:h-screen md:gap-16 md:px-[100px]"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle,rgba(255,255,255,0.9)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,black_55%,transparent)]"
       />
       <div className="flex flex-col items-center gap-8 md:flex-row">
         <HistoryCard

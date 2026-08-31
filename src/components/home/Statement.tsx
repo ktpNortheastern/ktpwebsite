@@ -4,11 +4,11 @@ export default function Statement() {
   return (
     <section
       data-snap-section
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy px-6 md:h-screen md:px-[100px]"
+      className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-navy px-6 md:h-screen md:px-[100px]"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,transparent,black_30%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle,rgba(255,255,255,0.9)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
       />
       <ScrambleText
         as="h2"
