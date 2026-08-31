@@ -16,7 +16,7 @@ export default function FaqRow({ index, question, answer }: FaqRowProps) {
       type="button"
       onClick={() => setOpen((o) => !o)}
       aria-expanded={open}
-      className="flex w-full flex-col gap-10 border-t border-[#909090] px-6 py-10 text-left md:px-[130px]"
+      className="flex w-full flex-col gap-10 border-t border-[#c5c5c5] px-6 py-10 text-left md:px-[130px]"
     >
       <div className="flex w-full items-center justify-between gap-6">
         <div className="flex items-center gap-6 md:gap-20">
