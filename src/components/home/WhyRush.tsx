@@ -132,7 +132,7 @@ export default function WhyRush() {
         <Button href="/members">Meet Our Brothers</Button>
       </div>
 
-      <div className="relative flex w-full flex-col gap-10 md:h-[400px] md:max-w-[770px] md:flex-1 md:gap-0">
+      <div className="relative flex w-full flex-col gap-10 md:h-[400px] md:max-w-[770px] md:flex-1 md:gap-0 md:mx-auto">
         {REASONS.map((reason, i) => (
           <div
             key={reason.title}
