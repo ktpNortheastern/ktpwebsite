@@ -47,7 +47,9 @@ export default function WhyRush() {
     let isDesktopActive = false;
 
     function setupDesktop() {
-      gsap.set(cards.slice(1), { opacity: 0, y: 40 });
+      gsap.set(cards.slice(1), { yPercent: 100 });
+
+      const step = 1 / cards.length;
 
       const st = ScrollTrigger.create({
         trigger: section,
@@ -55,32 +57,35 @@ export default function WhyRush() {
         end: () => `+=${(cards.length - 1) * 400 + 300}`,
         pin: true,
         onUpdate: (self) => {
-          const step = 1 / cards.length;
-          const activeIndex = Math.min(
-            cards.length - 1,
-            Math.floor(self.progress / step)
-          );
-          // Set (not tween) each card's state directly from the current
+          // Set (not tween) each card's position directly from the current
           // scroll progress every frame, rather than firing an independent
-          // gsap.to() per card. Independent tweens can get skipped past
-          // (a fast scroll jumping activeIndex by more than one step) or
-          // left stuck mid-fade if interrupted before completing — since
-          // the correct visual state is a pure function of progress, setting
-          // it directly is self-correcting on every single update no matter
-          // how big a jump happens between frames. The CSS `transition`
-          // classes on each card (see JSX) supply the smoothing instead.
+          // gsap.to() per card. Independent tweens can get skipped past (a
+          // fast scroll jumping past a card's whole range) or left stuck
+          // mid-swipe if interrupted before completing — since the correct
+          // position is a pure function of progress, setting it directly is
+          // self-correcting on every update no matter how big a jump
+          // happens between frames, and reverses cleanly scrolling back up.
+          //
+          // Card 0 rests permanently at yPercent 0 — the bottom of the
+          // stack. Each later card starts fully below the box (yPercent
+          // 100, hidden) and swipes up to yPercent 0 as scroll passes
+          // through its own dedicated step range, covering the card
+          // beneath it, then stays there once scrolled past.
           cards.forEach((card, i) => {
-            gsap.set(card, {
-              opacity: i === activeIndex ? 1 : 0,
-              y: i === activeIndex ? 0 : 40,
-            });
+            if (i === 0) return;
+            const localProgress = gsap.utils.clamp(
+              0,
+              1,
+              (self.progress - (i - 1) * step) / step
+            );
+            gsap.set(card, { yPercent: 100 * (1 - localProgress) });
           });
         },
       });
 
       cleanupDesktop = () => {
         st.kill();
-        gsap.set(cards, { clearProps: "opacity,transform" });
+        gsap.set(cards, { clearProps: "transform" });
       };
     }
 
@@ -118,14 +123,14 @@ export default function WhyRush() {
         <Button href="/members">Meet Our Brothers</Button>
       </div>
 
-      <div className="relative flex w-full flex-col gap-10 md:h-[400px] md:max-w-[770px] md:flex-1 md:gap-0 md:mx-auto">
+      <div className="relative flex w-full flex-col gap-10 md:h-[400px] md:max-w-[770px] md:flex-1 md:gap-0 md:mx-auto md:overflow-hidden">
         {REASONS.map((reason, i) => (
           <div
             key={reason.title}
             ref={(el) => {
               if (el) cardRefs.current[i] = el;
             }}
-            className="static flex flex-col gap-4 transition-[opacity,transform] duration-500 ease-out md:absolute md:inset-0"
+            className="static flex flex-col gap-4 overflow-hidden rounded-2xl border border-white/10 bg-[#162841] p-6 md:absolute md:inset-0"
           >
             <PlaceholderImage n={reason.image} className="h-[140px] w-full shrink-0" />
             <div className="flex items-center gap-4">
