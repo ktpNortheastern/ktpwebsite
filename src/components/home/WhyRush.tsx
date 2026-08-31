@@ -30,14 +30,12 @@ const REASONS = [
 
 export default function WhyRush() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
 
   useIsomorphicLayoutEffect(() => {
     const section = sectionRef.current;
-    const header = headerRef.current;
     const cards = cardRefs.current;
-    if (!section || !header || !cards.length) return;
+    if (!section || !cards.length) return;
 
     // Below `md`, the pin + crossfade is skipped entirely — pinning eats
     // most of a phone's vertical space for not much payoff on 3 short text
@@ -77,21 +75,12 @@ export default function WhyRush() {
               y: i === activeIndex ? 0 : 40,
             });
           });
-
-          // in the final stretch of the pin, shrink/slide the header up
-          // as the section hands off to Network below.
-          const exitProgress = gsap.utils.clamp(0, 1, (self.progress - 0.85) / 0.15);
-          gsap.set(header, {
-            yPercent: -exitProgress * 20,
-            scale: 1 - exitProgress * 0.15,
-          });
         },
       });
 
       cleanupDesktop = () => {
         st.kill();
         gsap.set(cards, { clearProps: "opacity,transform" });
-        gsap.set(header, { clearProps: "transform" });
       };
     }
 
@@ -120,10 +109,7 @@ export default function WhyRush() {
       data-snap-section
       className="flex min-h-screen flex-col items-start gap-10 bg-navy px-6 py-16 md:h-screen md:flex-row md:items-center md:gap-16 md:px-[100px] md:py-0"
     >
-      <div
-        ref={headerRef}
-        className="flex w-full shrink-0 flex-col gap-8 transition-transform duration-200 ease-out md:w-[275px]"
-      >
+      <div className="flex w-full shrink-0 flex-col gap-8 md:w-[275px]">
         <h2 className="font-mono text-6xl font-bold leading-none text-white">
           Why
           <br />
