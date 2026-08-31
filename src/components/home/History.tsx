@@ -29,7 +29,7 @@ export default function History() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,black_90%,transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
       />
       <div className="flex flex-col items-center gap-8 md:flex-row">
         <HistoryCard

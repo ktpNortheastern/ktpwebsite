@@ -8,7 +8,7 @@ export default function Statement() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,transparent,black_10%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,transparent,black_30%)]"
       />
       <ScrambleText
         as="h2"
