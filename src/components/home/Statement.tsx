@@ -13,7 +13,7 @@ export default function Statement() {
       <ScrambleText
         as="h2"
         text="We are the first professional, co-ed technology fraternity in the country"
-        className="max-w-5xl text-center font-mono text-5xl font-bold leading-tight text-white md:text-7xl"
+        className="max-w-5xl text-center font-mono text-5xl font-bold leading-tight text-white md:text-[100px] md:leading-none"
       />
     </section>
   );
