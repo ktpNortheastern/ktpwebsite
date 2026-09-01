@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import ScrambleText from "@/components/motion/ScrambleText";
 
 const navigation = [
@@ -9,13 +8,15 @@ const navigation = [
   { label: "Rush Process", href: "/rush" },
 ];
 
-// TODO(design feedback): all four hrefs below are still "#" — real profile
-// URLs to come from the user, swap in when provided.
 const socials = [
-  { label: "Instagram", href: "#", Icon: InstagramIcon },
-  { label: "LinkedIn", href: "#", Icon: LinkedInIcon },
-  { label: "Email", href: "#", Icon: MailIcon },
-  { label: "GitHub", href: "#", Icon: GitHubIcon },
+  { label: "Instagram", href: "https://www.instagram.com/ktpneu/", Icon: InstagramIcon },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/kappa-theta-pi-omega-chapter/",
+    Icon: LinkedInIcon,
+  },
+  { label: "Email", href: "mailto:ktp.northeastern@gmail.com", Icon: MailIcon },
+  { label: "GitHub", href: "https://github.com/ktpNortheastern", Icon: GitHubIcon },
 ];
 
 const products = [
@@ -34,6 +35,20 @@ export default function Footer() {
           <p className="mt-2 font-mono text-sm text-white/60">
             For the love of technology.
           </p>
+          <div className="mt-6 flex items-center gap-4">
+            {socials.map(({ label, href, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                target={href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                className="text-white/70 transition-colors duration-200 hover:text-white"
+              >
+                <Icon />
+              </a>
+            ))}
+          </div>
         </div>
         <div className="flex flex-wrap gap-16">
           <FooterColumn title="Navigation" items={navigation} />
@@ -75,23 +90,25 @@ function FooterColumn({
 function FooterSocials({
   items,
 }: {
-  items: { label: string; href: string; Icon: () => ReactNode }[];
+  items: { label: string; href: string }[];
 }) {
   return (
     <div>
       <p className="font-sans font-medium">Socials</p>
-      <div className="mt-3 flex items-center gap-4">
-        {items.map(({ label, href, Icon }) => (
-          <a
-            key={label}
-            href={href}
-            aria-label={label}
-            className="text-white/70 transition-colors duration-200 hover:text-white"
-          >
-            <Icon />
-          </a>
+      <ul className="mt-3 flex flex-col gap-2">
+        {items.map(({ label, href }) => (
+          <li key={label}>
+            <a
+              href={href}
+              target={href.startsWith("mailto:") ? undefined : "_blank"}
+              rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+              className="font-sans text-sm text-white/70"
+            >
+              {label}
+            </a>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
