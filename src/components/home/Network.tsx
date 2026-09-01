@@ -45,6 +45,7 @@ export default function Network() {
     <section
       data-snap-section
       data-snap-through
+      data-network-section
       className="flex flex-col bg-white px-6 pt-20 pb-12 md:px-[130px] md:pt-32 md:pb-16"
     >
       <p className="font-mono text-sm text-black/50">( Network )</p>
