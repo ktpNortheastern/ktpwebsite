@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClassFilterDropdown from "@/components/members/ClassFilterDropdown";
 import ClassSection from "@/components/members/ClassSection";
 
@@ -33,13 +35,52 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
   const [selected, setSelected] = useState("all");
   // Collapsed by default so the page reads as a dense index rather than a
   // long scroll of grids — Executive Board opens first since it's the
-  // natural starting point. Selecting a specific class from the dropdown
-  // always shows it open regardless of this state (see isOpen below).
+  // natural starting point.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     "executive-board": true,
   });
+  // A ref parked for the effect below rather than a scroll inside the click
+  // handler: the jump has to happen after React commits the expansion, since
+  // opening the section moves everything under it.
+  const pendingScroll = useRef<string | null>(null);
 
-  const visibleClasses = selected === "all" ? classes : classes.filter((c) => c.slug === selected);
+  function handlePick(slug: string) {
+    setSelected(slug);
+    setExpanded((prev) => ({ ...prev, [slug]: true }));
+    pendingScroll.current = slug;
+  }
+
+  // Keyed on `expanded` so it runs on the commit that opened the section.
+  // Toggling a heading open by hand leaves the ref empty and scrolls nothing.
+  useEffect(() => {
+    const slug = pendingScroll.current;
+    if (!slug) return;
+    pendingScroll.current = null;
+
+    const target = document.getElementById(slug);
+    if (!target) return;
+
+    // The fixed navbar would otherwise cover the heading we just jumped to.
+    const navH =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 0;
+
+    // On desktop ScrollSmoother owns scrolling — the wrapper is fixed and the
+    // content is transformed, so scrollIntoView/window.scrollTo do nothing
+    // there and the jump has to go through the smoother. Below md it never
+    // initializes (see SnapScrollContainer) and native scrolling applies.
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      // The section just changed height; refresh so the smoother measures the
+      // new geometry before resolving the target's offset.
+      ScrollTrigger.refresh();
+      smoother.scrollTo(target, true, `top ${navH}px`);
+      return;
+    }
+    window.scrollTo({
+      top: target.getBoundingClientRect().top + window.scrollY - navH,
+      behavior: "smooth",
+    });
+  }, [expanded]);
 
   return (
     <>
@@ -65,7 +106,7 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
             The best way to predict your future is to invent it. Build with us.
           </p>
           <div className="mt-6">
-            <ClassFilterDropdown classes={classes} value={selected} onChange={setSelected} />
+            <ClassFilterDropdown classes={classes} value={selected} onChange={handlePick} />
           </div>
         </div>
         {/* aspect matches the asset's own 622x476 so object-contain doesn't
@@ -80,14 +121,14 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
         />
       </div>
 
-      {visibleClasses.map((cls) => (
+      {classes.map((cls, index) => (
         <ClassSection
           key={cls.slug}
-          index={classes.findIndex((c) => c.slug === cls.slug)}
+          index={index}
           slug={cls.slug}
           name={cls.name}
           members={membersByClass[cls.slug] ?? []}
-          expanded={selected !== "all" || Boolean(expanded[cls.slug])}
+          expanded={Boolean(expanded[cls.slug])}
           onToggle={() => setExpanded((prev) => ({ ...prev, [cls.slug]: !prev[cls.slug] }))}
         />
       ))}

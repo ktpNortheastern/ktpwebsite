@@ -17,12 +17,9 @@ function shortLabel(name: string) {
 }
 
 /**
- * A real filter, not a jump-to-anchor menu — deliberately deviates from the
- * Figma mock, which shows every class stacked with this control above it.
- * That layout doesn't scale once the roster grows (more classes, hundreds
- * of members): jumping to an anchor still means scrolling past everything
- * else first. Filtering to just the selected class avoids that. Worth
- * raising with the designer since the mock implies scroll-to-section.
+ * A jump menu: every class stays on the page and picking one opens it and
+ * scrolls there (see MembersView.handlePick), so this is a second route to the
+ * same thing clicking a class heading does.
  *
  * Custom rather than a styled <select> because the mock splits the control
  * into two bordered boxes (label + chevron) with a bordered option list —
@@ -58,10 +55,7 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
   }
 
   function select(slug: string) {
-    // Re-picking the active class clears back to all classes, which is the
-    // only way out of a filter for anyone who opened the list without one
-    // selected (the "All Classes" row below only appears once one is).
-    onChange(slug === value ? "all" : slug);
+    onChange(slug);
     close({ refocus: true });
   }
 
@@ -112,9 +106,6 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
           // between rows.
           className="absolute top-full left-0 z-20 mt-1.5 w-[156px]"
         >
-          {value !== "all" && (
-            <Row label="All Classes" selected={false} onSelect={() => select("all")} />
-          )}
           {classes.map((c) => (
             <Row
               key={c.slug}
