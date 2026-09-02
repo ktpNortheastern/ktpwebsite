@@ -5,8 +5,7 @@ import type { ClassEntry } from "@/components/members/MembersView";
 
 type ClassFilterDropdownProps = {
   classes: ClassEntry[];
-  value: string;
-  onChange: (value: string) => void;
+  onSelect: (slug: string) => void;
 };
 
 // The mock's list reads "Delta / Gamma / Beta / Alpha / Founding" while the
@@ -21,20 +20,22 @@ function shortLabel(name: string) {
  * scrolls there (see MembersView.handlePick), so this is a second route to the
  * same thing clicking a class heading does.
  *
+ * Menu rather than listbox semantics, and a label that always reads "Select
+ * Class": picking a row is an action (jump there), not a selection the control
+ * goes on representing.
+ *
  * Custom rather than a styled <select> because the mock splits the control
  * into two bordered boxes (label + chevron) with a bordered option list —
  * none of which a native select can render. That costs us the platform's
- * keyboard handling, so listbox semantics and arrow/Escape keys are wired up
+ * keyboard handling, so the menu semantics and arrow/Escape keys are wired up
  * by hand below. It also matters more than usual that the rows have a hover
  * state: globals.css hides the system cursor everywhere in favor of the
  * custom dot, so there's no pointer shape to signal "clickable".
  */
-export default function ClassFilterDropdown({ classes, value, onChange }: ClassFilterDropdownProps) {
+export default function ClassFilterDropdown({ classes, onSelect }: ClassFilterDropdownProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-
-  const selected = classes.find((c) => c.slug === value);
 
   // Same click-outside idiom as GalleryGrid: a data attribute on the wrapper
   // plus closest(), rather than a ref containment check.
@@ -55,7 +56,7 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
   }
 
   function select(slug: string) {
-    onChange(slug);
+    onSelect(slug);
     close({ refocus: true });
   }
 
@@ -83,13 +84,13 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label="Filter by class"
-        aria-haspopup="listbox"
+        aria-label="Jump to a class"
+        aria-haspopup="menu"
         aria-expanded={open}
         className="flex items-stretch gap-1.5 font-mono text-sm text-black"
       >
         <span className="min-w-[128px] border border-black px-3 py-[5px] text-left leading-none">
-          {selected ? shortLabel(selected.name) : "Select Class"}
+          Select Class
         </span>
         <span aria-hidden className="grid w-[22px] place-items-center border border-black">
           <span className={`transition-transform duration-200 ${open ? "rotate-90" : ""}`}>›</span>
@@ -99,20 +100,15 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
       {open && (
         <ul
           ref={listRef}
-          role="listbox"
-          aria-label="Class"
+          role="menu"
+          aria-label="Classes"
           onKeyDown={handleListKeyDown}
           // Row borders stay uncollapsed — the mock shows the doubled rule
           // between rows.
           className="absolute top-full left-0 z-20 mt-1.5 w-[156px]"
         >
           {classes.map((c) => (
-            <Row
-              key={c.slug}
-              label={shortLabel(c.name)}
-              selected={c.slug === value}
-              onSelect={() => select(c.slug)}
-            />
+            <Row key={c.slug} label={shortLabel(c.name)} onSelect={() => select(c.slug)} />
           ))}
         </ul>
       )}
@@ -120,27 +116,16 @@ export default function ClassFilterDropdown({ classes, value, onChange }: ClassF
   );
 }
 
-function Row({
-  label,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
+function Row({ label, onSelect }: { label: string; onSelect: () => void }) {
   return (
-    // role="none" so the button is the listbox's direct owned option — an
-    // <li>'s implicit listitem role would sit between the two.
+    // role="none" so the button is the menu's direct owned item — an <li>'s
+    // implicit listitem role would sit between the two.
     <li role="none">
       <button
         type="button"
-        role="option"
-        aria-selected={selected}
+        role="menuitem"
         onClick={onSelect}
-        className={`block w-full border border-black bg-[#fafafa] px-3 py-[5px] text-left font-mono text-sm leading-none transition-colors duration-150 hover:bg-black hover:text-[#fafafa] ${
-          selected ? "text-black" : "text-black/70"
-        }`}
+        className="block w-full border border-black bg-[#fafafa] px-3 py-[5px] text-left font-mono text-sm leading-none text-black/70 transition-colors duration-150 hover:bg-black hover:text-[#fafafa]"
       >
         {label}
       </button>

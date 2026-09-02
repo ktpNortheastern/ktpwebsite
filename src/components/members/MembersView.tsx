@@ -32,7 +32,6 @@ type MembersViewProps = {
 };
 
 export default function MembersView({ classes, membersByClass }: MembersViewProps) {
-  const [selected, setSelected] = useState("all");
   // Collapsed by default so the page reads as a dense index rather than a
   // long scroll of grids — Executive Board opens first since it's the
   // natural starting point.
@@ -45,7 +44,6 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
   const pendingScroll = useRef<string | null>(null);
 
   function handlePick(slug: string) {
-    setSelected(slug);
     setExpanded((prev) => ({ ...prev, [slug]: true }));
     pendingScroll.current = slug;
   }
@@ -106,7 +104,7 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
             The best way to predict your future is to invent it. Build with us.
           </p>
           <div className="mt-6">
-            <ClassFilterDropdown classes={classes} value={selected} onChange={handlePick} />
+            <ClassFilterDropdown classes={classes} onSelect={handlePick} />
           </div>
         </div>
         {/* aspect matches the asset's own 622x476 so object-contain doesn't
