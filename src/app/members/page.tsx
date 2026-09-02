@@ -26,28 +26,7 @@ export default function MembersPage() {
   }
 
   return (
-    <section className="min-h-screen bg-white pt-[var(--nav-h)]">
-      <div className="flex items-start justify-between gap-6 px-6 py-5 md:px-[38px] md:py-6">
-        <div className="max-w-lg">
-          <p className="font-mono text-sm text-black/50">( Meet Our Brothers )</p>
-          <div className="mt-2 border-t border-black/20" />
-          <p className="mt-3 font-sans text-sm text-black">
-            Our members are shaping technology as engineers, designers, product thinkers,
-            founders, and operators building at the edge of what&apos;s possible. Kappa Theta
-            Pi is a collective of people who don&apos;t wait for opportunity.
-          </p>
-          <p className="mt-2 font-sans text-sm font-medium text-black">
-            The best way to predict your future is to invent it. Build with us.
-          </p>
-        </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/members-hand-ascii.png"
-          alt=""
-          className="hidden aspect-[486/413] w-40 shrink-0 object-contain md:block lg:w-56"
-        />
-      </div>
-
+    <section className="min-h-screen bg-[#fafafa] pt-[var(--nav-h)]">
       <MembersView classes={classes} membersByClass={membersByClass} />
     </section>
   );
