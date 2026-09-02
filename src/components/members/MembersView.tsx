@@ -32,12 +32,11 @@ type MembersViewProps = {
 };
 
 export default function MembersView({ classes, membersByClass }: MembersViewProps) {
-  // Collapsed by default so the page reads as a dense index rather than a
-  // long scroll of grids — Executive Board opens first since it's the
-  // natural starting point.
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    "executive-board": true,
-  });
+  // Every class open on arrival — the whole roster is the point of the page,
+  // and the headings stay clickable to collapse the ones you're done with.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(classes.map((c) => [c.slug, true])),
+  );
   // A ref parked for the effect below rather than a scroll inside the click
   // handler: the jump has to happen after React commits the expansion, since
   // opening the section moves everything under it.
