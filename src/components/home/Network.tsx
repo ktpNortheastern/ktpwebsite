@@ -41,6 +41,18 @@ const BASE_MAX_WIDTH_PCT = 80; // % of the cell
 export default function Network() {
   const companies = getCollection<NetworkEntry>("network");
 
+  // The entry count won't divide evenly into the column count at every
+  // breakpoint (42 entries leaves the 4-col grid two short), which reads
+  // as a half-drawn last row rather than a table. Pad with empty cells so
+  // the grid always closes out. The mobile (2-col) and desktop (4-col)
+  // remainders differ, so render the larger number and hide the extras
+  // below md.
+  const mobileFillers = (2 - (companies.length % 2)) % 2;
+  const desktopFillers = (4 - (companies.length % 4)) % 4;
+  const fillers = Array.from({
+    length: Math.max(mobileFillers, desktopFillers),
+  });
+
   return (
     <section
       data-snap-section
@@ -102,6 +114,15 @@ export default function Network() {
             </div>
           );
         })}
+        {fillers.map((_, i) => (
+          <div
+            key={`filler-${i}`}
+            aria-hidden
+            className={`h-[120px] border border-black/20 ${
+              i < mobileFillers ? "" : "hidden md:block"
+            }`}
+          />
+        ))}
       </div>
     </section>
   );
