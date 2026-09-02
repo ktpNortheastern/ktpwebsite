@@ -38,25 +38,32 @@ export default function ClassSection({
   onToggle,
 }: ClassSectionProps) {
   return (
-    <section id={slug} className="border-t border-black/10 px-6 first:border-t-0 md:px-[38px]">
+    <section id={slug} className="relative mb-9 px-6 md:px-[130px]">
+      {/* The container edge is its own masked layer rather than a border on
+          the section: the linear-gradient mask leaves the top rule and its
+          rounded corners at full strength and dissolves the side rules on the
+          way down, so there's no bottom edge to close the box off. Same
+          mask-image idiom the dot-grid overlays use (gallery/page.tsx).
+          The fade runs a fixed 140px rather than a percentage so a collapsed
+          class and an expanded one dissolve over the same distance instead of
+          in proportion to their very different heights. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-2 inset-y-0 rounded-t-[32px] border border-black/15 [mask-image:linear-gradient(to_bottom,black,transparent_140px)] md:inset-x-4"
+      />
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        className="flex w-full items-baseline justify-between gap-3 py-4 text-left"
+        // Without the "+" the mock leaves nothing to mark the row as
+        // clickable, and the custom cursor rules out a pointer shape — so the
+        // whole row dims slightly on hover.
+        className={`flex w-full items-baseline gap-8 py-10 text-left font-mono font-bold text-black transition-opacity duration-200 hover:opacity-60 md:pt-[76px] ${
+          expanded ? "md:pb-10" : "md:pb-[76px]"
+        }`}
       >
-        <span className="flex items-baseline gap-3 font-mono font-bold text-black">
-          <span>{String(index).padStart(2, "0")}.</span>
-          <span className="text-lg">{name}</span>
-          <span className="font-mono text-xs font-normal text-black/40">
-            ({members.length})
-          </span>
-        </span>
-        <span
-          className={`font-mono text-lg text-black transition-transform duration-200 ${expanded ? "rotate-45" : ""}`}
-        >
-          +
-        </span>
+        <span>{String(index).padStart(2, "0")}.</span>
+        <span className="text-lg">{name}</span>
       </button>
 
       {expanded &&
