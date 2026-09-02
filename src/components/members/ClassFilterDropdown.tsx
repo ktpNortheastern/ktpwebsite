@@ -5,6 +5,7 @@ import type { ClassEntry } from "@/components/members/MembersView";
 
 type ClassFilterDropdownProps = {
   classes: ClassEntry[];
+  value: string;
   onSelect: (slug: string) => void;
 };
 
@@ -16,26 +17,29 @@ function shortLabel(name: string) {
 }
 
 /**
- * A jump menu: every class stays on the page and picking one opens it and
- * scrolls there (see MembersView.handlePick), so this is a second route to the
- * same thing clicking a class heading does.
- *
- * Menu rather than listbox semantics, and a label that always reads "Select
- * Class": picking a row is an action (jump there), not a selection the control
- * goes on representing.
+ * Picking a class opens it and scrolls there (see MembersView.handlePick), and
+ * the control goes on showing what you picked — so it's a second route to what
+ * clicking a class heading does, and a marker of where you last went.
  *
  * Custom rather than a styled <select> because the mock splits the control
- * into two bordered boxes (label + chevron) with a bordered option list —
- * none of which a native select can render. That costs us the platform's
- * keyboard handling, so the menu semantics and arrow/Escape keys are wired up
- * by hand below. It also matters more than usual that the rows have a hover
- * state: globals.css hides the system cursor everywhere in favor of the
- * custom dot, so there's no pointer shape to signal "clickable".
+ * into two bordered boxes (label + chevron) with a bordered option list, and
+ * styles the picked row in italic blue — none of which a native select can
+ * render. That costs us the platform's keyboard handling, so listbox semantics
+ * and arrow/Escape keys are wired up by hand below. It also matters more than
+ * usual that the rows have a hover state: globals.css hides the system cursor
+ * everywhere in favor of the custom dot, so there's no pointer shape to
+ * signal "clickable".
  */
-export default function ClassFilterDropdown({ classes, onSelect }: ClassFilterDropdownProps) {
+export default function ClassFilterDropdown({
+  classes,
+  value,
+  onSelect,
+}: ClassFilterDropdownProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+
+  const selected = classes.find((c) => c.slug === value);
 
   // Same click-outside idiom as GalleryGrid: a data attribute on the wrapper
   // plus closest(), rather than a ref containment check.
@@ -85,12 +89,16 @@ export default function ClassFilterDropdown({ classes, onSelect }: ClassFilterDr
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Jump to a class"
-        aria-haspopup="menu"
+        aria-haspopup="listbox"
         aria-expanded={open}
         className="flex items-stretch gap-1.5 font-mono text-sm text-black"
       >
-        <span className="min-w-[128px] border border-black px-3 py-[5px] text-left leading-none">
-          Select Class
+        {/* Fixed width rather than min-width so swapping the placeholder for a
+            class name doesn't resize the control, and so the list can line up
+            with this box exactly as the mock has it. Sized to fit the longest
+            label ("Executive Board"). */}
+        <span className="w-[152px] border border-black px-3 py-[5px] text-left leading-none">
+          {selected ? shortLabel(selected.name) : "Select Class"}
         </span>
         <span aria-hidden className="grid w-[22px] place-items-center border border-black">
           <span className={`transition-transform duration-200 ${open ? "rotate-90" : ""}`}>›</span>
@@ -100,15 +108,20 @@ export default function ClassFilterDropdown({ classes, onSelect }: ClassFilterDr
       {open && (
         <ul
           ref={listRef}
-          role="menu"
-          aria-label="Classes"
+          role="listbox"
+          aria-label="Class"
           onKeyDown={handleListKeyDown}
           // Row borders stay uncollapsed — the mock shows the doubled rule
-          // between rows.
-          className="absolute top-full left-0 z-20 mt-1.5 w-[156px]"
+          // between rows. Width matches the label box, not the whole trigger.
+          className="absolute top-full left-0 z-20 mt-1.5 w-[152px]"
         >
           {classes.map((c) => (
-            <Row key={c.slug} label={shortLabel(c.name)} onSelect={() => select(c.slug)} />
+            <Row
+              key={c.slug}
+              label={shortLabel(c.name)}
+              selected={c.slug === value}
+              onSelect={() => select(c.slug)}
+            />
           ))}
         </ul>
       )}
@@ -116,16 +129,31 @@ export default function ClassFilterDropdown({ classes, onSelect }: ClassFilterDr
   );
 }
 
-function Row({ label, onSelect }: { label: string; onSelect: () => void }) {
+function Row({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   return (
-    // role="none" so the button is the menu's direct owned item — an <li>'s
-    // implicit listitem role would sit between the two.
+    // role="none" so the button is the listbox's direct owned option — an
+    // <li>'s implicit listitem role would sit between the two.
     <li role="none">
       <button
         type="button"
-        role="menuitem"
+        role="option"
+        aria-selected={selected}
         onClick={onSelect}
-        className="block w-full border border-black bg-[#fafafa] px-3 py-[5px] text-left font-mono text-sm leading-none text-black/70 transition-colors duration-150 hover:bg-black hover:text-[#fafafa]"
+        // Hover borrows the picked row's own treatment (italic blue on a pale
+        // blue fill) rather than inventing a third state for it.
+        className={`block w-full border px-3 py-[5px] text-left font-mono text-sm leading-none transition-colors duration-150 hover:border-[#2e5b99] hover:bg-[#e7eff9] hover:text-[#2e5b99] hover:italic ${
+          selected
+            ? "border-[#2e5b99] bg-[#e7eff9] text-[#2e5b99] italic"
+            : "border-black bg-[#fafafa] text-black"
+        }`}
       >
         {label}
       </button>

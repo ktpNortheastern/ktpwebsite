@@ -32,6 +32,10 @@ type MembersViewProps = {
 };
 
 export default function MembersView({ classes, membersByClass }: MembersViewProps) {
+  // Which class the dropdown last jumped to — its own label and picked row
+  // show it, and it's deliberately not tied to `expanded`: collapsing that
+  // class by hand doesn't mean you were never there.
+  const [selected, setSelected] = useState("");
   // Every class open on arrival — the whole roster is the point of the page,
   // and the headings stay clickable to collapse the ones you're done with.
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
@@ -43,6 +47,7 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
   const pendingScroll = useRef<string | null>(null);
 
   function handlePick(slug: string) {
+    setSelected(slug);
     setExpanded((prev) => ({ ...prev, [slug]: true }));
     pendingScroll.current = slug;
   }
@@ -103,7 +108,7 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
             The best way to predict your future is to invent it. Build with us.
           </p>
           <div className="mt-6">
-            <ClassFilterDropdown classes={classes} onSelect={handlePick} />
+            <ClassFilterDropdown classes={classes} value={selected} onSelect={handlePick} />
           </div>
         </div>
         {/* aspect matches the asset's own 622x476 so object-contain doesn't
