@@ -70,3 +70,20 @@ body {
 #smooth-wrapper.smoother-active #smooth-content {
   overflow: visible;
 }
+
+/* Adjacent sections are flush in layout (each one's top is exactly the
+   previous one's bottom), but ScrollSmoother translates #smooth-content by a
+   FRACTIONAL pixel mid-scroll, so that shared boundary lands on a half pixel
+   and both sections anti-alias their edge against whatever is behind them —
+   the white page background. Between two navy sections that reads as a light
+   hairline divider flickering past as you scroll (rgb(70,84,103) against
+   navy's rgb(10,29,55)); it disappears once scrolling settles on a whole
+   pixel, which is why it only shows up in motion.
+   Overlapping each section 1px into the one above means the boundary row is
+   always fully covered by an opaque background, so there's nothing for the
+   page background to show through at any subpixel offset. Applied to every
+   direct child (not just [data-snap-section]) so the footer boundary is
+   covered too, and via the #id so it beats any Tailwind margin utility. */
+#smooth-content > * + * {
+  margin-top: -1px;
+}
