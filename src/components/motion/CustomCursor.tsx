@@ -76,9 +76,16 @@ export function CustomCursorProvider({ children }: { children: ReactNode }) {
 
   return (
     <CursorContext.Provider value={{ setState }}>
+      {/* White + `difference` so the dot inverts its backdrop instead of
+          picking a color per section: most sections are bg-navy or bg-black,
+          but Network/FaqPreview and the /faq, /members, /rush routes are
+          light, and WhyRush's scoop-lift puts navy and white on screen at
+          once — no single color works. Same trick as the NavBar wordmark.
+          It only reaches the page because this div lives in <body>, outside
+          ScrollSmoother's transformed #smooth-content; don't move it inside. */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black transition-[width,height,opacity] duration-200"
+        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference transition-[width,height,opacity] duration-200"
         style={{
           opacity: ready && state !== "caption" ? 1 : 0,
           width: isSmall ? HOVER_SIZE : DEFAULT_SIZE,
