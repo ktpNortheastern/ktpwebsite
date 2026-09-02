@@ -29,7 +29,7 @@ export default function FaqPreview() {
       className="flex min-h-screen flex-col justify-center bg-white px-6 py-16 md:h-screen md:px-[130px]"
     >
       <p className="font-mono text-sm text-black/50">( FAQ )</p>
-      <div className="mt-2 border-t border-black" />
+      <div className="mt-2 border-t border-black/20" />
       <h2 className="mt-6 font-sans text-3xl text-black">Common Questions</h2>
 
       <div className="mt-10">
