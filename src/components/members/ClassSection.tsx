@@ -18,11 +18,14 @@ type ClassSectionProps = {
 // each breakpoint gets its own full grid markup toggled by Tailwind
 // visibility classes, rather than one grid whose filler count could only
 // ever be right for one column count at a time.
+// Five across at lg is the mock's grid — it puts the cards at roughly their
+// native 232px on a 1448px screen. Column counts step down from there so the
+// cards never get narrower than that ratio: md tops out at 4 because the
+// 130px gutters only leave ~508px there.
 const BREAKPOINTS: { cols: number; wrapperClass: string }[] = [
   { cols: 3, wrapperClass: "grid grid-cols-3 sm:hidden" },
-  { cols: 4, wrapperClass: "hidden sm:grid sm:grid-cols-4 md:hidden" },
-  { cols: 6, wrapperClass: "hidden md:grid md:grid-cols-6 lg:hidden" },
-  { cols: 7, wrapperClass: "hidden lg:grid lg:grid-cols-7" },
+  { cols: 4, wrapperClass: "hidden sm:grid sm:grid-cols-4 lg:hidden" },
+  { cols: 5, wrapperClass: "hidden lg:grid lg:grid-cols-5" },
 ];
 
 function EmptySlot() {
