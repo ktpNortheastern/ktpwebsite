@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
-import ScrambleText from "@/components/motion/ScrambleText";
+import ScrambleText, { scramble } from "@/components/motion/ScrambleText";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -98,6 +98,11 @@ export default function NavBar() {
       .set(inner, { autoAlpha: 0 })
       .set(header, { autoAlpha: 0, y: -20 })
       .to(inner, { autoAlpha: 1, duration: 0.7, ease: "power2.out", delay: 0.15 })
+      // Scramble-decodes the wordmark right after its own fade-in settles,
+      // on top of (not instead of) that fade — same left-to-right decode
+      // ScrambleText uses elsewhere, chained here since this element is a
+      // plain ref-driven span rather than the ScrambleText component.
+      .call(() => scramble(inner, "Kappa Theta Pi"))
       .to(header, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "+=0.5");
 
     // Stretches the headline to the exact edge-to-edge width of its
@@ -422,7 +427,11 @@ export default function NavBar() {
             }
             aria-hidden={isHome}
           >
-            {!isHome && <Link href="/">ΚΘΠ</Link>}
+            {!isHome && (
+              <Link href="/">
+                <ScrambleText as="span" text="ΚΘΠ" trigger="immediate" />
+              </Link>
+            )}
             {isHome && "Kappa Theta Pi"}
           </div>
 
