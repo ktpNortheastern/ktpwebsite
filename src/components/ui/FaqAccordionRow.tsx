@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { renderRichText } from "@/lib/renderRichText";
 
 type FaqAccordionRowProps = {
   index: number;
@@ -15,7 +16,7 @@ export default function FaqAccordionRow({ index, question, answer }: FaqAccordio
     <button
       type="button"
       onClick={() => setOpen((o) => !o)}
-      className="group relative flex w-full flex-col gap-3 overflow-hidden border-t border-black/10 py-6 pr-4 pl-1 text-left first:border-t-0"
+      className="group relative flex w-full flex-col gap-3 overflow-hidden border-t border-black/10 py-5 pr-4 pl-1 text-left first:border-t-0"
     >
       {/* Same left-to-right hover wipe as the full FAQ page's rows
           (FaqRow.tsx) — scaleX from the left edge, not a plain fade. */}
@@ -28,11 +29,15 @@ export default function FaqAccordionRow({ index, question, answer }: FaqAccordio
           <span className="font-mono text-sm text-black/50">
             {String(index).padStart(2, "0")}.
           </span>
-          <span className="font-sans text-black/70">{question}</span>
+          <span className="font-sans text-black">{question}</span>
         </div>
-        <span className="font-mono text-xl">{open ? "−" : "+"}</span>
+        <span className="font-mono text-xl text-black/50">{open ? "−" : "+"}</span>
       </div>
-      {open && <p className="relative z-10 pl-12 font-sans text-sm text-black/60">{answer}</p>}
+      {open && (
+        <p className="relative z-10 pl-12 font-sans text-sm text-black/60">
+          {renderRichText(answer)}
+        </p>
+      )}
     </button>
   );
 }
