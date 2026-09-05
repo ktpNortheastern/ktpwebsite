@@ -5,6 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCursor } from "@/components/motion/CustomCursor";
+import { scramble } from "@/components/motion/ScrambleText";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 export default function Hero() {
@@ -52,7 +53,14 @@ export default function Hero() {
     tl.set(lines, { autoAlpha: 0, y: 16 })
       .set(hint, { autoAlpha: 0 })
       .to(lines, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.15 })
+      // Scramble-decodes each tagline line right after its own fade/slide-up
+      // settles — on top of, not instead of, that reveal. Each line keeps
+      // its own real text as the scramble's target string.
+      .call(() => {
+        lines.forEach((line) => scramble(line as HTMLElement, line.textContent ?? ""));
+      })
       .to(hint, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, "+=0.1")
+      .call(() => scramble(hint, hint.textContent ?? ""))
       .call(() => {
         // Started only once the reveal tween above is done with `y` on
         // this element — running both at once would have them fighting
@@ -104,9 +112,9 @@ export default function Hero() {
           alt=""
           fill
           priority
-          className="object-cover object-top blur-[4px]"
+          className="object-cover object-top"
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/30" />
 
         {/* Anchored to the photo's own box rather than sharing space with
             the headline, so NavBar's wordmark — confined to its own
