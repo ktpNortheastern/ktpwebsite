@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { getCollection } from "@/lib/content";
+import ScrambleText from "@/components/motion/ScrambleText";
 
 type NetworkEntry = {
   name: string;
@@ -62,9 +63,11 @@ export default function Network() {
     >
       <p className="font-mono text-sm text-black/50">( Network )</p>
       <div className="mt-2 border-t border-black/20" />
-      <h2 className="mt-6 font-sans text-3xl text-black">
-        Companies we&apos;ve brought value to
-      </h2>
+      <ScrambleText
+        as="h2"
+        text="Companies we've brought value to"
+        className="mt-6 font-sans text-3xl text-black"
+      />
 
       <div className="mt-10 grid grid-cols-2 border border-black/20 md:grid-cols-4">
         {companies.map((company) => {
