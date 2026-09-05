@@ -466,7 +466,7 @@ export default function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`font-sans text-base ${isHome ? "text-white" : "text-black"}`}
+              className={`font-sans text-base transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
             >
               {link.label}
             </Link>
@@ -502,7 +502,7 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`font-sans text-lg ${isHome ? "text-white" : "text-black"}`}
+                className={`font-sans text-lg transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
               >
                 {link.label}
               </Link>
