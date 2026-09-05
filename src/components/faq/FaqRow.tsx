@@ -16,9 +16,16 @@ export default function FaqRow({ index, question, answer }: FaqRowProps) {
       type="button"
       onClick={() => setOpen((o) => !o)}
       aria-expanded={open}
-      className="flex w-full flex-col gap-10 border-t border-[#c5c5c5] px-6 py-10 text-left md:px-[130px]"
+      className="group relative flex w-full flex-col gap-10 overflow-hidden border-t border-[#c5c5c5] px-6 py-10 text-left md:px-[130px]"
     >
-      <div className="flex w-full items-center justify-between gap-6">
+      {/* Wipes in from the left on hover, scaleX rather than a plain
+          background-color transition so the fill visibly travels across
+          the block instead of just fading up in place. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-black/[0.04] transition-transform duration-300 ease-out group-hover:scale-x-100"
+      />
+      <div className="relative z-10 flex w-full items-center justify-between gap-6">
         <div className="flex items-center gap-6 md:gap-20">
           <span className="shrink-0 font-mono font-bold text-black">
             {String(index).padStart(2, "0")}.
@@ -33,7 +40,7 @@ export default function FaqRow({ index, question, answer }: FaqRowProps) {
           +
         </span>
       </div>
-      {open && <p className="font-sans text-base text-black">{answer}</p>}
+      {open && <p className="relative z-10 font-sans text-base text-black">{answer}</p>}
     </button>
   );
 }

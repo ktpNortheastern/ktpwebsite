@@ -15,9 +15,15 @@ export default function FaqAccordionRow({ index, question, answer }: FaqAccordio
     <button
       type="button"
       onClick={() => setOpen((o) => !o)}
-      className="flex w-full flex-col gap-3 border-t border-black/10 py-6 text-left first:border-t-0"
+      className="group relative flex w-full flex-col gap-3 overflow-hidden border-t border-black/10 py-6 pr-4 pl-1 text-left first:border-t-0"
     >
-      <div className="flex items-center justify-between gap-6">
+      {/* Same left-to-right hover wipe as the full FAQ page's rows
+          (FaqRow.tsx) — scaleX from the left edge, not a plain fade. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-black/[0.04] transition-transform duration-300 ease-out group-hover:scale-x-100"
+      />
+      <div className="relative z-10 flex items-center justify-between gap-6">
         <div className="flex items-center gap-6">
           <span className="font-mono text-sm text-black/50">
             {String(index).padStart(2, "0")}.
@@ -26,7 +32,7 @@ export default function FaqAccordionRow({ index, question, answer }: FaqAccordio
         </div>
         <span className="font-mono text-xl">{open ? "−" : "+"}</span>
       </div>
-      {open && <p className="pl-12 font-sans text-sm text-black/60">{answer}</p>}
+      {open && <p className="relative z-10 pl-12 font-sans text-sm text-black/60">{answer}</p>}
     </button>
   );
 }
