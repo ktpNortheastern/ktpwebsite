@@ -23,8 +23,8 @@ export default function RushEventCard({ event, index }: RushEventCardProps) {
   const { title, description, inviteOnly, date, time, location, image } = event;
 
   return (
-    <div className="flex flex-col gap-5 sm:h-[190px] sm:flex-row sm:items-start">
-      <div className="flex w-full flex-col justify-between gap-4 border border-navy bg-[#fdfdfd] px-6 py-6 sm:h-full sm:w-[468px] sm:px-9 sm:py-7">
+    <div className="flex flex-col gap-5 sm:h-[160px] sm:flex-row sm:items-start">
+      <div className="flex w-full flex-col justify-center gap-4 border border-navy bg-[#fdfdfd] px-6 py-6 sm:h-full sm:w-[468px] sm:px-9 sm:py-7">
         <div className="flex w-full flex-col gap-3">
           <div className="flex w-full items-center justify-between gap-4">
             <p className="font-sans text-base font-bold text-navy">{title}</p>
@@ -53,10 +53,10 @@ export default function RushEventCard({ event, index }: RushEventCardProps) {
         <img
           src={image}
           alt=""
-          className="h-[190px] w-full shrink-0 object-cover sm:w-[190px]"
+          className="h-[160px] w-full shrink-0 object-cover sm:w-[160px]"
         />
       ) : (
-        <PlaceholderImage n={index + 1} className="h-[190px] w-full shrink-0 sm:w-[190px]" />
+        <PlaceholderImage n={index + 1} className="h-[160px] w-full shrink-0 sm:w-[160px]" />
       )}
     </div>
   );

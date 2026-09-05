@@ -1,18 +1,20 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Button from "@/components/ui/Button";
 import RushEventCard, { type RushEvent } from "@/components/rush/RushEventCard";
 import { isMobileViewport } from "@/lib/isMobileViewport";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Matches the Figma mock's own numbers: 190px-tall cards, a single spine
-// line running through the 32px gap between the "up" and "down" bands.
-const CARD_H = 190;
+// Cards were shrunk from the Figma mock's original 190px so the section
+// could take on real bottom padding (see the section className below) and
+// still fit one screen — RushEventCard's own height classes are sized to
+// match this same constant.
+const CARD_H = 160;
 const BAND_GAP = 32;
 const TRACK_H = CARD_H * 2 + BAND_GAP;
 const LINE_TOP = CARD_H + BAND_GAP / 2;
@@ -39,6 +41,33 @@ type RushTimelineProps = {
 export default function RushTimeline({ events, applicationsDue, applyUrl }: RushTimelineProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<HTMLDivElement[]>([]);
+
+  // A one-time fade/slide-up when the cards first come into view — separate
+  // from the desktop pin/scrub effect below (which only fires on `md` and
+  // drives horizontal position), so both mobile's plain swipeable strip and
+  // desktop's pinned traverse get the same entrance instead of just
+  // appearing static.
+  useIsomorphicLayoutEffect(() => {
+    const section = sectionRef.current;
+    const cards = cardRefs.current;
+    if (!section || !cards.length) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top 80%",
+      once: true,
+      onEnter: () => {
+        gsap.fromTo(
+          cards,
+          { autoAlpha: 0, y: 40 },
+          { autoAlpha: 1, y: 0, duration: 0.7, ease: "power2.out", stagger: 0.15 },
+        );
+      },
+    });
+
+    return () => trigger.kill();
+  }, [events]);
 
   useIsomorphicLayoutEffect(() => {
     const section = sectionRef.current;
@@ -110,23 +139,25 @@ export default function RushTimeline({ events, applicationsDue, applyUrl }: Rush
     <section
       ref={sectionRef}
       data-snap-section
-      className="flex min-h-screen flex-col justify-center gap-10 overflow-hidden bg-[#fafafa] px-6 pt-24 pb-10 md:h-screen md:px-[80px] md:pt-0 md:pb-0"
+      className="flex min-h-screen flex-col gap-10 overflow-hidden bg-[#fafafa] px-6 pt-20 pb-10 md:h-screen md:px-[80px] md:pt-[110px] md:pb-16"
     >
       <div className="flex w-full flex-col items-start gap-2">
         <p className="font-sans text-2xl font-bold text-black md:text-[30px]">
           (&nbsp;&nbsp;&nbsp;&nbsp;FALL 2026 RUSH SCHEDULE&nbsp;&nbsp;&nbsp;&nbsp;)
         </p>
         <p className="font-sans text-base font-medium text-black">{applicationsDue}</p>
-        {/* No arrow — matches the Figma "Apply Now" button exactly (plain
-            navy block), unlike the arrow-suffixed Button used for nav CTAs. */}
-        <Link
+        {/* Same flip-up hover as the nav's Rush Now button, just without its
+            arrow — arrow={false} covers that instead of a bespoke plain link. */}
+        <Button
           href={applyUrl}
+          variant="dark"
+          arrow={false}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-flex w-fit bg-navy px-5 py-2.5 font-mono text-base text-white"
+          className="mt-2 w-fit"
         >
           Apply Now
-        </Link>
+        </Button>
       </div>
 
       <div
@@ -142,6 +173,9 @@ export default function RushTimeline({ events, applicationsDue, applyUrl }: Rush
         {events.map((event, i) => (
           <div
             key={event.slug}
+            ref={(el) => {
+              if (el) cardRefs.current[i] = el;
+            }}
             className="w-[678px] shrink-0 snap-center"
             style={{ marginTop: i % 2 === 0 ? 0 : CARD_H + BAND_GAP }}
           >
