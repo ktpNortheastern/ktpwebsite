@@ -90,7 +90,10 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
           because the mock puts the class filter inside this text column,
           alongside the ASCII hand — as a sibling block below the hero row it
           would land underneath the hand instead. */}
-      <div className="flex items-start justify-between gap-6 px-6 pt-10 pb-6 md:px-[130px] md:pt-[88px]">
+      {/* pb-44 (not pb-6) reserves room below the row for the class dropdown's
+          own opened list (7 rows ≈ 188px) so it doesn't overlap the first
+          class section's heading underneath when clicked open. */}
+      <div className="flex items-start justify-between gap-6 px-6 pt-3 pb-44 md:px-[130px] md:pt-[42px]">
         {/* shrink-0 only from lg, where the hand is beside it — below that
             the column has to be free to shrink under 440px. */}
         <div className="max-w-[440px] lg:shrink-0">
