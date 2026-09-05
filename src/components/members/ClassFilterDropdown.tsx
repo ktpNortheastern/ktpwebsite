@@ -111,16 +111,16 @@ export default function ClassFilterDropdown({
           role="listbox"
           aria-label="Class"
           onKeyDown={handleListKeyDown}
-          // Row borders stay uncollapsed — the mock shows the doubled rule
-          // between rows. Width matches the label box, not the whole trigger.
+          // Width matches the label box, not the whole trigger.
           className="absolute top-full left-0 z-20 mt-1.5 w-[152px]"
         >
-          {classes.map((c) => (
+          {classes.map((c, i) => (
             <Row
               key={c.slug}
               label={shortLabel(c.name)}
               selected={c.slug === value}
               onSelect={() => select(c.slug)}
+              isFirst={i === 0}
             />
           ))}
         </ul>
@@ -133,15 +133,21 @@ function Row({
   label,
   selected,
   onSelect,
+  isFirst,
 }: {
   label: string;
   selected: boolean;
   onSelect: () => void;
+  isFirst: boolean;
 }) {
   return (
     // role="none" so the button is the listbox's direct owned option — an
-    // <li>'s implicit listitem role would sit between the two.
-    <li role="none">
+    // <li>'s implicit listitem role would sit between the two. -mt-px pulls
+    // every row but the first up to sit exactly on the previous row's
+    // bottom border, so the shared edge is one line (matching the box's
+    // outer edge thickness) instead of both rows' borders stacking into a
+    // visibly thicker doubled rule.
+    <li role="none" className={isFirst ? "" : "-mt-px"}>
       <button
         type="button"
         role="option"
