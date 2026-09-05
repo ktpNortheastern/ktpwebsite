@@ -19,6 +19,11 @@ const BAND_GAP = 32;
 const TRACK_H = CARD_H * 2 + BAND_GAP;
 const LINE_TOP = CARD_H + BAND_GAP / 2;
 
+// Hardcoded to the first event for now — there's no real "today vs each
+// event's date" progress logic yet, so this just shows where that fill
+// would sit once we're actually partway through the schedule.
+const CURRENT_EVENT_INDEX = 0;
+
 type RushTimelineProps = {
   events: RushEvent[];
   applicationsDue: string;
@@ -42,31 +47,60 @@ export default function RushTimeline({ events, applicationsDue, applyUrl }: Rush
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
+  const eventImageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const progressLineRef = useRef<HTMLDivElement>(null);
 
-  // A one-time fade/slide-up when the cards first come into view — separate
-  // from the desktop pin/scrub effect below (which only fires on `md` and
-  // drives horizontal position), so both mobile's plain swipeable strip and
-  // desktop's pinned traverse get the same entrance instead of just
-  // appearing static.
+  // Each card fades/slides up the moment IT actually becomes visible on
+  // screen, rather than all of them at once the moment the section scrolls
+  // into view — the latter meant cards 2+ were already fully revealed
+  // before the horizontal scrub ever brought them on screen. A plain
+  // IntersectionObserver (not a ScrollTrigger) works for both the desktop
+  // pin/scrub (cards move via transform, which IntersectionObserver still
+  // tracks against the real viewport) and mobile's native horizontal swipe
+  // (its default root correctly accounts for clipping by that scrollable
+  // ancestor) with one shared implementation.
   useIsomorphicLayoutEffect(() => {
-    const section = sectionRef.current;
     const cards = cardRefs.current;
-    if (!section || !cards.length) return;
+    if (!cards.length) return;
 
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: "top 80%",
-      once: true,
-      onEnter: () => {
-        gsap.fromTo(
-          cards,
-          { autoAlpha: 0, y: 40 },
-          { autoAlpha: 1, y: 0, duration: 0.7, ease: "power2.out", stagger: 0.15 },
-        );
+    gsap.set(cards, { autoAlpha: 0, y: 40 });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          gsap.to(entry.target, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" });
+          observer.unobserve(entry.target);
+        });
       },
-    });
+      { threshold: 0.2 },
+    );
 
-    return () => trigger.kill();
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [events]);
+
+  // Sizes the blue progress fill to the CURRENT_EVENT_INDEX card's real
+  // image-box position — measured off the actual DOM rather than a
+  // hardcoded pixel guess, the same rect-diffing approach History.tsx uses,
+  // so it stays correct regardless of card width/gap changes. Runs
+  // independent of the desktop pin/mobile-swipe split above: both share the
+  // same untransformed track layout, so one measurement covers both.
+  useIsomorphicLayoutEffect(() => {
+    const track = trackRef.current;
+    const progressLine = progressLineRef.current;
+    const targetImage = eventImageRefs.current[CURRENT_EVENT_INDEX];
+    if (!track || !progressLine || !targetImage) return;
+
+    function measure() {
+      const trackRect = track!.getBoundingClientRect();
+      const imageRect = targetImage!.getBoundingClientRect();
+      gsap.set(progressLine, { width: imageRect.right - trackRect.left });
+    }
+
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, [events]);
 
   useIsomorphicLayoutEffect(() => {
@@ -139,7 +173,7 @@ export default function RushTimeline({ events, applicationsDue, applyUrl }: Rush
     <section
       ref={sectionRef}
       data-snap-section
-      className="flex min-h-screen flex-col gap-10 overflow-hidden bg-[#fafafa] px-6 pt-20 pb-10 md:h-screen md:px-[80px] md:pt-[110px] md:pb-16"
+      className="flex min-h-screen flex-col overflow-hidden bg-[#fafafa] px-6 pt-20 pb-10 md:h-screen md:px-[80px] md:pt-[110px] md:pb-16"
     >
       <div className="flex w-full flex-col items-start gap-2">
         <p className="font-sans text-2xl font-bold text-black md:text-[30px]">
@@ -160,28 +194,50 @@ export default function RushTimeline({ events, applicationsDue, applyUrl }: Rush
         </Button>
       </div>
 
-      <div
-        ref={trackRef}
-        className="relative flex w-max items-start gap-16 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory md:overflow-visible md:pb-0 md:snap-none"
-        style={{ height: TRACK_H }}
-      >
+      {/* flex-1 + justify-center so the track centers in whatever space is
+          actually left below the header (which keeps its own fixed
+          position above), instead of sitting flush under a fixed gap and
+          leaving all the leftover space stranded below it. */}
+      <div className="flex min-h-0 flex-1 flex-col justify-center">
         <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 h-[2px] bg-black/25"
-          style={{ top: LINE_TOP }}
-        />
-        {events.map((event, i) => (
+          ref={trackRef}
+          className="relative flex w-max items-start gap-16 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory md:overflow-visible md:pb-0 md:snap-none"
+          style={{ height: TRACK_H }}
+        >
+          {/* Gray for the whole schedule, with a blue fill on top showing
+              progress up to the current event (see the measurement effect
+              above) — starts at width 0 so there's no flash of a full-width
+              fill before that effect measures and sets the real value. */}
           <div
-            key={event.slug}
-            ref={(el) => {
-              if (el) cardRefs.current[i] = el;
-            }}
-            className="w-[678px] shrink-0 snap-center"
-            style={{ marginTop: i % 2 === 0 ? 0 : CARD_H + BAND_GAP }}
-          >
-            <RushEventCard event={event} index={i} />
-          </div>
-        ))}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 h-[2px] bg-black/15"
+            style={{ top: LINE_TOP }}
+          />
+          <div
+            ref={progressLineRef}
+            aria-hidden
+            className="pointer-events-none absolute left-0 h-[2px] bg-[#2e5b99]"
+            style={{ top: LINE_TOP, width: 0 }}
+          />
+          {events.map((event, i) => (
+            <div
+              key={event.slug}
+              ref={(el) => {
+                if (el) cardRefs.current[i] = el;
+              }}
+              className="w-[678px] shrink-0 snap-center"
+              style={{ marginTop: i % 2 === 0 ? 0 : CARD_H + BAND_GAP }}
+            >
+              <RushEventCard
+                event={event}
+                index={i}
+                imageRef={(el) => {
+                  eventImageRefs.current[i] = el;
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
