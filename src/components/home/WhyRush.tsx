@@ -220,7 +220,7 @@ export default function WhyRush() {
             ref={(el) => {
               if (el) cardRefs.current[i] = el;
             }}
-            className="static flex flex-col gap-4 overflow-hidden rounded-2xl border border-white/10 bg-[#162841] p-6 md:absolute md:inset-0"
+            className="static flex flex-col gap-4 overflow-hidden border border-white/10 bg-[#162841] p-6 md:absolute md:inset-0"
           >
             <PlaceholderImage n={reason.image} className="h-[140px] w-full shrink-0" />
             <div className="flex items-center gap-4">
