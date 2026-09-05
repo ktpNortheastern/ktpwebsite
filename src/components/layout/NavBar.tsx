@@ -16,6 +16,8 @@ const links = [
   { label: "Members", href: "/members" },
   { label: "FAQ", href: "/faq" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
 ];
 
 // Shared timeline shape so the headline's FLIP and the nav links' spread
@@ -470,18 +472,24 @@ export default function NavBar() {
           )}
         </div>
 
+        {/* trigger="immediate" here decodes once, right on mount — this nav
+            never unmounts across client-side navigations, so it only ever
+            plays on the actual initial page load, not on every route
+            change. Deliberately not reused on the mobile dropdown below or
+            baked into Button itself — this is a one-off for the persistent
+            desktop nav, not a general button/link effect. */}
         <nav ref={navLinksRef} className="hidden items-center gap-10 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`font-sans text-base transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
+              className={`font-sans text-[15px] transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
             >
-              {link.label}
+              <ScrambleText as="span" text={link.label} trigger="immediate" />
             </Link>
           ))}
           <Button href="/rush" variant={isHome ? "light" : "dark"}>
-            Rush Now
+            <ScrambleText as="span" text="Rush Now" trigger="immediate" />
           </Button>
         </nav>
 
