@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
@@ -11,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 export default function SnapScrollContainer({ children }: { children: ReactNode }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -189,6 +191,23 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       cleanupDesktop?.();
     };
   }, []);
+
+  // This component lives in the root layout and never remounts across
+  // client-side navigations — only `children` swaps — so neither the
+  // browser's scroll position nor ScrollSmoother's own virtualized one
+  // resets on its own. Without this, navigating to a new (often shorter)
+  // page can leave it rendered already scrolled to wherever the previous
+  // page happened to be, instead of at the top. `ScrollSmoother.get()`
+  // returns the live instance if the desktop system is active, or null on
+  // mobile (where it's never created), so this covers both.
+  useEffect(() => {
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      smoother.scrollTo(0, false);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   return (
     <div id="smooth-wrapper" ref={wrapperRef}>
