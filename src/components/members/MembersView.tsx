@@ -112,14 +112,14 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
           </div>
         </div>
         {/* aspect matches the asset's own 622x476 so object-contain doesn't
-            letterbox it, and the box is sized past the mock's 500px hand
-            because roughly 18% of the PNG's width is transparent padding.
+            letterbox it. Sized so the image's bottom edge lands roughly at
+            the class filter dropdown, not the mock's full-height hand.
             Below lg the 130px gutters leave no room for it beside the copy. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/members-hand-ascii.png"
           alt=""
-          className="hidden aspect-[622/476] w-[610px] min-w-0 object-contain lg:block"
+          className="hidden aspect-[622/476] w-[350px] min-w-0 object-contain lg:block"
         />
       </div>
 
