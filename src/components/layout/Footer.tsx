@@ -5,6 +5,8 @@ const navigation = [
   { label: "Brothers", href: "/members" },
   { label: "FAQ", href: "/faq" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
   { label: "Rush Process", href: "/rush" },
 ];
 
