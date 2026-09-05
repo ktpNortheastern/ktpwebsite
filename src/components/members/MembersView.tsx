@@ -21,6 +21,10 @@ export type MemberEntry = {
   class: string;
   status: string;
   role?: string;
+  // Distinct from `role` (the CURRENT centered title on the card) — this
+  // honors a past E-Board position, e.g. "VP Membership 2025", shown as a
+  // corner badge instead.
+  pastRole?: string;
   linkedin?: string;
   email?: string;
   order?: number;

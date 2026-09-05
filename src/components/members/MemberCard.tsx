@@ -11,6 +11,7 @@ type MemberCardProps = {
   major: string;
   classYear: string;
   role?: string;
+  pastRole?: string;
   linkedin?: string;
   email?: string;
 };
@@ -33,6 +34,7 @@ export default function MemberCard({
   major,
   classYear,
   role,
+  pastRole,
   linkedin,
   email,
 }: MemberCardProps) {
@@ -52,6 +54,16 @@ export default function MemberCard({
         if (isCoarsePointer()) setRevealed((r) => !r);
       }}
     >
+      {/* Absolutely positioned children align to the figure's padding box
+          (the inner edge of its border), not inset by the figure's own p-3 —
+          so top-0/right-0 here sits flush against the card's corner with no
+          gap, same as the flush border-r/border-b cards share in the grid. */}
+      {pastRole && (
+        <span className="absolute top-0 right-0 z-10 bg-black px-2 py-1 font-mono text-[10px] uppercase text-white">
+          {pastRole}
+        </span>
+      )}
+
       {role && (
         <p className="shrink-0 truncate text-center font-sans text-base font-medium uppercase text-black">
           {role}

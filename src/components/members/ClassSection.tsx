@@ -90,6 +90,7 @@ export default function ClassSection({
                       major={member.major}
                       classYear={member.classYear}
                       role={member.role}
+                      pastRole={member.pastRole}
                       linkedin={member.linkedin}
                       email={member.email}
                     />
