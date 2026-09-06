@@ -3,7 +3,7 @@ name: Rachel Chen
 major: CS + Philosophy
 classYear: "26"
 class: founding
-status: Alumni
-pastRole: VP Something
+status: Active
+pastRole: ""
 linkedin: https://www.linkedin.com/in/racheljiarui/
 ---
