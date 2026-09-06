@@ -1,11 +1,11 @@
 ---
-name: "Member One"
-major: "CS + Business"
+name: Andrew Rettig
+major: CS + Business
 classYear: "26"
-class: "executive-board"
-status: "Active"
-role: "Co-President"
+class: executive-board
+status: Active
+role: Co-President
+linkedin: https://www.linkedin.com/in/rettig-andrew/
+email: ""
 order: 10
-linkedin: "https://linkedin.com/in/ktp-eboard-01"
-email: "eboard-01@ktp-northeastern.org"
 ---
