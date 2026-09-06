@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
-import ScrambleText from "@/components/motion/ScrambleText";
+import ScrambleText, { scramble } from "@/components/motion/ScrambleText";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -16,6 +16,8 @@ const links = [
   { label: "Members", href: "/members" },
   { label: "FAQ", href: "/faq" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
 ];
 
 // Shared timeline shape so the headline's FLIP and the nav links' spread
@@ -98,6 +100,11 @@ export default function NavBar() {
       .set(inner, { autoAlpha: 0 })
       .set(header, { autoAlpha: 0, y: -20 })
       .to(inner, { autoAlpha: 1, duration: 0.7, ease: "power2.out", delay: 0.15 })
+      // Scramble-decodes the wordmark right after its own fade-in settles,
+      // on top of (not instead of) that fade — same left-to-right decode
+      // ScrambleText uses elsewhere, chained here since this element is a
+      // plain ref-driven span rather than the ScrambleText component.
+      .call(() => scramble(inner, "Kappa Theta Pi"))
       .to(header, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "+=0.5");
 
     // Stretches the headline to the exact edge-to-edge width of its
@@ -422,7 +429,11 @@ export default function NavBar() {
             }
             aria-hidden={isHome}
           >
-            {!isHome && <Link href="/">ΚΘΠ</Link>}
+            {!isHome && (
+              <Link href="/">
+                <ScrambleText as="span" text="ΚΘΠ" trigger="immediate" />
+              </Link>
+            )}
             {isHome && "Kappa Theta Pi"}
           </div>
 
@@ -461,18 +472,24 @@ export default function NavBar() {
           )}
         </div>
 
+        {/* trigger="immediate" here decodes once, right on mount — this nav
+            never unmounts across client-side navigations, so it only ever
+            plays on the actual initial page load, not on every route
+            change. Deliberately not reused on the mobile dropdown below or
+            baked into Button itself — this is a one-off for the persistent
+            desktop nav, not a general button/link effect. */}
         <nav ref={navLinksRef} className="hidden items-center gap-10 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`font-sans text-base ${isHome ? "text-white" : "text-black"}`}
+              className={`font-sans text-[15px] transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
             >
-              {link.label}
+              <ScrambleText as="span" text={link.label} trigger="immediate" />
             </Link>
           ))}
           <Button href="/rush" variant={isHome ? "light" : "dark"}>
-            Rush Now
+            <ScrambleText as="span" text="Rush Now" trigger="immediate" />
           </Button>
         </nav>
 
@@ -502,7 +519,7 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`font-sans text-lg ${isHome ? "text-white" : "text-black"}`}
+                className={`font-sans text-lg transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
               >
                 {link.label}
               </Link>

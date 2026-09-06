@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import FaqAccordionRow from "@/components/ui/FaqAccordionRow";
+import ScrambleText from "@/components/motion/ScrambleText";
 
 const PREVIEW_FAQS = [
   {
@@ -30,7 +31,11 @@ export default function FaqPreview() {
     >
       <p className="font-mono text-sm text-black/50">( FAQ )</p>
       <div className="mt-2 border-t border-black/20" />
-      <h2 className="mt-6 font-sans text-3xl text-black">Common Questions</h2>
+      <ScrambleText
+        as="h2"
+        text="Common Questions"
+        className="mt-6 font-sans text-3xl text-black"
+      />
 
       <div className="mt-10">
         {PREVIEW_FAQS.map((faq, i) => (

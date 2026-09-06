@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCollection } from "@/lib/content";
 import GalleryGrid, { type GalleryEntry } from "@/components/gallery/GalleryGrid";
+import DotMatrixText from "@/components/ui/DotMatrixText";
 
 export const metadata: Metadata = {
   title: "Gallery | KTP Northeastern",
@@ -15,6 +16,9 @@ export default function GalleryPage() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.25)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]"
       />
+      <div className="flex justify-center py-10 md:py-14">
+        <DotMatrixText text="GALLERY" className="text-white" size="sm" />
+      </div>
       <GalleryGrid items={items} />
     </section>
   );

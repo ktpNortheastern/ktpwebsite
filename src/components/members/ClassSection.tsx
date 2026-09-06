@@ -41,7 +41,7 @@ export default function ClassSection({
   onToggle,
 }: ClassSectionProps) {
   return (
-    <section id={slug} className="relative mb-9 px-6 md:px-[130px]">
+    <section id={slug} className="relative mb-9 px-4 md:px-16">
       {/* The container edge is its own masked layer rather than a border on
           the section: the linear-gradient mask leaves the top rule and its
           rounded corners at full strength and dissolves the side rules on the
@@ -90,6 +90,7 @@ export default function ClassSection({
                       major={member.major}
                       classYear={member.classYear}
                       role={member.role}
+                      pastRole={member.pastRole}
                       linkedin={member.linkedin}
                       email={member.email}
                     />

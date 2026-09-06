@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { gsap } from "gsap";
 
@@ -10,9 +10,9 @@ gsap.registerPlugin(ScrollTrigger);
 // read as visual noise rather than a "decoding" effect.
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-const SWEEP_MS = 900;
-const SETTLE_MS = 320;
-const FLICKER_INTERVAL_MS = 45;
+const SWEEP_MS = 300;
+const SETTLE_MS = 110;
+const FLICKER_INTERVAL_MS = 20;
 
 type ScrambleTextProps = {
   text: string;
@@ -54,6 +54,18 @@ export default function ScrambleText({
     onCompleteRef.current = onComplete;
   });
 
+  // Runs before paint, so a scroll-triggered instance never shows its real
+  // text even for a single frame while it's still below the "top 80%" line
+  // waiting for the decode below to start — it reads as already-scrambled
+  // noise the whole time it's approaching, not readable text that glitches
+  // once it arrives.
+  useLayoutEffect(() => {
+    if (trigger !== "scroll") return;
+    const el = ref.current;
+    if (!el) return;
+    el.textContent = randomize(text);
+  }, [text, trigger]);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -89,7 +101,21 @@ export default function ScrambleText({
   );
 }
 
-function scramble(el: HTMLElement, finalText: string, onComplete?: () => void) {
+function randomize(text: string): string {
+  return text
+    .split("")
+    .map((char) =>
+      char === " " || char === "\n"
+        ? char
+        : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)],
+    )
+    .join("");
+}
+
+// Exported so components with their own hand-rolled GSAP timelines (NavBar's
+// wordmark, Hero's tagline/scroll hint) can chain this same decode onto the
+// end of an existing intro tween instead of duplicating the effect.
+export function scramble(el: HTMLElement, finalText: string, onComplete?: () => void) {
   const chars = finalText.split("");
   const total = chars.length;
   const startTimes = chars.map((_, i) => (i / total) * (SWEEP_MS - SETTLE_MS));

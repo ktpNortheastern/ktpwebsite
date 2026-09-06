@@ -5,6 +5,8 @@ const navigation = [
   { label: "Brothers", href: "/members" },
   { label: "FAQ", href: "/faq" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
   { label: "Rush Process", href: "/rush" },
 ];
 
@@ -77,7 +79,10 @@ function FooterColumn({
       <ul className="mt-3 flex flex-col gap-2">
         {items.map((item) => (
           <li key={item.label}>
-            <a href={item.href} className="font-sans text-sm text-white/70">
+            <a
+              href={item.href}
+              className="font-sans text-sm text-white/70 transition-colors duration-200 hover:text-white"
+            >
               {item.label}
             </a>
           </li>
@@ -102,7 +107,7 @@ function FooterSocials({
               href={href}
               target={href.startsWith("mailto:") ? undefined : "_blank"}
               rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-              className="font-sans text-sm text-white/70"
+              className="font-sans text-sm text-white/70 transition-colors duration-200 hover:text-white"
             >
               {label}
             </a>

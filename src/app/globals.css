@@ -87,3 +87,21 @@ body {
 #smooth-content > * + * {
   margin-top: -1px;
 }
+
+/* Used via Tailwind's `animate-[fade-in_..]`/`animate-[fade-in-up_..]`
+   arbitrary values (e.g. ProjectsSection's featured-tab switch) — CSS
+   animations replay automatically on every fresh mount, so keying the
+   element by whatever changed (a tab's slug, etc.) is enough to retrigger
+   this without any JS-driven mounted-state effect. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

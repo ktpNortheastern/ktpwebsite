@@ -21,6 +21,10 @@ export type MemberEntry = {
   class: string;
   status: string;
   role?: string;
+  // Distinct from `role` (the CURRENT centered title on the card) — this
+  // honors a past E-Board position, e.g. "VP Membership 2025", shown as a
+  // corner badge instead.
+  pastRole?: string;
   linkedin?: string;
   email?: string;
   order?: number;
@@ -90,7 +94,10 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
           because the mock puts the class filter inside this text column,
           alongside the ASCII hand — as a sibling block below the hero row it
           would land underneath the hand instead. */}
-      <div className="flex items-start justify-between gap-6 px-6 pt-10 pb-6 md:px-[130px] md:pt-[88px]">
+      {/* pb-44 (not pb-6) reserves room below the row for the class dropdown's
+          own opened list (7 rows ≈ 188px) so it doesn't overlap the first
+          class section's heading underneath when clicked open. */}
+      <div className="flex items-start justify-between gap-6 px-6 pt-3 pb-44 md:px-[130px] md:pt-[42px]">
         {/* shrink-0 only from lg, where the hand is beside it — below that
             the column has to be free to shrink under 440px. */}
         <div className="max-w-[440px] lg:shrink-0">
@@ -112,14 +119,14 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
           </div>
         </div>
         {/* aspect matches the asset's own 622x476 so object-contain doesn't
-            letterbox it, and the box is sized past the mock's 500px hand
-            because roughly 18% of the PNG's width is transparent padding.
+            letterbox it. Sized so the image's bottom edge lands roughly at
+            the class filter dropdown, not the mock's full-height hand.
             Below lg the 130px gutters leave no room for it beside the copy. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/members-hand-ascii.png"
           alt=""
-          className="hidden aspect-[622/476] w-[610px] min-w-0 object-contain lg:block"
+          className="hidden aspect-[622/476] w-[350px] min-w-0 object-contain lg:block"
         />
       </div>
 
