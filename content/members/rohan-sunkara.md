@@ -5,6 +5,6 @@ classYear: "27"
 class: alpha
 status: Active
 role: ""
-pastRole: AVP Marketing 2025
+pastRole: ""
 linkedin: https://www.linkedin.com/in/rohansunkara/
 ---
