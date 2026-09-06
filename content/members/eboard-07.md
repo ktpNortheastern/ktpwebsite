@@ -1,5 +1,6 @@
 ---
 name: Rowen Latif
+photo: /images/uploads/rowen-pfp.jpg
 major: CS + Design
 classYear: "27"
 class: executive-board
