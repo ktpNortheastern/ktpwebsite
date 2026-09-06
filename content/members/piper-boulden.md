@@ -1,7 +1,7 @@
 ---
 name: Piper Boulden
 photo: /images/uploads/piper-boulden.png
-major: MechE
+major: Mechanical engineering
 classYear: "29"
 class: delta
 status: Active
