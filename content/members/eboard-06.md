@@ -1,11 +1,11 @@
 ---
-name: "Member Six"
-major: "CS + Design"
+name: Peter Savinelli
+major: Computer Science
 classYear: "27"
-class: "executive-board"
-status: "Active"
-role: "VP Engagement"
+class: executive-board
+status: Active
+role: VP Engagement
+linkedin: https://www.linkedin.com/in/peter-savinelli/
+email: eboard-06@ktp-northeastern.org
 order: 60
-linkedin: "https://linkedin.com/in/ktp-eboard-06"
-email: "eboard-06@ktp-northeastern.org"
 ---
