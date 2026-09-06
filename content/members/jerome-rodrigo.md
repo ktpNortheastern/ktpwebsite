@@ -6,4 +6,5 @@ class: executive-board
 status: Active
 role: VP Tech Dev
 linkedin: https://www.linkedin.com/in/jrodrigo2028/
+order: 110
 ---
