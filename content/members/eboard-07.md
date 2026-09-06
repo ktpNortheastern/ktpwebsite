@@ -1,11 +1,11 @@
 ---
-name: "Member Seven"
-major: "Marketing"
-classYear: "28"
-class: "executive-board"
-status: "Active"
-role: "VP Marketing"
+name: Rowen Latif
+major: CS + Design
+classYear: "27"
+class: executive-board
+status: Active
+role: VP Marketing
+linkedin: https://www.linkedin.com/in/rowen-latif/
+email: rowenlatif@gmail.com
 order: 70
-linkedin: "https://linkedin.com/in/ktp-eboard-07"
-email: "eboard-07@ktp-northeastern.org"
 ---
