@@ -1,11 +1,11 @@
 ---
-name: "Member Two"
-major: "CS + Design"
-classYear: "26"
-class: "executive-board"
-status: "Active"
-role: "Co-President"
+name: Eleanor Meltzer
+major: DS + Econ
+classYear: "28"
+class: executive-board
+status: Active
+role: Co-President
+linkedin: https://www.linkedin.com/in/eleanor-meltzer/
+email: eboard-02@ktp-northeastern.org
 order: 20
-linkedin: "https://linkedin.com/in/ktp-eboard-02"
-email: "eboard-02@ktp-northeastern.org"
 ---
