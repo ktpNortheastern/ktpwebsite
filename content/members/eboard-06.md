@@ -8,5 +8,5 @@ status: Active
 role: VP Engagement
 linkedin: https://www.linkedin.com/in/peter-savinelli/
 email: eboard-06@ktp-northeastern.org
-order: 60
+order: 90
 ---
