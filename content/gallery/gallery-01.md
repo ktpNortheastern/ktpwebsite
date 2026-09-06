@@ -1,6 +1,6 @@
 ---
 image: /images/uploads/gallery-01.jpg
-caption: Our first ever merch designs
+caption: FIRST EVER MERCH DESIGNS
 order: 1
 year: 2024
 brothers:
