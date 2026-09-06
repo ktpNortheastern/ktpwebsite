@@ -1,5 +1,11 @@
 ---
-image: "/images/uploads/gallery-06.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-06.jpg
+caption: PREVIOUS CO-OP PANEL
 order: 6
+brothers:
+  - SEBY
+  - RICHARD
+  - ARMINA
+  - SYD
+  - LORELI
 ---
