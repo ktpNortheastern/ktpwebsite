@@ -6,6 +6,7 @@ classYear: "26"
 class: executive-board
 status: Active
 role: Co-President
+pledgeClass: beta
 linkedin: https://www.linkedin.com/in/rettig-andrew/
 email: ""
 order: 10

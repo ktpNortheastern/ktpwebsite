@@ -12,8 +12,18 @@ type MemberCardProps = {
   classYear: string;
   role?: string;
   pastRole?: string;
+  pledgeClass?: string;
   linkedin?: string;
   email?: string;
+};
+
+// Executive Board only — their pledge class shown as a lowercase Greek
+// letter right after their name, instead of repeating the class name.
+const GREEK_LETTERS: Record<string, string> = {
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
 };
 
 /**
@@ -35,10 +45,12 @@ export default function MemberCard({
   classYear,
   role,
   pastRole,
+  pledgeClass,
   linkedin,
   email,
 }: MemberCardProps) {
   const [revealed, setRevealed] = useState(false);
+  const greekLetter = pledgeClass ? GREEK_LETTERS[pledgeClass] : undefined;
   // Falls back to the same PlaceholderImage gray as a member with no photo
   // at all — some `photo` values are external hotlinks (e.g. a pasted
   // LinkedIn CDN URL) rather than a real CMS upload, which expire/block
@@ -104,7 +116,10 @@ export default function MemberCard({
       </div>
 
       <div className="absolute inset-x-3 bottom-2 flex flex-col bg-gradient-to-t from-navy from-20% to-transparent px-2 pt-8 pb-2">
-        <figcaption className="truncate font-sans text-base font-medium text-white">{name}</figcaption>
+        <figcaption className="truncate font-sans text-base font-medium text-white">
+          {name}
+          {greekLetter ? ` ${greekLetter}` : ""}
+        </figcaption>
         <div className="mt-2 flex flex-wrap gap-2">
           <span className="bg-black px-2 py-1 font-mono text-[10px] uppercase text-white">
             {major}

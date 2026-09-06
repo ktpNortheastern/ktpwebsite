@@ -7,6 +7,7 @@ class: executive-board
 status: Active
 role: VP Tech Dev
 pastRole: ""
+pledgeClass: gamma
 linkedin: https://www.linkedin.com/in/mihikachalasani/
 order: 100
 ---

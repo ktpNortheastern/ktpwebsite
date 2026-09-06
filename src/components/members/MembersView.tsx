@@ -25,6 +25,10 @@ export type MemberEntry = {
   // honors a past E-Board position, e.g. "VP Membership 2025", shown as a
   // corner badge instead.
   pastRole?: string;
+  // Executive Board only — their original pledge class (e.g. "beta"),
+  // since e-board members are grouped under Executive Board rather than
+  // their pledge class. Shown as a small Greek-letter badge.
+  pledgeClass?: string;
   linkedin?: string;
   email?: string;
   order?: number;

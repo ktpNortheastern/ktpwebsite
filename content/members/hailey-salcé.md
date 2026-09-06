@@ -6,6 +6,7 @@ classYear: "27"
 class: executive-board
 status: Active
 role: VP Philanthropy
+pledgeClass: beta
 linkedin: https://www.linkedin.com/in/hailey-salce/
 order: 60
 ---

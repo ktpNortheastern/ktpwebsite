@@ -85,6 +85,15 @@ collections:
         widget: "string"
         required: false
         hint: "Honors a past exec board position, e.g. VP Membership 2025 — shown as a badge in the card's top-right corner. Leave blank for members without one."
+      - label: "Pledge Class (E-Board badge)"
+        name: "pledgeClass"
+        widget: "relation"
+        collection: "classes"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+        hint: "Executive Board only — since e-board members are grouped under Executive Board (not their pledge class), this shows their original class as a small Greek-letter badge on the card. Leave blank for everyone else."
       - {
           label: "LinkedIn URL",
           name: "linkedin",

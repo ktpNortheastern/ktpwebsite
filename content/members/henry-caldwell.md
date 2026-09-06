@@ -7,6 +7,7 @@ class: executive-board
 status: Active
 role: VP New Member Education
 pastRole: VP Internal Ops
+pledgeClass: alpha
 linkedin: https://www.linkedin.com/in/henrycaldwell05/
 order: 40
 ---

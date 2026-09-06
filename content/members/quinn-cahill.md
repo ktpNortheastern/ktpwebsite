@@ -6,6 +6,7 @@ classYear: "27"
 class: executive-board
 status: Active
 role: VP Internal Ops
+pledgeClass: alpha
 linkedin: https://www.linkedin.com/in/quinn-cahill-/
 order: 50
 ---

@@ -5,6 +5,7 @@ classYear: "27"
 class: executive-board
 status: Active
 role: VP PROF DEV
+pledgeClass: alpha
 linkedin: https://www.linkedin.com/in/erika-von-kirchbach/
 order: 80
 ---

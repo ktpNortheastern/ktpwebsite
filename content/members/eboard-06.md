@@ -6,6 +6,7 @@ classYear: "27"
 class: executive-board
 status: Active
 role: VP Engagement
+pledgeClass: beta
 linkedin: https://www.linkedin.com/in/peter-savinelli/
 email: eboard-06@ktp-northeastern.org
 order: 90

@@ -91,6 +91,7 @@ export default function ClassSection({
                       classYear={member.classYear}
                       role={member.role}
                       pastRole={member.pastRole}
+                      pledgeClass={member.pledgeClass}
                       linkedin={member.linkedin}
                       email={member.email}
                     />

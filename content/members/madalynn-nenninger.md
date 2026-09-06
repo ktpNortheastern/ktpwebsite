@@ -6,6 +6,7 @@ classYear: "28"
 class: executive-board
 status: Active
 role: VP Recruitment
+pledgeClass: beta
 linkedin: https://www.linkedin.com/in/madalynn-nenninger/
 order: 30
 ---
