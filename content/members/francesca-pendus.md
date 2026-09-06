@@ -7,4 +7,5 @@ class: executive-board
 status: Active
 role: VP Finance
 linkedin: https://www.linkedin.com/in/francesca-pendus/
+order: 120
 ---
