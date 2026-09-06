@@ -2,8 +2,8 @@
 name: Aidan Niceberg
 major: Computer Science
 classYear: "25"
-class: alumni
-status: Alumni
+class: founding
+status: Active
 role: ""
 pastRole: VP Something
 linkedin: https://www.linkedin.com/in/aidanniceberg/
