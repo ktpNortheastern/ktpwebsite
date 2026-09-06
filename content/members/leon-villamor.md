@@ -1,5 +1,6 @@
 ---
 name: Leon Villamor
+photo: /images/uploads/leon-villamor.png
 major: Mechanical Engineering
 classYear: "29"
 class: delta

@@ -1,5 +1,6 @@
 ---
 name: Hannah Adeleye
+photo: /images/uploads/hannah-adeleye.png
 major: Biology
 classYear: "28"
 class: delta

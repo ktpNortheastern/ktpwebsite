@@ -1,5 +1,6 @@
 ---
 name: Tommy Nordahl
+photo: /images/uploads/tommy-nordahl.png
 major: Computer Science
 classYear: "29"
 class: delta

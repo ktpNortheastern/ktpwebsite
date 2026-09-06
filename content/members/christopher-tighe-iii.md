@@ -1,5 +1,6 @@
 ---
 name: Christopher Tighe III
+photo: /images/uploads/christopher-tighe-iii.png
 major: Computer Science
 classYear: "29"
 class: delta

@@ -1,5 +1,6 @@
 ---
 name: Edlawit Zewde
+photo: /images/uploads/edlawit-zewde.png
 major: DS + Bio Chem
 classYear: "28"
 class: delta

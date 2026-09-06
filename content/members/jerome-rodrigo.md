@@ -1,5 +1,6 @@
 ---
 name: Jerome Rodrigo
+photo: /images/uploads/jerome-rodrigo.png
 major: DS + Math
 classYear: "28"
 class: executive-board

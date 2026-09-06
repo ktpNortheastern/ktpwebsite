@@ -1,6 +1,6 @@
 ---
 name: Sienna Hargreaves
-photo: https://media.licdn.com/dms/image/v2/D5603AQE3Yq8PJqPcPw/profile-displayphoto-crop_800_800/B56aAvQF5VJAAI-/0/1787499143337?e=1790208000&v=beta&t=fz04UDparNZnVY4ItaXgIia2hQ0pqsEkmiNHqGjNqnQ
+photo: /images/uploads/delta-03.png
 major: Computer Science
 classYear: "28"
 class: delta
