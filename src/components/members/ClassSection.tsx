@@ -29,7 +29,7 @@ const BREAKPOINTS: { cols: number; wrapperClass: string }[] = [
 ];
 
 function EmptySlot() {
-  return <div aria-hidden className="aspect-[232/303] border-r border-b border-black/70" />;
+  return <div aria-hidden className="aspect-[232/303] border-r border-b border-black/20" />;
 }
 
 export default function ClassSection({
@@ -66,7 +66,7 @@ export default function ClassSection({
         }`}
       >
         <span>{String(index).padStart(2, "0")}.</span>
-        <span className="text-lg">{name}</span>
+        <span className="text-xl">{name}</span>
       </button>
 
       {expanded &&
@@ -75,7 +75,7 @@ export default function ClassSection({
             No members listed yet — check back soon.
           </p>
         ) : (
-          <div className="mb-6 border-t border-l border-black/70">
+          <div className="mb-6 border-t border-l border-black/20">
             {BREAKPOINTS.map(({ cols, wrapperClass }) => {
               const remainder = members.length % cols;
               const fillerCount = remainder === 0 ? 0 : cols - remainder;
