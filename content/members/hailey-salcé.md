@@ -7,4 +7,5 @@ class: executive-board
 status: Active
 role: VP Philanthropy
 linkedin: https://www.linkedin.com/in/hailey-salce/
+order: 60
 ---
