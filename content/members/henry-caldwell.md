@@ -8,4 +8,5 @@ status: Active
 role: VP New Member Education
 pastRole: VP Internal Ops
 linkedin: https://www.linkedin.com/in/henrycaldwell05/
+order: 40
 ---
