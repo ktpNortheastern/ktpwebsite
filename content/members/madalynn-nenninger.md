@@ -7,4 +7,5 @@ class: executive-board
 status: Active
 role: VP Recruitment
 linkedin: https://www.linkedin.com/in/madalynn-nenninger/
+order: 30
 ---
