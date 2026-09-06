@@ -80,6 +80,11 @@ collections:
         widget: "string"
         required: false
         hint: "Exec board title, e.g. VP Tech Dev. Leave blank for general class members."
+      - label: "Previous E-Board Position"
+        name: "pastRole"
+        widget: "string"
+        required: false
+        hint: "Honors a past exec board position, e.g. VP Membership 2025 — shown as a badge in the card's top-right corner. Leave blank for members without one."
       - {
           label: "LinkedIn URL",
           name: "linkedin",
@@ -205,3 +210,15 @@ collections:
       - { label: "Image", name: "image", widget: "image" }
       - { label: "Caption", name: "caption", widget: "string" }
       - { label: "Order", name: "order", widget: "number", required: false }
+      - {
+          label: "Year",
+          name: "year",
+          widget: "number",
+          required: false,
+          hint: "e.g. 2025 — shown on the gallery card if set",
+        }
+      - label: "Brothers"
+        name: "brothers"
+        widget: "list"
+        required: false
+        hint: "Names of brothers pictured. Shown on the gallery card as a comma-separated list — if there are more than a handful, it just shows \"Variety\" instead of listing everyone."

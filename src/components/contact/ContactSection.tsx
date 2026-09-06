@@ -74,7 +74,7 @@ export default function ContactSection() {
             Feel free to reach out on any platform or even send an email inquiry right here.
           </p>
           <p className="font-sans text-base font-medium leading-snug">
-            The best way to predict your future is to invent it. Build with us.
+            Let&apos;s start a conversation.
           </p>
         </div>
 

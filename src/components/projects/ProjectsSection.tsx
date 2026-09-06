@@ -9,30 +9,30 @@ type ProjectTab = {
   year: string;
   title: string;
   subtitle: string;
+  // Philanthropy has no real mockup yet — its featured box falls back to a
+  // plain gray square (see FeaturedImage) rather than sharing another
+  // project's screenshot as a stand-in.
+  image?: string;
 };
-
-// Figma's file only supplied one real image (the KTP Life App phone mockup)
-// for this featured box — Website Redesign and Philanthropy don't have their
-// own screenshots yet, so all three tabs share it for now as a nicer stand-in
-// than a plain gray box, not as each project's actual, correct image.
-const FEATURED_PLACEHOLDER_IMAGE = "/images/projects/featured-placeholder.png";
 
 const PROJECT_TABS: ProjectTab[] = [
   {
     slug: "ktp-life-app",
     index: "01",
     label: "KTP LIFE APP",
-    year: "2026",
+    year: "2025",
     title: "KTP LIFE APP",
-    subtitle: "Desc",
+    subtitle: "A chapter-built app for managing and connecting KTP, now expanding nationally.",
+    image: "/images/projects/featured-ktp-life-app.png",
   },
   {
     slug: "website-redesign",
     index: "02",
-    label: "WEBSITE REDESIGN",
+    label: "KTP WEBSITE REDESIGN",
     year: "2026",
-    title: "WEBSITE REDESIGN",
-    subtitle: "Desc",
+    title: "KTP WEBSITE REDESIGN",
+    subtitle: "A full redesign of KTP's chapter website and digital experience.",
+    image: "/images/projects/featured-website-redesign.png",
   },
   {
     slug: "philanthropy",
@@ -40,14 +40,23 @@ const PROJECT_TABS: ProjectTab[] = [
     label: "PHILANTHROPY",
     year: "2026",
     title: "PHILANTHROPY",
-    subtitle: "Desc",
+    subtitle: "More info coming soon.",
   },
 ];
 
 const MERCH_ITEMS = [
-  { title: "Fall 26 Collection" },
-  { title: "Summer 26 Collection" },
-  { title: "Fall 25 Collection" },
+  {
+    title: "Fall 26 Collection",
+    description: "A mixed media collection inspired by surveillance.",
+  },
+  {
+    title: "Summer 26 Collection",
+    description: "A playful merch collection to honor the girlies of KTP.",
+  },
+  {
+    title: "Fall 25 Collection",
+    description: "A retro-tech inspired merch collection.",
+  },
 ] as const;
 
 export default function ProjectsSection() {
@@ -71,7 +80,7 @@ export default function ProjectsSection() {
             was adding extra minimum spacing rather than letting the cards
             distribute purely evenly. */}
         <div className="flex flex-col items-center gap-10 md:flex-row md:items-start md:justify-between md:gap-0">
-          <MerchCard title={MERCH_ITEMS[0].title} tilt="left">
+          <MerchCard title={MERCH_ITEMS[0].title} description={MERCH_ITEMS[0].description} tilt="left">
             {/* object-top so the crop comes off the bottom, not the top —
                 object-cover alone was clipping the top of the hoodie. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -81,7 +90,7 @@ export default function ProjectsSection() {
               className="h-full w-full object-cover object-top"
             />
           </MerchCard>
-          <MerchCard title={MERCH_ITEMS[1].title} tilt="right">
+          <MerchCard title={MERCH_ITEMS[1].title} description={MERCH_ITEMS[1].description} tilt="right">
             {/* Both insets moved fully positive (previously negative offsets
                 pushed them past the container's right edge, clipping) —
                 sized down slightly so they stay comfortably inside the
@@ -99,7 +108,7 @@ export default function ProjectsSection() {
               className="absolute right-[4%] bottom-[6%] w-[52%] max-w-none rotate-3 object-contain drop-shadow-md"
             />
           </MerchCard>
-          <MerchCard title={MERCH_ITEMS[2].title} tilt="left">
+          <MerchCard title={MERCH_ITEMS[2].title} description={MERCH_ITEMS[2].description} tilt="left">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/projects/merch-fall-25.png"
@@ -124,9 +133,9 @@ function ProjectShowcase() {
     // there's more below, rather than the fold landing exactly on the box's
     // edge.
     <div className="flex w-full flex-col items-start gap-10 px-6 md:flex-row md:justify-between md:px-[130px]">
-      <div className="flex w-full flex-col gap-7 border border-black p-5 md:h-[420px] md:w-[579px]">
+      <div className="flex w-full flex-col gap-7 border border-black/20 p-5 md:h-[420px] md:w-[579px]">
         <div className="relative min-h-0 w-full flex-1 overflow-hidden">
-          <FeaturedImage key={active.slug} src={FEATURED_PLACEHOLDER_IMAGE} />
+          <FeaturedImage key={active.slug} src={active.image} />
         </div>
         <FeaturedCaption key={active.slug} title={active.title} subtitle={active.subtitle} />
       </div>
@@ -152,13 +161,19 @@ function ProjectShowcase() {
 // remounts a fresh element on every switch — the CSS animation classes below
 // replay automatically on that new element, with no JS-driven mounted state
 // needed to retrigger them.
-function FeaturedImage({ src }: { src: string }) {
+function FeaturedImage({ src }: { src?: string }) {
+  if (!src) {
+    return (
+      <div className="absolute inset-0 animate-[fade-in-up_500ms_ease-out] bg-[#d9d9d9]" />
+    );
+  }
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt=""
-      className="absolute inset-0 h-full w-full animate-[fade-in_500ms_ease-out] object-contain"
+      className="absolute inset-0 h-full w-full animate-[fade-in-up_500ms_ease-out] object-contain"
     />
   );
 }
@@ -177,7 +192,7 @@ function TabRow({ project, onSelect }: { project: ProjectTab; onSelect: () => vo
     <button
       type="button"
       onClick={onSelect}
-      className="group relative flex w-full items-center gap-6 overflow-hidden border-t border-black p-5 text-left last:border-b"
+      className="group relative flex w-full items-center gap-6 overflow-hidden border-t border-black/20 p-5 text-left last:border-b"
     >
       {/* Same left-to-right gray wipe as FaqRow/ContactSection's fields. */}
       <span
@@ -199,10 +214,12 @@ function TabRow({ project, onSelect }: { project: ProjectTab; onSelect: () => vo
 // explicitly by the caller) rather than every card tilting the same way.
 function MerchCard({
   title,
+  description,
   tilt,
   children,
 }: {
   title: string;
+  description: string;
   tilt: "left" | "right";
   children: ReactNode;
 }) {
@@ -219,7 +236,7 @@ function MerchCard({
       </div>
       <div className="flex w-full flex-col gap-0.5">
         <p className="font-mono text-2xl font-bold text-black">{title}</p>
-        <p className="font-sans text-base text-black/60">Description</p>
+        <p className="font-sans text-base text-black/60">{description}</p>
       </div>
     </div>
   );

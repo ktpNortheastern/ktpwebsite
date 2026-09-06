@@ -1,29 +1,23 @@
+import { getCollection } from "@/lib/content";
 import Button from "@/components/ui/Button";
 import FaqAccordionRow from "@/components/ui/FaqAccordionRow";
 import ScrambleText from "@/components/motion/ScrambleText";
 
-const PREVIEW_FAQS = [
-  {
-    question: "Do I need to be a computer science major to rush?",
-    answer:
-      "Not at all — KTP is interdisciplinary. We have brothers studying everything from CS and engineering to business, design, and the humanities.",
-  },
-  {
-    question: "What is the time commitment like?",
-    answer:
-      "Expect a few hours a week for chapter meetings, events, and committee work, with more during the pledge process.",
-  },
-  {
-    question: "Is there a GPA requirement?",
-    answer: "We look at your whole application, not just your GPA — academic effort matters more than a specific number.",
-  },
-  {
-    question: "How do I apply?",
-    answer: "Applications open each semester ahead of rush — check the Rush page for this cycle's dates and the application link.",
-  },
-];
+type FaqEntry = {
+  question: string;
+  answer: string;
+  order?: number;
+};
+
+// Only a taste of the full list — same content/faq/*.md collection the
+// /faq page reads (sorted by `order` in getCollection), so this can never
+// drift out of sync with the real answers the way a separately hand-typed
+// preview array did.
+const PREVIEW_COUNT = 4;
 
 export default function FaqPreview() {
+  const faqs = getCollection<FaqEntry>("faq").slice(0, PREVIEW_COUNT);
+
   return (
     <section
       data-snap-section
@@ -38,7 +32,7 @@ export default function FaqPreview() {
       />
 
       <div className="mt-10">
-        {PREVIEW_FAQS.map((faq, i) => (
+        {faqs.map((faq, i) => (
           <FaqAccordionRow key={faq.question} index={i + 1} question={faq.question} answer={faq.answer} />
         ))}
       </div>

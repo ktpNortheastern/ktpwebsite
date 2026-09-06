@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
@@ -32,6 +32,23 @@ const TOTAL = HOLD + SHRINK;
 export default function NavBar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  // The gallery's canvas is navy edge-to-edge, so its nav gets the same
+  // dark treatment as home (bg-navy, white text) — without the hero
+  // wordmark animation itself, which stays isHome-only below.
+  const isDark = isHome || pathname === "/gallery";
+  // Home keeps its own scroll-driven wordmark choreography below instead
+  // (no separate hide-on-activity treatment, so the two don't fight over
+  // the same header element), and Rush/Contact are conversion-intent pages
+  // where the nav should just stay put. Every other route gets the
+  // hide-while-exploring treatment below.
+  const hideOnActivity = !["/", "/rush", "/contact"].includes(pathname);
+  // Hidden while the user is actively scrolling/panning (drag or wheel), so
+  // the page gets more of the viewport — reappears once they've settled
+  // for a couple seconds, or as soon as the pointer moves back up near the
+  // nav strip itself. Suppressed entirely while the gallery lightbox is
+  // open (see the "gallery-lightbox" listener below) — it should never pop
+  // back up over an enlarged photo, however long it's been.
+  const [navHidden, setNavHidden] = useState(false);
   const [open, setOpen] = useState(false);
   // Whether the Greek "ΚΘΠ" corner label is mounted/visible. Purely a
   // function of scroll progress (see updateWordmarkCorner below) — no
@@ -54,6 +71,65 @@ export default function NavBar() {
   const wordmarkInnerRef = useRef<HTMLSpanElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
   const navLinksRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hideOnActivity) return;
+
+    const IDLE_MS = 2000;
+    const TOP_REVEAL_PX = 96; // roughly the nav's own height
+    let idleTimer: number | undefined;
+    // True only on /gallery, while its lightbox is open (see the
+    // "gallery-lightbox" CustomEvent GalleryCanvas dispatches) — while
+    // true, every reveal trigger below is suppressed, however long it's
+    // been or wherever the pointer moves.
+    let lightboxOpen = false;
+
+    function scheduleReveal() {
+      if (lightboxOpen) return;
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => setNavHidden(false), IDLE_MS);
+    }
+
+    function handlePointerMove(e: PointerEvent) {
+      if (lightboxOpen) return;
+      if (e.clientY <= TOP_REVEAL_PX) {
+        setNavHidden(false);
+        window.clearTimeout(idleTimer);
+        return;
+      }
+      // buttons & 1: actively dragging (mouse button held), not just idly
+      // moving the cursor — only a real pan gesture should hide the nav.
+      if (e.buttons & 1) {
+        setNavHidden(true);
+        scheduleReveal();
+      }
+    }
+
+    function handleWheel() {
+      if (lightboxOpen) return;
+      setNavHidden(true);
+      scheduleReveal();
+    }
+
+    function handleLightboxToggle(e: Event) {
+      const open = (e as CustomEvent<{ open: boolean }>).detail?.open ?? false;
+      lightboxOpen = open;
+      if (open) {
+        window.clearTimeout(idleTimer);
+        setNavHidden(true);
+      }
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("gallery-lightbox", handleLightboxToggle);
+    return () => {
+      window.clearTimeout(idleTimer);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("gallery-lightbox", handleLightboxToggle);
+    };
+  }, [hideOnActivity]);
 
   // Only the home page opens on the big white "Kappa Theta Pi" headline —
   // every other page has no hero moment to shrink from, so it renders
@@ -408,9 +484,9 @@ export default function NavBar() {
 
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between px-[var(--nav-pad-x)] py-5 ${
-          isHome ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"
-        }`}
+        className={`fixed top-0 left-0 z-50 flex h-[var(--nav-h)] w-full items-center justify-between px-[var(--nav-pad-x)] py-5 transition-transform duration-300 ease-out ${
+          hideOnActivity && navHidden ? "-translate-y-full" : "translate-y-0"
+        } ${isDark ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"}`}
       >
         <div className="relative">
           {/* Invisible geometry probe on home (buildTimeline() measures
@@ -425,7 +501,7 @@ export default function NavBar() {
             className={
               isHome
                 ? "invisible font-sans text-2xl font-bold text-white"
-                : "font-serif text-4xl font-semibold text-navy"
+                : `font-serif text-4xl font-semibold ${isDark ? "text-white" : "text-navy"}`
             }
             aria-hidden={isHome}
           >
@@ -483,12 +559,12 @@ export default function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`font-sans text-[15px] transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
+              className={`font-sans text-[15px] transition-colors duration-200 ${isDark ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
             >
               <ScrambleText as="span" text={link.label} trigger="immediate" />
             </Link>
           ))}
-          <Button href="/rush" variant={isHome ? "light" : "dark"}>
+          <Button href="/rush" variant={isDark ? "light" : "dark"}>
             <ScrambleText as="span" text="Rush Now" trigger="immediate" />
           </Button>
         </nav>
@@ -501,17 +577,17 @@ export default function NavBar() {
           className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
         >
           <span
-            className={`h-px w-6 transition-transform duration-200 ${isHome ? "bg-white" : "bg-black"} ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
+            className={`h-px w-6 transition-transform duration-200 ${isDark ? "bg-white" : "bg-black"} ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
           />
           <span
-            className={`h-px w-6 transition-transform duration-200 ${isHome ? "bg-white" : "bg-black"} ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
+            className={`h-px w-6 transition-transform duration-200 ${isDark ? "bg-white" : "bg-black"} ${open ? "-translate-y-[3.5px] -rotate-45" : ""}`}
           />
         </button>
 
         {open && (
           <nav
             className={`absolute top-full left-0 flex w-full flex-col gap-6 px-6 py-8 md:hidden ${
-              isHome ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"
+              isDark ? "bg-navy" : "bg-white shadow-[0_4px_4px_rgba(0,0,0,0.15)]"
             }`}
           >
             {links.map((link) => (
@@ -519,12 +595,12 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`font-sans text-lg transition-colors duration-200 ${isHome ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
+                className={`font-sans text-lg transition-colors duration-200 ${isDark ? "text-white hover:text-white/70" : "text-black hover:text-black/70"}`}
               >
                 {link.label}
               </Link>
             ))}
-            <Button href="/rush" variant={isHome ? "light" : "dark"} className="self-start">
+            <Button href="/rush" variant={isDark ? "light" : "dark"} className="self-start">
               Rush Now
             </Button>
           </nav>

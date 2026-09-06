@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Anonymous_Pro, EB_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import NavBar from "@/components/layout/NavBar";
-import Footer from "@/components/layout/Footer";
+import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import { CustomCursorProvider } from "@/components/motion/CustomCursor";
 import SnapScrollContainer from "@/components/motion/SnapScrollContainer";
 import PageTransition from "@/components/motion/PageTransition";
@@ -55,7 +55,7 @@ export default function RootLayout({
           <NavBar />
           <SnapScrollContainer>
             {children}
-            <Footer />
+            <ConditionalFooter />
           </SnapScrollContainer>
         </CustomCursorProvider>
       </body>

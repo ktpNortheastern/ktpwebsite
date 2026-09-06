@@ -31,8 +31,10 @@ export default function RushEventCard({ event, index, imageRef }: RushEventCardP
     <div className="flex flex-col gap-5 sm:h-[160px] sm:flex-row sm:items-start">
       {/* The translucent blue "glass" treatment lives on the CONTAINER now
           (moved from the tags, which read as too solid/attention-grabbing) —
-          light tint + soft border, dark text for legibility against it. */}
-      <div className="flex w-full flex-col justify-center gap-4 border border-[#2e5b99]/40 bg-[#2e5b99]/20 px-6 py-6 sm:h-full sm:w-[468px] sm:px-9 sm:py-7">
+          light tint + soft border, dark text for legibility against it.
+          Border/fill balance matched to WhyRush's card treatment (crisper
+          outline, lighter fill) rather than the previous heavier tint. */}
+      <div className="flex w-full flex-col justify-center gap-4 border border-[#2e5b99]/60 bg-[#2e5b99]/10 px-6 py-6 sm:h-full sm:w-[468px] sm:px-9 sm:py-7">
         <div className="flex w-full flex-col gap-3">
           <div className="flex w-full items-center justify-between gap-4">
             <p className="font-sans text-base font-bold text-navy">{title}</p>
