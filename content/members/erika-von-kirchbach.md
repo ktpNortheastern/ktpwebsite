@@ -6,4 +6,5 @@ class: executive-board
 status: Active
 role: VP PROF DEV
 linkedin: https://www.linkedin.com/in/erika-von-kirchbach/
+order: 80
 ---
