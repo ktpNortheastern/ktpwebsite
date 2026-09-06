@@ -1,6 +1,6 @@
 ---
 name: Mei Luangkhot
-major: Environmental Eng + Business
+major: Env Eng + Business
 classYear: "26"
 class: alpha
 status: Active
