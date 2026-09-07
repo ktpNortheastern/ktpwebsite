@@ -1,5 +1,8 @@
 ---
-image: "/images/uploads/gallery-18.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-18.jpg
+caption: Mimo and Rowen Initation!
 order: 18
+brothers:
+  - Mimo
+  - Rowen
 ---
