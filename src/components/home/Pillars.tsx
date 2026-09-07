@@ -1,4 +1,3 @@
-import PlaceholderImage from "@/components/ui/PlaceholderImage";
 import ScrambleText from "@/components/motion/ScrambleText";
 
 const PILLARS = [
@@ -6,16 +5,23 @@ const PILLARS = [
     title: "Academic Support",
     body:
       "Kappa Theta Pi brothers strive to foster academic growth and excellence for each other. We provide a supportive network filled with some of the brightest tech minds at the university that members can always rely on for help in classes and extracurricular activities.",
+    // Delta Loves Henry — cropped in ~40% tighter than the original
+    // gallery-33.jpg (same 4:3 ratio, just a closer frame on the group)
+    // since the wider original left too much empty wall/ceiling around
+    // the group at this card's size.
+    image: "/images/uploads/gallery-33-zoom.jpg",
   },
   {
     title: "Professional / Technical Development",
     body:
       "Through events like interview training, resume building, one-on-one mentorship, private company recruiting, project teams, and technical workshops, KTP prepares members for success in any technology-related career while giving them hands-on ways to build new skills.",
+    image: "/images/uploads/gallery-19.jpg", // Tech Olympics
   },
   {
     title: "Social Growth",
     body:
       "The people you meet in Kappa Theta Pi will go on to be some of your closest friends throughout college and beyond. We host a variety of exclusive social events throughout the semester through which our members can bond, some of which include formal, retreat, and apple picking.",
+    image: "/images/uploads/gallery-51.jpg", // Charlie is one of the Gamma girls
   },
 ];
 
@@ -37,7 +43,8 @@ export default function Pillars() {
             key={pillar.title}
             className="border-y border-white/20 py-8 md:w-[320px]"
           >
-            <PlaceholderImage n={i + 4} className="h-[210px] w-full" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={pillar.image} alt="" className="h-[210px] w-full object-cover" />
             <p className="mt-6 font-mono text-sm text-white/60">
               {String(i + 1).padStart(2, "0")}
             </p>
