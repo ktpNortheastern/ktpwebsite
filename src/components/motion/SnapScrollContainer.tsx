@@ -166,6 +166,25 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
         ScrollTrigger.refresh();
       });
 
+      // Fonts alone aren't the whole story: several pages render plain
+      // <img> tags with no explicit width/height (History's reel, Pillars,
+      // WhyRush) whose intrinsic size — and thus the page's total height —
+      // isn't known until each image actually finishes loading over the
+      // network, which can land well after fonts.ready on a cold cache.
+      // A trigger anchored below the last image (e.g. the footer's
+      // ScrambleText, "top 80%" of its own position) gets cached with a
+      // start point computed against that shorter, pre-image-load page —
+      // often only tens of pixels past the real max scroll — so it can
+      // never fire at all once the images push the page taller. The
+      // window `load` event (unlike DOMContentLoaded/fonts.ready) only
+      // fires once every image has finished, making it the right final
+      // checkpoint to refresh against.
+      if (document.readyState === "complete") {
+        ScrollTrigger.refresh();
+      } else {
+        window.addEventListener("load", () => ScrollTrigger.refresh(), { once: true });
+      }
+
       cleanupDesktop = () => {
         snapTrigger.kill();
         smoother.kill();

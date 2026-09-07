@@ -87,6 +87,21 @@ export default function ScrambleText({
       },
     });
 
+    // This trigger's start position is computed from wherever the page's
+    // layout happens to be the moment it's created — same race every
+    // other GSAP-pinned component in this codebase guards against (see
+    // SnapScrollContainer.tsx/RushHeader.tsx) by refreshing once fonts
+    // settle, which this was missing. It matters more here than most:
+    // this instance sits in the footer, rendered once by RootLayout, so
+    // it mounts before the actual page's own pinned sections (Hero,
+    // History, WhyRush, etc. on home) have reserved their own pin-spacing
+    // scroll distance — a page as long and scroll-jacked as home can
+    // still be growing well after this trigger's initial geometry is
+    // cached, permanently pointing "80% down the viewport" at a stale
+    // pixel position the real page never actually reaches, leaving the
+    // text stuck mid-scramble forever instead of ever firing onEnter.
+    document.fonts.ready.then(() => ScrollTrigger.refresh());
+
     return () => {
       scrollTrigger.kill();
       cancel?.();
