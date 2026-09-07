@@ -6,5 +6,6 @@ classYear: "27"
 class: alpha
 status: Active
 role: ""
+pastRole: AVP Tech Dev
 linkedin: https://www.linkedin.com/in/amelia-rogers-nu/
 ---
