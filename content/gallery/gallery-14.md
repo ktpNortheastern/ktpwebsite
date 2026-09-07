@@ -1,5 +1,9 @@
 ---
-image: "/images/uploads/gallery-14.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-14.jpg
+caption: Criminals!
 order: 14
+brothers:
+  - martin
+  - prabhav
+  - owen
 ---
