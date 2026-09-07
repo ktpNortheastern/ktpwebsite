@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/gallery-19.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-19.jpg
+caption: TECH OLYMPICS
 order: 19
 ---
