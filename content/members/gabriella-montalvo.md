@@ -6,6 +6,6 @@ classYear: "28"
 class: gamma
 status: Active
 role: ""
-pastRole: AVP Recruitment
+pastRole: AVP Engagement
 linkedin: https://www.linkedin.com/in/gabriella-montalvo/
 ---
