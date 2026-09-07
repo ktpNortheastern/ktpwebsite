@@ -34,7 +34,7 @@ export default function FaqAccordionRow({ index, question, answer }: FaqAccordio
         <span className="font-mono text-xl text-black/50">{open ? "−" : "+"}</span>
       </div>
       {open && (
-        <p className="relative z-10 pl-12 font-sans text-sm text-black/60">
+        <p className="relative z-10 pl-12 font-sans text-black">
           {renderRichText(answer)}
         </p>
       )}
