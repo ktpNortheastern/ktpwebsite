@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import GridBackground from "@/components/ui/GridBackground";
 
 type ProjectTab = {
   slug: string;
@@ -22,7 +23,8 @@ const PROJECT_TABS: ProjectTab[] = [
     label: "KTP LIFE APP",
     year: "2025",
     title: "KTP LIFE APP",
-    subtitle: "A chapter-built app for managing and connecting KTP, now expanding nationally.",
+    subtitle:
+      "An omega chapter-built app for managing and connecting KTP, now expanding nationally across 20+ KTP chapters.",
     image: "/images/projects/featured-ktp-life-app.png",
   },
   {
@@ -31,7 +33,7 @@ const PROJECT_TABS: ProjectTab[] = [
     label: "KTP WEBSITE REDESIGN",
     year: "2026",
     title: "KTP WEBSITE REDESIGN",
-    subtitle: "A full redesign of KTP's chapter website and digital experience.",
+    subtitle: "A full redesign of KTP's omega chapter website and digital experience.",
     image: "/images/projects/featured-website-redesign.png",
   },
   {
@@ -61,7 +63,13 @@ const MERCH_ITEMS = [
 
 export default function ProjectsSection() {
   return (
-    <section className="flex min-h-screen flex-col gap-8 bg-[#fafafa] pt-20 pb-16 md:pt-[110px]">
+    <section className="relative isolate flex min-h-screen flex-col gap-8 bg-[#fafafa] pt-20 pb-16 md:pt-[110px]">
+      {/* Much lighter than the default — this page's own frosted panels
+          (the featured box, tab rows, merch cards) already carry the
+          visual weight, so the grid only needs to read as a faint
+          texture behind them, not the more noticeable pattern Rush/FAQ
+          use over their comparatively bare backgrounds. */}
+      <GridBackground maxAlpha={0.035} />
       <div className="flex flex-col gap-1 px-6 text-black md:px-[130px]">
         <p className="font-sans text-2xl font-bold whitespace-pre md:text-[30px]">
           (&nbsp;&nbsp;&nbsp;&nbsp;OUR PROJECTS&nbsp;&nbsp;&nbsp;&nbsp;)
@@ -133,11 +141,26 @@ function ProjectShowcase() {
     // there's more below, rather than the fold landing exactly on the box's
     // edge.
     <div className="flex w-full flex-col items-start gap-10 px-6 md:flex-row md:justify-between md:px-[130px]">
-      <div className="flex w-full flex-col gap-7 border border-black/20 p-5 md:h-[420px] md:w-[579px]">
-        <div className="relative min-h-0 w-full flex-1 overflow-hidden">
+      {/* The border stays crisp on the container itself; the frosted
+          fill (bg-white/60 + a light backdrop-blur-sm, not the rush
+          cards' -md, since this box's photo already carries plenty of
+          its own visual weight) lives on its own absolutely-positioned
+          layer behind the real content, masked to feather toward the
+          edges (an ellipse, not the box's hard rectangle) so it reads
+          as a soft glass panel inside a defined frame rather than a
+          flat rectangle cutting off — solid enough through the middle
+          (60%) that the caption text stays fully readable. */}
+      <div className="relative flex w-full flex-col gap-7 border border-black/20 p-5 md:h-[420px] md:w-[579px]">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]"
+        />
+        <div className="relative z-10 min-h-0 w-full flex-1 overflow-hidden">
           <FeaturedImage key={active.slug} src={active.image} />
         </div>
-        <FeaturedCaption key={active.slug} title={active.title} subtitle={active.subtitle} />
+        <div className="relative z-10">
+          <FeaturedCaption key={active.slug} title={active.title} subtitle={active.subtitle} />
+        </div>
       </div>
 
       <div className="flex w-full flex-col md:w-[529px]">
@@ -194,6 +217,14 @@ function TabRow({ project, onSelect }: { project: ProjectTab; onSelect: () => vo
       onClick={onSelect}
       className="group relative flex w-full items-center gap-6 overflow-hidden border-t border-black/20 p-5 text-left last:border-b"
     >
+      {/* Frosted fill on its own layer (see Field/the featured project
+          box above), masked to feather toward the edges instead of
+          cutting off as a flat rectangle — solid enough through the
+          middle (60%) that the index/title/year text reads clearly. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]"
+      />
       {/* Same left-to-right gray wipe as FaqRow/ContactSection's fields. */}
       <span
         aria-hidden
@@ -224,8 +255,16 @@ function MerchCard({
   children: ReactNode;
 }) {
   return (
-    <div className="flex w-full max-w-[332px] flex-col items-center gap-7 px-3 py-5">
-      <div className="group relative h-[300px] w-full overflow-hidden">
+    <div className="relative flex w-full max-w-[332px] flex-col items-center gap-7 px-3 py-5">
+      {/* Frosted fill on its own layer (see Field/TabRow above), masked
+          to feather toward the edges instead of cutting off as a flat
+          rectangle — solid enough through the middle (60%) that the
+          title/description text reads clearly. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]"
+      />
+      <div className="group relative z-10 h-[300px] w-full overflow-hidden">
         <div
           className={`absolute inset-0 transition-transform duration-300 ease-out ${
             tilt === "left" ? "group-hover:-rotate-2" : "group-hover:rotate-2"
@@ -234,7 +273,7 @@ function MerchCard({
           {children}
         </div>
       </div>
-      <div className="flex w-full flex-col gap-0.5">
+      <div className="relative z-10 flex w-full flex-col gap-0.5">
         <p className="font-mono text-2xl font-bold text-black">{title}</p>
         <p className="font-sans text-base text-black/60">{description}</p>
       </div>

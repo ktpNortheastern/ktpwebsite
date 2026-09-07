@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCollection } from "@/lib/content";
 import FaqRow from "@/components/faq/FaqRow";
+import GridBackground from "@/components/ui/GridBackground";
 
 export const metadata: Metadata = {
   title: "FAQ | KTP Northeastern",
@@ -16,7 +17,8 @@ export default function FaqPage() {
   const faqs = getCollection<FaqEntry>("faq");
 
   return (
-    <section className="flex min-h-screen flex-col items-start gap-10 bg-[#fafafa] pt-20 pb-16 md:pt-[110px]">
+    <section className="relative isolate flex min-h-screen flex-col items-start gap-10 bg-[#fafafa] pt-20 pb-16 md:pt-[110px]">
+      <GridBackground />
       <div className="flex w-full items-center px-6 md:px-[130px]">
         <p className="font-sans text-2xl font-bold text-black md:text-[30px]">
           (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FAQ&nbsp;&nbsp;&nbsp;&nbsp;)

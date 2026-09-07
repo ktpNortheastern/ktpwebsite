@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
+import GridBackground from "@/components/ui/GridBackground";
 
 // Matches most real addresses without being a full RFC-5322 validator —
 // good enough to catch "forgot the @" / "forgot the domain" typos, which is
@@ -63,7 +64,11 @@ export default function ContactSection() {
     // block dead center with equal breathing room above and below — rather
     // than top-anchored right under the nav with all the slack stranded at
     // the bottom.
-    <section className="flex min-h-screen flex-col justify-center bg-[#fafafa] px-6 pt-20 pb-20 md:h-screen md:px-[130px] md:pt-[110px] md:pb-[110px]">
+    <section className="relative isolate flex min-h-screen flex-col justify-center bg-[#fafafa] px-6 pt-20 pb-20 md:h-screen md:px-[130px] md:pt-[110px] md:pb-[110px]">
+      {/* Much lighter than the default — this page's own frosted form
+          container (see below) already carries the visual weight, so
+          the grid only needs to read as a faint texture behind it. */}
+      <GridBackground maxAlpha={0.035} />
       <div className="flex w-full flex-col gap-10 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col gap-7 text-black md:w-[455px]">
           <p className="font-sans text-2xl font-bold whitespace-pre md:text-[30px]">
@@ -81,8 +86,20 @@ export default function ContactSection() {
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="flex flex-col items-end gap-8 md:w-[520px]"
+          className="relative flex flex-col items-end gap-8 p-6 md:w-[520px]"
         >
+          {/* Frosted fill for the whole form now, not each field
+              individually (see Field below) — bg-white/60 + a light
+              backdrop-blur-sm, masked to feather toward the edges (an
+              ellipse, not the form's hard rectangle) so it blends into
+              the grid instead of cutting off sharply. Solid enough
+              through the middle (60%) that the fields/button/status
+              text all stay fully readable regardless of exactly where
+              they land inside the form. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]"
+          />
           <Field label="[ YOUR NAME ]">
             <input
               type="text"
@@ -116,7 +133,7 @@ export default function ContactSection() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="group inline-flex items-center gap-[2px] font-mono text-base disabled:pointer-events-none disabled:opacity-40"
+            className="group relative z-10 inline-flex items-center gap-[2px] font-mono text-base disabled:pointer-events-none disabled:opacity-40"
           >
             <span className="relative overflow-hidden bg-navy px-3 py-1.5 text-white">
               <span className="block transition-transform duration-300 ease-out group-hover:-translate-y-full">
@@ -144,7 +161,7 @@ export default function ContactSection() {
               centered. Reserving the space up front means nothing above
               ever moves. */}
           <p
-            className={`min-h-5 w-full text-right font-mono text-sm ${
+            className={`relative z-10 min-h-5 w-full text-right font-mono text-sm ${
               error ? "text-red-600" : "text-black/60"
             }`}
           >
@@ -167,6 +184,9 @@ export default function ContactSection() {
 // past" and "actively editing" read as clearly different states.
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
+    // The frosted fill (and its own padding) moved to the <form> itself
+    // — one soft panel behind the whole form instead of three separate
+    // ones stacked with gaps between them.
     <label className="group relative flex w-full flex-col gap-1">
       <span
         aria-hidden
