@@ -5,8 +5,8 @@ major: CS + Business
 classYear: "27"
 class: executive-board
 status: Active
-role: VP PROF DEV
+role: VP Professional Development
+pledgeClass: alpha
 linkedin: https://www.linkedin.com/in/erika-von-kirchbach/
 order: 80
-pledgeClass: alpha
 ---
