@@ -1,5 +1,7 @@
 ---
-image: "/images/uploads/gallery-12.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-12.jpg
+caption: Beta Ready for BU KTP Mixer
 order: 12
+brothers:
+  - Beta
 ---
