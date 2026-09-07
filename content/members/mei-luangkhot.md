@@ -5,6 +5,6 @@ major: Env Eng + Business
 classYear: "26"
 class: alpha
 status: Active
-pastRole: VP Something 25
+pastRole: ""
 linkedin: https://www.linkedin.com/in/mei-luangkhot/
 ---
