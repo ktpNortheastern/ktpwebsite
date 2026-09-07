@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/gallery-77.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-77.jpg
+caption: Our Letters!
 order: 77
 ---
