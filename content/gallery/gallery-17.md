@@ -1,5 +1,6 @@
 ---
-image: "/images/uploads/gallery-17.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-17.jpg
+caption: Beta Initiation!!
 order: 17
+year: 2025
 ---
