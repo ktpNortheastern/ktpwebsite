@@ -1,6 +1,6 @@
 ---
 name: Vince Schacknies
-photo: /images/uploads/screenshot-2026-09-07-at-1.25.18 pm.png
+photo: /images/uploads/vince-schacknies.png
 major: Computer Science
 classYear: "27"
 class: alpha
