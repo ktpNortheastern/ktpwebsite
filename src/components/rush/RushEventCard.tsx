@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import PlaceholderImage from "@/components/ui/PlaceholderImage";
 import { formatEventDate } from "@/lib/formatEventDate";
 
 export type RushEvent = {
@@ -17,64 +16,72 @@ export type RushEvent = {
 type RushEventCardProps = {
   event: RushEvent;
   index: number;
-  // Lets RushTimeline measure exactly where this card's image box ends, to
-  // size the progress line against a real DOM position instead of a
-  // guessed pixel value — attached to a shared wrapper (below) so it
-  // resolves to the same box regardless of whether `image` is set.
-  imageRef?: (el: HTMLDivElement | null) => void;
+  // Lets RushScheduleTrack re-scramble the title text each time this
+  // card becomes the active one in the desktop crossfade.
+  titleRef?: (el: HTMLParagraphElement | null) => void;
 };
 
-export default function RushEventCard({ event, index, imageRef }: RushEventCardProps) {
-  const { title, description, inviteOnly, date, time, location, image } = event;
+export default function RushEventCard({ event, index, titleRef }: RushEventCardProps) {
+  const { title, description, inviteOnly, date, time, location } = event;
 
   return (
-    <div className="flex flex-col gap-5 sm:h-[160px] sm:flex-row sm:items-start">
-      {/* The translucent blue "glass" treatment lives on the CONTAINER now
-          (moved from the tags, which read as too solid/attention-grabbing) —
-          light tint + soft border, dark text for legibility against it.
-          Border/fill balance matched to WhyRush's card treatment (crisper
-          outline, lighter fill) rather than the previous heavier tint. */}
-      <div className="flex w-full flex-col justify-center gap-4 border border-[#2e5b99]/60 bg-[#2e5b99]/10 px-6 py-6 sm:h-full sm:w-[468px] sm:px-9 sm:py-7">
-        <div className="flex w-full flex-col gap-3">
-          <div className="flex w-full items-center justify-between gap-4">
-            <p className="font-sans text-base font-bold text-navy">{title}</p>
-            <p className="shrink-0 font-sans text-base font-bold text-navy/50">
-              ({String(index + 1).padStart(2, "0")})
-            </p>
+    <div className="h-full min-h-[200px]">
+      {/* Terminal-window styling for the "retro tech" pass: a mono-font
+          "EVENT NN" label bar (echoing the gallery node cards' "PICTURE
+          NN" + dot treatment) up top, then the title, then description +
+          tags. Light gray + translucent (bg-gray-200/60), not the old
+          solid bg-[#fafafa] or the blue-tinted white/70 before that, so
+          the schedule line/dots drawn behind these cards (see
+          RushScheduleTrack) still show through as a soft smear rather
+          than a sharp shape competing with the card's text. No image
+          column anymore — just this one text block. */}
+      <div className="group relative flex w-full flex-col gap-2 overflow-hidden border border-[#2e5b99]/70 bg-gray-200/60 px-6 py-6 backdrop-blur-md sm:px-9 sm:py-7">
+        {/* Same left-to-right wipe idiom as ProjectsSection/FaqRow/
+            ContactSection's hover fields. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-white/40 transition-transform duration-300 ease-out group-hover:scale-x-100"
+        />
+        <div className="relative mb-2 flex w-full items-center gap-2">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2e5b99]" />
+          <span className="font-mono text-xs font-bold tracking-wide text-navy/60 uppercase">
+            Event {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+
+        <p ref={titleRef} className="relative font-sans text-xl font-bold text-navy md:text-2xl">
+          {title}
+        </p>
+
+        <div className="relative flex w-full flex-col gap-3">
+          {/* No line-clamp — the full description always shows, wrapping
+              onto as many lines as it needs, rather than truncating with
+              an ellipsis. */}
+          <p className="font-sans text-base text-navy/70">{description}</p>
+
+          <div className="flex w-full flex-wrap items-center gap-2">
+            {inviteOnly ? (
+              <Chip>Details Found Within Invite</Chip>
+            ) : (
+              <>
+                {date && <Chip>{formatEventDate(date)}</Chip>}
+                {time && <Chip>{time}</Chip>}
+                {location && <Chip>{location}</Chip>}
+              </>
+            )}
           </div>
-          <p className="line-clamp-2 font-sans text-base text-navy/70">{description}</p>
         </div>
-
-        <div className="flex w-full flex-wrap items-center gap-2">
-          {inviteOnly ? (
-            <Chip>Details Found Within Invite</Chip>
-          ) : (
-            <>
-              {date && <Chip>{formatEventDate(date)}</Chip>}
-              {time && <Chip>{time}</Chip>}
-              {location && <Chip>{location}</Chip>}
-            </>
-          )}
-        </div>
-      </div>
-
-      <div ref={imageRef} className="h-[160px] w-full shrink-0 sm:w-[160px]">
-        {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <PlaceholderImage n={index + 1} className="h-full w-full" />
-        )}
       </div>
     </div>
   );
 }
 
-// Simple outline only — no fill, no rounded corners — now that the card
-// itself carries the color treatment these used to have.
+// An inline-code look — a soft fill, no border, like a <code> snippet —
+// monotone blue (the same #2e5b99 as the "EVENT NN" label) rather than
+// navy, so every accent on this card reads as one color.
 function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="border border-navy px-2 py-0.5 font-sans text-xs font-medium whitespace-nowrap text-navy">
+    <span className="rounded-sm bg-[#2e5b99]/10 px-1.5 py-0.5 font-mono text-xs font-medium tracking-wide whitespace-nowrap text-[#2e5b99] uppercase">
       {children}
     </span>
   );
