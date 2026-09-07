@@ -171,21 +171,28 @@ export default function SnapScrollContainer({ children }: { children: ReactNode 
       // WhyRush) whose intrinsic size — and thus the page's total height —
       // isn't known until each image actually finishes loading over the
       // network, which can land well after fonts.ready on a cold cache.
-      // A trigger anchored below the last image (e.g. the footer's
-      // ScrambleText, "top 80%" of its own position) gets cached with a
-      // start point computed against that shorter, pre-image-load page —
-      // often only tens of pixels past the real max scroll — so it can
-      // never fire at all once the images push the page taller. The
-      // window `load` event (unlike DOMContentLoaded/fonts.ready) only
-      // fires once every image has finished, making it the right final
-      // checkpoint to refresh against.
-      if (document.readyState === "complete") {
-        ScrollTrigger.refresh();
-      } else {
-        window.addEventListener("load", () => ScrollTrigger.refresh(), { once: true });
-      }
+      // Each image that lands afterward silently grows the page a little
+      // more, leaving every cached trigger stale — including this snap
+      // trigger's own `end: "max"`. That one is the most visible to break:
+      // once the real document grows past its cached `end`, the snap-to-
+      // nearest-point logic above starts resyncing the scroll position
+      // against that stale, shorter max the instant the user nears the
+      // bottom, yanking them back up away from the true end and hiding the
+      // tail of the footer. A single `load`-event checkpoint isn't enough
+      // (images can keep finishing, and each late arrival re-opens the same
+      // gap) — a ResizeObserver on the actual content element catches every
+      // one of these as it happens, not just once, keeping every trigger's
+      // geometry in sync with reality as the page keeps settling.
+      let resizeRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+      const resizeObserver = new ResizeObserver(() => {
+        clearTimeout(resizeRefreshTimer);
+        resizeRefreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150);
+      });
+      resizeObserver.observe(content!);
 
       cleanupDesktop = () => {
+        clearTimeout(resizeRefreshTimer);
+        resizeObserver.disconnect();
         snapTrigger.kill();
         smoother.kill();
         wrapper!.classList.remove("smoother-active");
