@@ -26,6 +26,12 @@ const products = [
   { label: "Omega Chapter App", href: "#" },
 ];
 
+const resources = [
+  { label: "Nationals Website", href: "https://www.kappathetapi.org/" },
+  { label: "History", href: "https://www.kappathetapi.org/about/history" },
+  { label: "Official Merch", href: "https://ktpmerch.com/Ktpmerch/shop/home" },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-black px-6 py-16 text-white md:px-[130px]">
@@ -56,6 +62,7 @@ export default function Footer() {
           <FooterColumn title="Navigation" items={navigation} />
           <FooterSocials items={socials} />
           <FooterColumn title="Products" items={products} />
+          <FooterColumn title="Resources" items={resources} />
         </div>
       </div>
       <div className="mt-16 flex flex-wrap justify-between font-mono text-xs text-white/50">
@@ -81,6 +88,8 @@ function FooterColumn({
           <li key={item.label}>
             <a
               href={item.href}
+              target={item.href.startsWith("http") ? "_blank" : undefined}
+              rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
               className="font-sans text-sm text-white/70 transition-colors duration-200 hover:text-white"
             >
               {item.label}
