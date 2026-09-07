@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/gallery-74.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-74.jpg
+caption: Paddle Reveal!
 order: 74
 ---
