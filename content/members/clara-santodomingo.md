@@ -5,6 +5,6 @@ major: CS + Music
 classYear: "26"
 class: founding
 status: Active
-pastRole: VP Something
+pastRole: ""
 linkedin: https://www.linkedin.com/in/clara-santodomingo/
 ---
