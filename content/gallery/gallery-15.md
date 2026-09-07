@@ -1,5 +1,10 @@
 ---
-image: "/images/uploads/gallery-15.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-15.jpg
+caption: Fam Reveal!
 order: 15
+brothers:
+  - mimo
+  - rhianna
+  - amelia
+  - madeline
 ---
