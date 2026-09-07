@@ -6,7 +6,7 @@ classYear: "26"
 class: alpha
 status: Active
 role: ""
-pastRole: VP Something
+pastRole: VP Prof Dev
 linkedin: https://www.linkedin.com/in/richardzhaoo/
 email: add@gmail.com
 ---
