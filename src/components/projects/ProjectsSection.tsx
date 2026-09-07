@@ -10,9 +10,9 @@ type ProjectTab = {
   year: string;
   title: string;
   subtitle: string;
-  // Philanthropy has no real mockup yet — its featured box falls back to a
-  // plain gray square (see FeaturedImage) rather than sharing another
-  // project's screenshot as a stand-in.
+  // Optional since a project without one yet (see FeaturedImage) falls
+  // back to a plain gray square rather than sharing another project's
+  // screenshot as a stand-in.
   image?: string;
 };
 
@@ -43,6 +43,11 @@ const PROJECT_TABS: ProjectTab[] = [
     year: "2026",
     title: "PHILANTHROPY",
     subtitle: "More info coming soon.",
+    // Philanthropy Work! — cropped to the same ~1.65:1 ratio as
+    // featured-website-redesign.png (the original gallery-24.jpg is a
+    // portrait photo; object-contain on this box would otherwise
+    // letterbox it very differently from the other two tabs).
+    image: "/images/uploads/gallery-24-wide.jpg",
   },
 ];
 
@@ -63,7 +68,7 @@ const MERCH_ITEMS = [
 
 export default function ProjectsSection() {
   return (
-    <section className="relative isolate flex min-h-screen flex-col gap-8 bg-[#fafafa] pt-20 pb-16 md:pt-[110px]">
+    <section className="relative isolate flex min-h-screen flex-col gap-8 bg-[#fafafa] pt-20 pb-16 md:pt-[117px]">
       {/* Much lighter than the default — this page's own frosted panels
           (the featured box, tab rows, merch cards) already carry the
           visual weight, so the grid only needs to read as a faint
@@ -230,7 +235,23 @@ function TabRow({ project, onSelect }: { project: ProjectTab; onSelect: () => vo
         aria-hidden
         className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-black/[0.04] transition-transform duration-300 ease-out group-hover:scale-x-100"
       />
-      <span aria-hidden className="relative z-10 h-[37px] w-20 shrink-0 bg-[#d9d9d9]" />
+      {/* A small preview of the project's own featured image (see
+          FeaturedImage above), not a flat swatch — object-contain scales
+          the whole image DOWN to fit this box at its own real
+          proportions, rather than object-cover's crop (which sliced a
+          near-random strip out of the app screenshot's portrait shape).
+          Falls back to the old flat swatch for a project with no image
+          yet. */}
+      {project.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={project.image}
+          alt=""
+          className="relative z-10 h-[37px] w-20 shrink-0 object-contain"
+        />
+      ) : (
+        <span aria-hidden className="relative z-10 h-[37px] w-20 shrink-0 bg-[#d9d9d9]" />
+      )}
       <span className="relative z-10 flex flex-1 items-center justify-between font-sans text-sm whitespace-nowrap text-black">
         <span>{project.index}</span>
         <span>{project.label}</span>
