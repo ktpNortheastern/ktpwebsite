@@ -1,4 +1,5 @@
 import PlaceholderImage from "@/components/ui/PlaceholderImage";
+import ScrambleText from "@/components/motion/ScrambleText";
 
 const PILLARS = [
   {
@@ -25,7 +26,7 @@ export default function Pillars() {
       className="flex min-h-screen flex-col justify-center overflow-hidden bg-navy px-6 py-16 md:px-[100px]"
     >
       {/* font-bold matches WhyRush's "Why Rush?" heading weight. */}
-      <h2 className="font-mono text-4xl font-bold text-white">Our Pillars</h2>
+      <ScrambleText as="h2" text="Our Pillars" className="font-mono text-4xl font-bold text-white" />
       {/* Flush left (no justify-center) so the row's left edge lines up
           with the title above it — both share the same section padding
           (px-6/md:px-[100px]) as their left margin, instead of the row
