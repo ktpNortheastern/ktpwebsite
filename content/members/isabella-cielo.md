@@ -5,5 +5,6 @@ major: Cybersecurity
 classYear: "29"
 class: gamma
 status: Active
+pastRole: AVP New Member Education
 linkedin: https://www.linkedin.com/in/bella-cielo-7a7714351/
 ---
