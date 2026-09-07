@@ -5,5 +5,6 @@ major: DS + Finance
 classYear: "27"
 class: gamma
 status: Active
+role: VP Recruitment
 linkedin: https://www.linkedin.com/in/maria-samos-rivas/
 ---
