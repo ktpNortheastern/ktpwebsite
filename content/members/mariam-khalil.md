@@ -5,6 +5,6 @@ major: CS + Econ
 classYear: "26"
 class: alpha
 status: Active
-pastRole: VP Something
+pastRole: ""
 linkedin: https://www.linkedin.com/in/mariam-khalil-csse1220/
 ---
