@@ -109,7 +109,17 @@ export default function GalleryNode({ slot, entry }: GalleryNodeProps) {
             key={entry.slug}
             text={caption}
             trigger="immediate"
-            className="font-mono text-sm text-white"
+            // uppercase is a render-only transform (the scramble
+            // animation itself manipulates textContent, not this class),
+            // so it forces every caption to read as all-caps regardless
+            // of how it's cased in the source content — some come in
+            // already shouty ("BROTHER BONDING"), others don't ("Paddle
+            // Reveal!"), and the mix read as inconsistent. font-bold
+            // (matching the "PICTURE NN" label above it) is what was
+            // actually making this look faint before — same white, but
+            // the label's bold weight reads as solid while this text's
+            // regular weight reads thin and washed out next to it.
+            className="font-mono text-base font-bold tracking-wide text-white uppercase"
           />
         )}
       </div>
@@ -118,12 +128,12 @@ export default function GalleryNode({ slot, entry }: GalleryNodeProps) {
         style={{ height: DETAIL_H }}
       >
         {entry?.year && (
-          <span className="truncate font-mono text-[10px] uppercase tracking-wide text-white/50">
+          <span className="truncate font-mono text-xs uppercase tracking-wide text-white/80">
             Year: {entry.year}
           </span>
         )}
         {brothersLabel && (
-          <span className="truncate font-mono text-[10px] uppercase tracking-wide text-white/50">
+          <span className="truncate font-mono text-xs uppercase tracking-wide text-white/80">
             Brothers: {brothersLabel}
           </span>
         )}
