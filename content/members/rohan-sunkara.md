@@ -6,6 +6,6 @@ classYear: "27"
 class: alpha
 status: Active
 role: ""
-pastRole: ""
+pastRole: AVP Marketing
 linkedin: https://www.linkedin.com/in/rohansunkara/
 ---
