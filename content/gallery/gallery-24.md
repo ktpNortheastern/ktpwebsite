@@ -1,5 +1,8 @@
 ---
-image: "/images/uploads/gallery-24.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-24.jpg
+caption: Philanthropy Work!
 order: 24
+year: 2026
+brothers:
+  - Various
 ---
