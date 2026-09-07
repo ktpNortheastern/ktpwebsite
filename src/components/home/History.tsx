@@ -3,11 +3,14 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import PlaceholderImage from "@/components/ui/PlaceholderImage";
 import { isMobileViewport } from "@/lib/isMobileViewport";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// The hero photo — DELTA INITIATION, matching the first of the 7 numbered
+// photos this reel is built around (hero + the 6 satellites below).
+const HERO_IMAGE = "/images/uploads/img-03.jpg";
 
 // One entry per satellite photo — tilt (deg) plus its rest-state position as
 // a fraction of viewport width/height, relative to screen center (negative
@@ -17,13 +20,13 @@ gsap.registerPlugin(ScrollTrigger);
 // flip unevenly, x/y jitter independently) so the two sides read as loosely
 // scattered rather than two uniform straight lines. Add/remove entries to
 // change how many satellites render; nothing else needs updating.
-const SATELLITE_CONFIG: { tilt: number; xVw: number; yVh: number }[] = [
-  { tilt: -14, xVw: -37, yVh: -29 },
-  { tilt: 9, xVw: -41, yVh: 1 },
-  { tilt: -5, xVw: -27, yVh: 33 },
-  { tilt: 13, xVw: 40, yVh: -21 },
-  { tilt: -10, xVw: 31, yVh: 9 },
-  { tilt: 6, xVw: 36, yVh: 35 },
+const SATELLITE_CONFIG: { tilt: number; xVw: number; yVh: number; image: string }[] = [
+  { tilt: -14, xVw: -37, yVh: -29, image: "/images/uploads/gallery-88.jpg" }, // KTP x Generate
+  { tilt: 9, xVw: -41, yVh: 1, image: "/images/uploads/gallery-04.jpg" }, // Rush Event!
+  { tilt: -5, xVw: -27, yVh: 33, image: "/images/uploads/gallery-07.jpg" }, // Merch Dropp
+  { tilt: 13, xVw: 40, yVh: -21, image: "/images/uploads/gallery-11.jpg" }, // Beta Girls!
+  { tilt: -10, xVw: 31, yVh: 9, image: "/images/uploads/gallery-30.jpg" }, // Zach and Maddy and Ife
+  { tilt: 6, xVw: 36, yVh: 35, image: "/images/uploads/gallery-77.jpg" }, // Our Letters!
 ];
 
 // Rest-state scale — the hero starts noticeably bigger than the satellites
@@ -59,7 +62,13 @@ function diamondScale(from: number, peak: number, to: number, t: number) {
 function computeReelSize() {
   const maxW = window.innerWidth * 0.85;
   const maxH = window.innerHeight * 0.68;
-  const ratio = 16 / 9;
+  // Matches the aspect-[3/2] on the hero/satellite boxes below, which
+  // this must stay in sync with since it's what the resolved-reel FLIP
+  // math actually measures against. object-cover on those boxes crops
+  // (rather than letterboxes) whichever photos don't already come in
+  // this ratio, so every photo still reads as a clean landscape frame
+  // instead of leaving some at their own native crop.
+  const ratio = 3 / 2;
   let width = maxW;
   let height = width / ratio;
   if (height > maxH) {
@@ -295,18 +304,20 @@ export default function History() {
             past them mid-scroll — flex items honor z-index even without an
             explicit `position`, so this alone is enough, no stacking
             context hack needed. */}
-        <div ref={heroRef} className="z-10 aspect-[16/9] w-[85vw] max-w-[500px] shrink-0">
-          <PlaceholderImage n={1} className="h-full w-full" />
+        <div ref={heroRef} className="z-10 aspect-[3/2] w-[85vw] max-w-[500px] shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={HERO_IMAGE} alt="" className="h-full w-full object-cover" />
         </div>
-        {SATELLITE_CONFIG.map((_, i) => (
+        {SATELLITE_CONFIG.map((satellite, i) => (
           <div
             key={i}
             ref={(el) => {
               if (el) satelliteRefs.current[i] = el;
             }}
-            className="z-0 aspect-[16/9] w-[85vw] max-w-[500px] shrink-0"
+            className="z-0 aspect-[3/2] w-[85vw] max-w-[500px] shrink-0"
           >
-            <PlaceholderImage n={i + 2} className="h-full w-full" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={satellite.image} alt="" className="h-full w-full object-cover" />
           </div>
         ))}
       </div>
