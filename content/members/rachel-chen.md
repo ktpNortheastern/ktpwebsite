@@ -5,6 +5,6 @@ major: CS + Philosophy
 classYear: "26"
 class: founding
 status: Active
-pastRole: ""
+pastRole: VP Philanthropy
 linkedin: https://www.linkedin.com/in/racheljiarui/
 ---
