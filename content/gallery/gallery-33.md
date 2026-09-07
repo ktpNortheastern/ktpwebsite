@@ -1,5 +1,5 @@
 ---
-image: "/images/uploads/gallery-33.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-33.jpg
+caption: Delta Loves Henry
 order: 33
 ---
