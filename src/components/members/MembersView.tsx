@@ -5,6 +5,7 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ClassFilterDropdown from "@/components/members/ClassFilterDropdown";
 import ClassSection from "@/components/members/ClassSection";
+import GridBackground from "@/components/ui/GridBackground";
 
 export type ClassEntry = {
   slug: string;
@@ -94,17 +95,14 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
 
   return (
     <>
+      <GridBackground />
       {/* The intro copy lives here rather than in the server page component
-          because the mock puts the class filter inside this text column,
-          alongside the ASCII hand — as a sibling block below the hero row it
-          would land underneath the hand instead. */}
+          because the mock puts the class filter inside this text column. */}
       {/* pb-44 (not pb-6) reserves room below the row for the class dropdown's
           own opened list (7 rows ≈ 188px) so it doesn't overlap the first
           class section's heading underneath when clicked open. */}
-      <div className="flex items-start justify-between gap-6 px-6 pt-3 pb-44 md:px-[130px] md:pt-[42px]">
-        {/* shrink-0 only from lg, where the hand is beside it — below that
-            the column has to be free to shrink under 440px. */}
-        <div className="max-w-[440px] lg:shrink-0">
+      <div className="flex items-start gap-6 px-6 pt-3 pb-44 md:px-[130px] md:pt-[42px]">
+        <div className="max-w-[440px]">
           {/* Steps down below sm because the padded parens make this string
               wide enough to force horizontal page overflow at 375px. */}
           <p className="font-sans text-lg leading-none font-bold text-black sm:text-2xl md:text-[30px]">
@@ -122,16 +120,6 @@ export default function MembersView({ classes, membersByClass }: MembersViewProp
             <ClassFilterDropdown classes={classes} value={selected} onSelect={handlePick} />
           </div>
         </div>
-        {/* aspect matches the asset's own 622x476 so object-contain doesn't
-            letterbox it. Sized so the image's bottom edge lands roughly at
-            the class filter dropdown, not the mock's full-height hand.
-            Below lg the 130px gutters leave no room for it beside the copy. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/members-hand-ascii.png"
-          alt=""
-          className="hidden aspect-[622/476] w-[350px] min-w-0 object-contain lg:block"
-        />
       </div>
 
       {classes.map((cls, index) => (

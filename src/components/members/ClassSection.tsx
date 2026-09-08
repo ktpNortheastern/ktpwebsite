@@ -49,10 +49,12 @@ export default function ClassSection({
           mask-image idiom the dot-grid overlays use (gallery/page.tsx).
           The fade runs a fixed 140px rather than a percentage so a collapsed
           class and an expanded one dissolve over the same distance instead of
-          in proportion to their very different heights. */}
+          in proportion to their very different heights. The white/60 fill
+          shares that same mask, so the card's tint dissolves at the same
+          edge as its border instead of ending in a hard rectangle. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-2 inset-y-0 rounded-t-[32px] border border-black/15 [mask-image:linear-gradient(to_bottom,black,transparent_140px)] md:inset-x-4"
+        className="pointer-events-none absolute inset-x-2 inset-y-0 rounded-t-[32px] border border-black/15 bg-white/60 [mask-image:linear-gradient(to_bottom,black,transparent_140px)] md:inset-x-4"
       />
       <button
         type="button"

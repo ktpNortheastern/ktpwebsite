@@ -51,7 +51,7 @@ export default function MembersPage() {
   }
 
   return (
-    <section className="min-h-screen bg-[#fafafa] pt-[var(--nav-h)]">
+    <section className="relative isolate min-h-screen bg-[#fafafa] pt-[var(--nav-h)]">
       <MembersView classes={classes} membersByClass={membersByClass} />
     </section>
   );
