@@ -42,12 +42,14 @@ export default function NavBar() {
   // where the nav should just stay put. Every other route gets the
   // hide-while-exploring treatment below.
   const hideOnActivity = !["/", "/rush", "/contact"].includes(pathname);
-  // Hidden while the user is actively scrolling/panning (drag or wheel), so
-  // the page gets more of the viewport — reappears once they've settled
-  // for a couple seconds, or as soon as the pointer moves back up near the
-  // nav strip itself. Suppressed entirely while the gallery lightbox is
-  // open (see the "gallery-lightbox" listener below) — it should never pop
-  // back up over an enlarged photo, however long it's been.
+  // Hidden while the user is scrolling down (an iOS-Safari-style reveal:
+  // it never disappears outright, just slides up out of the way), shown
+  // again the instant they scroll back up, and always shown near the very
+  // top of the page — a bare nav-less top of page reads as broken/loading
+  // rather than intentional. Suppressed entirely while the gallery
+  // lightbox is open (see the "gallery-lightbox" listener below) — it
+  // should never pop back up over an enlarged photo, however long it's
+  // been or whichever direction the user scrolls inside it.
   const [navHidden, setNavHidden] = useState(false);
   const [open, setOpen] = useState(false);
   // Whether the Greek "ΚΘΠ" corner label is mounted/visible. Purely a
@@ -75,58 +77,59 @@ export default function NavBar() {
   useEffect(() => {
     if (!hideOnActivity) return;
 
-    const IDLE_MS = 2000;
-    const TOP_REVEAL_PX = 96; // roughly the nav's own height
-    let idleTimer: number | undefined;
+    const TOP_REVEAL_PX = 4; // treat a few px of scroll as still "at the top"
     // True only on /gallery, while its lightbox is open (see the
     // "gallery-lightbox" CustomEvent GalleryCanvas dispatches) — while
-    // true, every reveal trigger below is suppressed, however long it's
-    // been or wherever the pointer moves.
+    // true, every direction-based update below is suppressed, however the
+    // user scrolls inside it.
     let lightboxOpen = false;
 
-    function scheduleReveal() {
+    // A single ScrollTrigger with no pinned element, just start/end scroll
+    // offsets — the same "global scroll position + direction" idiom
+    // SnapScrollContainer's own snap trigger uses (trigger: "body", start:
+    // "top top", end: "max"). Reading self.scroll()/self.direction here
+    // rather than raw wheel/pointer events means this works identically
+    // whether ScrollSmoother owns the scroll (desktop, where the window
+    // itself never scrolls — see globals.css's `smoother-active` — so a
+    // plain `window.scrollY`/"scroll" listener would never fire at all) or
+    // native scrolling does (mobile, below ScrollSmoother's breakpoint).
+    function update(self: ScrollTrigger) {
       if (lightboxOpen) return;
-      window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => setNavHidden(false), IDLE_MS);
-    }
-
-    function handlePointerMove(e: PointerEvent) {
-      if (lightboxOpen) return;
-      if (e.clientY <= TOP_REVEAL_PX) {
+      if (self.scroll() <= TOP_REVEAL_PX) {
         setNavHidden(false);
-        window.clearTimeout(idleTimer);
-        return;
-      }
-      // buttons & 1: actively dragging (mouse button held), not just idly
-      // moving the cursor — only a real pan gesture should hide the nav.
-      if (e.buttons & 1) {
+      } else if (self.direction === 1) {
         setNavHidden(true);
-        scheduleReveal();
+      } else if (self.direction === -1) {
+        setNavHidden(false);
       }
     }
 
-    function handleWheel() {
-      if (lightboxOpen) return;
-      setNavHidden(true);
-      scheduleReveal();
-    }
+    const st = ScrollTrigger.create({
+      trigger: "body",
+      start: "top top",
+      end: "max",
+      onUpdate: update,
+    });
+    // onUpdate only fires on an actual scroll/refresh event, not at
+    // creation time — without this, a route that mounts already scrolled
+    // (a restored position) would leave the nav in its default shown state
+    // until the next scroll instead of reflecting where it actually is.
+    update(st);
 
     function handleLightboxToggle(e: Event) {
       const open = (e as CustomEvent<{ open: boolean }>).detail?.open ?? false;
       lightboxOpen = open;
-      if (open) {
-        window.clearTimeout(idleTimer);
-        setNavHidden(true);
-      }
+      // The gallery's own canvas (see GalleryCanvas.tsx) is a bounded 2D
+      // pan surface, not a real scrolling page — there's no scroll signal
+      // left afterward to reveal the nav via the direction logic above, so
+      // closing the lightbox has to explicitly show it back rather than
+      // leaving it stuck hidden forever.
+      setNavHidden(open);
     }
 
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("wheel", handleWheel, { passive: true });
     window.addEventListener("gallery-lightbox", handleLightboxToggle);
     return () => {
-      window.clearTimeout(idleTimer);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("wheel", handleWheel);
+      st.kill();
       window.removeEventListener("gallery-lightbox", handleLightboxToggle);
     };
   }, [hideOnActivity]);
