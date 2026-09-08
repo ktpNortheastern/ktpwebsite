@@ -67,7 +67,6 @@ export default function Footer() {
       </div>
       <div className="mt-16 flex flex-wrap justify-between font-mono text-xs text-white/50">
         <p>© 2026 Kappa Theta Pi Omega Chapter. All rights reserved.</p>
-        <p>Sponsored by Jane Street.</p>
       </div>
     </footer>
   );
