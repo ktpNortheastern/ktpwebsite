@@ -1,8 +1,8 @@
 ---
 image: /images/uploads/gallery-11.jpg
-caption: BETA GIRLS!
+caption: FULL LINEUP OF BETA BADDIES
 order: 11
-year: 2001
+year: 2025
 brothers:
   - Mimo
   - Rowen
