@@ -1,10 +1,11 @@
 ---
 image: /images/uploads/gallery-19.jpg
-caption: TECH OLYMPICS
+caption: TECH OLYMPICS WINNERS
 order: 19
+year: 2025
 brothers:
-  - johnyel
-  - rhianna
-  - martin
-  - easha
+  - Jhonyel
+  - Rhianna
+  - Martin
+  - Easha
 ---
