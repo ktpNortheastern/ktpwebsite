@@ -6,6 +6,6 @@ classYear: "27"
 class: gamma
 status: Active
 role: ""
-pastRole: VP Recruitment
+pastRole: AVP Recruitment
 linkedin: https://www.linkedin.com/in/maria-samos-rivas/
 ---
