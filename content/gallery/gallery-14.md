@@ -2,8 +2,9 @@
 image: /images/uploads/gallery-14.jpg
 caption: Criminals!
 order: 14
+year: 2025
 brothers:
-  - martin
-  - prabhav
-  - owen
+  - Martin
+  - Prabhav
+  - Owen
 ---
