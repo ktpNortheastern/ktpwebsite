@@ -64,14 +64,32 @@ const DEFAULT_MAX_ALPHA = 0.09;
  * not `relative` by itself — see RushTimeline.tsx/ContactSection.tsx/
  * ProjectsSection.tsx/faq/page.tsx for the `relative isolate` pairing.
  */
+// rgb triplets the canvas fills with (at the per-square alpha computed
+// below) — "dark" (slate) for the light (#fafafa/white) sections this
+// originally shipped on, "light" (near-white) for the navy sections that
+// used to render their own separate white-dot pattern (Statement/History).
+const TONE_RGB = {
+  dark: "15, 23, 42",
+  light: "255, 255, 255",
+} as const;
+
 export default function GridBackground({
   maxAlpha = DEFAULT_MAX_ALPHA,
+  tone = "dark",
+  className = "",
 }: {
   // Rush/FAQ read fine at the default; Contact and Projects both sit
   // behind their own already-visible frosted-glass panels (see
   // ContactSection.tsx/ProjectsSection.tsx), so a noticeably lighter
   // grid there reads as texture rather than competing with those panels.
   maxAlpha?: number;
+  // "dark" squares read on this site's light (#fafafa/white) sections;
+  // "light" squares are the near-white equivalent for its navy ones.
+  tone?: "dark" | "light";
+  // Extra classes merged onto the canvas itself — e.g. a mask-image to
+  // fade this out toward one edge of its section on top of the per-band
+  // falloff every caller already gets (see FaqPage's bottom-of-page use).
+  className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -82,6 +100,7 @@ export default function GridBackground({
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    const rgb = TONE_RGB[tone];
 
     function draw() {
       const rect = parent!.getBoundingClientRect();
@@ -134,7 +153,7 @@ export default function GridBackground({
           const alpha = Math.min(maxAlpha, maxAlpha * falloff * jitter);
           if (alpha <= 0.003) continue;
 
-          ctx!.fillStyle = `rgba(15, 23, 42, ${alpha})`;
+          ctx!.fillStyle = `rgba(${rgb}, ${alpha})`;
           ctx!.beginPath();
           ctx!.roundRect(x, y, SQUARE, SQUARE, RADIUS);
           ctx!.fill();
@@ -153,9 +172,13 @@ export default function GridBackground({
     const observer = new ResizeObserver(() => draw());
     observer.observe(parent);
     return () => observer.disconnect();
-  }, [maxAlpha]);
+  }, [maxAlpha, tone]);
 
   return (
-    <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 -z-10" />
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 -z-10 ${className}`}
+    />
   );
 }

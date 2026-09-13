@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { isMobileViewport } from "@/lib/isMobileViewport";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
+import GridBackground from "@/components/ui/GridBackground";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -265,12 +266,13 @@ export default function History() {
   return (
     <section
       ref={sectionRef}
+      id="history"
       data-snap-section
       className="relative isolate flex min-h-screen flex-col overflow-hidden bg-navy pt-[var(--nav-h)] pb-16 md:h-screen md:justify-center md:pb-0"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle,rgba(255,255,255,0.6)_0.5px,transparent_0.5px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,black_80%,transparent)]"
+      <GridBackground
+        tone="light"
+        className="[mask-image:linear-gradient(to_bottom,black_80%,transparent)]"
       />
 
       {/* Normal document flow (above the strip) below `md`, where there's no
