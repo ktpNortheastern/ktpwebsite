@@ -1,5 +1,10 @@
 ---
-image: "/images/uploads/gallery-66.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-66.jpg
+caption: ZACH ZACH MELVIN
 order: 66
+year: 2026
+brothers:
+  - ZACH
+  - ZACH
+  - MELVIN
 ---
