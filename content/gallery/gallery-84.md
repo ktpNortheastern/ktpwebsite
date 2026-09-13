@@ -1,5 +1,9 @@
 ---
-image: "/images/uploads/gallery-84.jpg"
-caption: "PLACEHOLDER — add real caption via /admin"
+image: /images/uploads/gallery-84.jpg
+caption: CUTIES!
 order: 84
+year: 2026
+brothers:
+  - ROWEN
+  - ABBY
 ---
