@@ -20,6 +20,7 @@ const LETTER_PARAGRAPHS = [
 export default function PresidentialWelcome() {
   return (
     <section
+      id="presidential-welcome"
       data-snap-section
       className="flex min-h-screen flex-col items-center justify-center gap-10 overflow-hidden bg-navy px-6 py-16 pt-[100px] md:h-screen md:flex-row md:items-stretch md:gap-16 md:px-[100px] md:py-10 md:pt-[100px]"
     >

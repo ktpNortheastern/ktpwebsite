@@ -28,14 +28,15 @@ const PILLARS = [
 export default function Pillars() {
   return (
     <section
+      id="pillars"
       data-snap-section
-      className="flex min-h-screen flex-col justify-center overflow-hidden bg-navy px-6 py-16 md:px-[100px]"
+      className="flex min-h-screen flex-col justify-center overflow-hidden bg-navy px-6 py-16 md:pr-[100px] md:pl-[160px]"
     >
       {/* font-bold matches WhyRush's "Why Rush?" heading weight. */}
       <ScrambleText as="h2" text="Our Pillars" className="font-mono text-4xl font-bold text-white" />
       {/* Flush left (no justify-center) so the row's left edge lines up
           with the title above it — both share the same section padding
-          (px-6/md:px-[100px]) as their left margin, instead of the row
+          (px-6, md:pl-[160px]) as their left margin, instead of the row
           being centered as its own block within that padding. */}
       <div className="mt-8 flex w-full flex-col items-stretch gap-8 md:flex-row md:justify-between">
         {PILLARS.map((pillar, i) => (

@@ -56,6 +56,7 @@ export default function Network() {
 
   return (
     <section
+      id="network"
       data-snap-section
       data-snap-through
       data-network-section

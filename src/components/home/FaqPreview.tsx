@@ -20,6 +20,7 @@ export default function FaqPreview() {
 
   return (
     <section
+      id="faq-preview"
       data-snap-section
       className="flex min-h-screen flex-col justify-center bg-white px-6 py-16 md:h-screen md:px-[130px]"
     >

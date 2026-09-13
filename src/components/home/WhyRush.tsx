@@ -200,8 +200,9 @@ export default function WhyRush() {
   return (
     <section
       ref={sectionRef}
+      id="why-rush"
       data-snap-section
-      className="flex min-h-screen flex-col items-start gap-10 bg-navy px-6 py-16 md:h-screen md:flex-row md:items-center md:gap-16 md:px-[100px] md:py-0"
+      className="flex min-h-screen flex-col items-start gap-10 bg-navy px-6 py-16 md:h-screen md:flex-row md:items-center md:gap-16 md:pr-[100px] md:pl-[160px] md:py-0"
     >
       <div className="flex w-full shrink-0 flex-col gap-8 md:w-[275px]">
         <h2 className="font-mono text-6xl font-bold leading-none text-white">
