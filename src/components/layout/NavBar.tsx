@@ -197,15 +197,13 @@ export default function NavBar() {
       gsap.set(inner!, { scaleX: container / natural });
     }
 
-    // mix-blend-difference is a permanent, always-on class on the wrapper
-    // (see JSX below), never touched by JS — only its OPACITY is animated,
-    // continuously, from the same scroll progress driving the FLIP itself.
-    // That opacity fade is the actual fix for the cream-tint bug: the
-    // wordmark is invisible by the time it would be sitting over the
-    // header's opaque navy, so there's no blended element left to show a
-    // stuck cream tint in the first place. A scramble effect can't do this
-    // job — scrambled characters are still rendered, still blended, still
-    // cream over navy — so this element only ever fades, never scrambles.
+    // The big wordmark's opacity is animated continuously, from the same
+    // scroll progress driving the FLIP itself, so it's fully faded out by
+    // the time it would be sitting in the header's small corner slot —
+    // that's the handoff point where the Greek "ΚΘΠ" corner label (never
+    // faded, see below) takes over instead. A scramble effect can't do
+    // this job — scrambled characters are still rendered/visible — so this
+    // element only ever fades, never scrambles.
     //
     // FADE_START_PROGRESS is where the fade begins, deliberately expressed
     // as a fraction of the SAME progress (0–1 over SCROLL_DISTANCE) that
@@ -220,12 +218,9 @@ export default function NavBar() {
     // synchronized with the wordmark's own position, in both directions,
     // on every scroll frame — same as HOLD/SHRINK below.
     const FADE_START_PROGRESS = 0.85; // last 15% of the FLIP's total progress
-    // Greek starts appearing slightly BEFORE English's fade fully
-    // completes (which still finishes exactly at progress 1, unchanged —
-    // that's the line that actually matters for the cream-tint bug).
-    // This overlap is only safe on Greek's side: it's never blended, so
-    // there's no tint risk in it becoming visible a little early. Without
-    // it, the two elements swapped in the same instant — each fade read
+    // Greek starts appearing slightly BEFORE English's fade fully completes
+    // (which still finishes exactly at progress 1, unchanged). Without this
+    // overlap, the two elements swapped in the same instant — each fade read
     // fine in isolation, but the handoff between them still landed as a
     // hard cut rather than a transition.
     const GREEK_APPEAR_PROGRESS = 0.95;
@@ -434,42 +429,21 @@ export default function NavBar() {
 
   return (
     <>
-      {/* A separate fixed element from <header>, deliberately — not a
-          styling choice, a stacking-context requirement. mix-blend-mode
-          only searches for backdrop within the nearest ancestor stacking
-          context; a blend on an element that is ITSELF a stacking-context
-          root (position:fixed here) searches one level further out (the
-          page), which is what lets it reach Hero's real photo. Nesting it
-          inside <header> instead confined the search to header's own
-          subtree, which has nothing painted where the wordmark visually
-          sits — it rendered as plain unblended white. Keeping it as its
-          own element also means <header> (nav strip, links, Rush Now)
-          never carries the blend and always stays solid navy/white.
-
-          mix-blend-difference is a permanent, static class here — no
-          longer toggled by JS. Only its opacity is, continuously, from
-          updateWordmarkCorner (via a plain ref, not a CSS class — a CSS
-          transition fighting a per-frame gsap.set would fight/lag against
-          it) so it fades away before it's fully sitting over the
-          header's opaque navy in the corner slot. That fade is what
-          fixes the old cream-tint bug — the blended element being hidden
-          by then, not a state it has to correctly guess and toggle out
-          of. showGreek's pointer-events/aria/tabIndex still reflect
-          whether it's currently the interactive element. */}
+      {/* A separate fixed element from <header>, deliberately: it fades out
+          (opacity, driven continuously by updateWordmarkCorner via a plain
+          ref — a CSS transition fighting a per-frame gsap.set would
+          fight/lag against it) before it's fully sitting over the header's
+          corner slot, handing off to the Greek "ΚΘΠ" corner label at that
+          point rather than the two ever overlapping. showGreek's
+          pointer-events/aria/tabIndex still reflect whether it's currently
+          the interactive element. Solid white, same as the rest of the
+          header — no blend mode. */}
       {isHome && (
         <div
           ref={wordmarkWrapperRef}
-          // z-40, deliberately BELOW header's z-50: despite this wrapper's
-          // own layout box sitting well below the header (top: --nav-h),
-          // its permanent mix-blend-difference forces it onto its own
-          // compositing layer for the cross-stacking-context blend (see the
-          // header comment above) — Chromium's hit-testing for that layer
-          // was found (empirically, via elementFromPoint at the nav links'
-          // real coordinates) to win over the header's own nav links
-          // whenever it outranked header in z-order, even though their
-          // layout boxes don't overlap. The header is opaque navy regardless,
-          // so painting this one layer below it costs nothing visually.
-          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-40 flex px-[var(--nav-pad-x)] mix-blend-difference"
+          // z-40, below header's z-50, purely so the header (nav strip,
+          // links, Rush Now) always paints on top of it.
+          className="pointer-events-none fixed inset-x-0 top-[var(--nav-h)] z-40 flex px-[var(--nav-pad-x)]"
         >
           <Link
             ref={wordmarkRef}

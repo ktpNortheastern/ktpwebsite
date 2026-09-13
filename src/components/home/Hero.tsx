@@ -5,11 +5,14 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCursor } from "@/components/motion/CustomCursor";
+import HeroPhotoGrid from "@/components/home/HeroPhotoGrid";
 import { scramble } from "@/components/motion/ScrambleText";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
+  const photoImgRef = useRef<HTMLImageElement>(null);
   const taglineRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLParagraphElement>(null);
   const { setState } = useCursor();
@@ -106,14 +109,16 @@ export default function Hero() {
           reads this element's live rect to know whether the wordmark is
           still actually over the photo right now, rather than guessing
           from a fixed scroll-timeline fraction. */}
-      <div data-hero-photo className="relative flex-1 overflow-hidden">
+      <div data-hero-photo ref={photoRef} className="relative flex-1 overflow-hidden">
         <Image
+          ref={photoImgRef}
           src="/images/homepage.png"
           alt=""
           fill
           priority
           className="object-cover object-top"
         />
+        <HeroPhotoGrid containerRef={photoRef} imgRef={photoImgRef} />
         <div className="absolute inset-0 bg-black/30" />
 
         {/* Anchored to the photo's own box rather than sharing space with
