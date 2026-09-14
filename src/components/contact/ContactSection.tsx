@@ -8,6 +8,18 @@ import GridBackground from "@/components/ui/GridBackground";
 // all this form needs to flag.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Web3Forms emails the submission on to whatever address the access key was
+// created for (ktp.northeastern@gmail.com) — so the club's address never
+// appears on the page for scrapers to pick up. Only the key does, which is
+// by design: Web3Forms keys are meant to be public, and their endpoint sits
+// behind a Cloudflare challenge that rejects server-to-server posts, so the
+// browser has to be the one making this request.
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+const MAX_MESSAGE_LENGTH = 5000;
+const SEND_FAILED = "We couldn't send your message right now. Please try again in a moment.";
+
 function getEmailError(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed.includes("@")) return "Please include an “@” in your email address.";
@@ -21,10 +33,13 @@ export default function ContactSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [botcheck, setBotcheck] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = name.trim() !== "" && email.trim() !== "" && message.trim() !== "";
+  const sending = status === "sending";
+  const canSubmit =
+    !sending && name.trim() !== "" && email.trim() !== "" && message.trim() !== "";
 
   // Editing any field after a submit attempt clears whatever that attempt
   // left behind, so a fixed typo doesn't keep showing a stale error (or an
@@ -33,29 +48,84 @@ export default function ContactSection() {
   function updateField(setter: (value: string) => void) {
     return (value: string) => {
       setError(null);
-      setSubmitted(false);
+      setStatus("idle");
       setter(value);
     };
   }
 
-  // No backend wired up yet (visuals only, per design feedback) — this just
-  // confirms the interaction locally rather than actually sending anything.
   // `noValidate` on the form (below) suppresses the browser's own native
   // validation bubble for type="email" so this custom message is the only
   // one that ever shows.
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
 
+    // Honeypot: the matching input is hidden from real users, so anything
+    // that arrives with it filled in is a script. Show the normal success
+    // state rather than an error so the bot doesn't retry with a different
+    // shape — but don't actually send anything.
+    if (botcheck !== "") {
+      setStatus("sent");
+      return;
+    }
+
     const emailError = getEmailError(email);
     if (emailError) {
-      setSubmitted(false);
+      setStatus("idle");
       setError(emailError);
       return;
     }
 
+    if (message.trim().length > MAX_MESSAGE_LENGTH) {
+      setStatus("idle");
+      setError("That message is too long to send.");
+      return;
+    }
+
+    if (!ACCESS_KEY) {
+      setStatus("idle");
+      setError("The contact form isn't configured yet. Please reach out on social instead.");
+      return;
+    }
+
     setError(null);
-    setSubmitted(true);
+    setStatus("sending");
+
+    try {
+      const response = await fetch(WEB3FORMS_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: ACCESS_KEY,
+          subject: `Website contact form — ${name.trim()}`,
+          from_name: "KTP Website",
+          // Sets the email's Reply-To, so hitting reply in the KTP inbox
+          // goes back to whoever filled out the form.
+          replyto: email.trim(),
+          name: name.trim(),
+          email: email.trim(),
+          message: message.trim(),
+        }),
+      });
+
+      // Web3Forms reports failures in the body (`success: false`) as well as
+      // via the status code, so check both before calling it sent.
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.success) {
+        console.error("Contact form: Web3Forms rejected the submission.", response.status, data);
+        setStatus("idle");
+        setError(SEND_FAILED);
+        return;
+      }
+
+      setStatus("sent");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch {
+      setStatus("idle");
+      setError("We couldn't send your message right now. Please check your connection.");
+    }
   }
 
   return (
@@ -127,6 +197,20 @@ export default function ContactSection() {
             />
           </Field>
 
+          {/* Honeypot — hidden from real users (and from screen readers via
+              aria-hidden + tabIndex=-1), so anything that arrives with this
+              filled in is a bot, and handleSubmit drops it. */}
+          <input
+            type="text"
+            name="botcheck"
+            value={botcheck}
+            onChange={(e) => setBotcheck(e.target.value)}
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden
+          />
+
           {/* Same flip-up hover + arrow treatment as ui/Button, but a real
               <button type="submit"> — Button is Link-only, and this one
               needs to be disabled until every field has content. */}
@@ -166,9 +250,11 @@ export default function ContactSection() {
             }`}
           >
             {error ??
-              (submitted
-                ? "Thank you for reaching out — your message has been received, and we will be in touch shortly."
-                : "")}
+              (status === "sending"
+                ? "Sending…"
+                : status === "sent"
+                  ? "Thank you for reaching out — your message has been received, and we will be in touch shortly."
+                  : "")}
           </p>
         </form>
       </div>
