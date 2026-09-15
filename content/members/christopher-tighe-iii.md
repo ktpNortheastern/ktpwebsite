@@ -1,7 +1,7 @@
 ---
 name: Christopher Tighe III
 photo: /images/uploads/christopher-tighe-iii.png
-major: Computer Science
+major: Physics
 classYear: "29"
 class: delta
 status: Active
