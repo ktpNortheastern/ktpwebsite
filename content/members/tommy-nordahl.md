@@ -1,7 +1,7 @@
 ---
 name: Tommy Nordahl
 photo: /images/uploads/tommy-nordahl.png
-major: Computer Science
+major: Math
 classYear: "29"
 class: delta
 status: Active
