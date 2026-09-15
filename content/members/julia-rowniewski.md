@@ -1,6 +1,6 @@
 ---
 name: Julia Rowniewski
-photo: /images/uploads/julia-rowniewski.png
+photo: /images/uploads/julia-rowniewski.jpg
 major: Cyber + PPE
 classYear: "29"
 class: gamma
