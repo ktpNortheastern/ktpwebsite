@@ -1,7 +1,7 @@
 ---
 name: Amogh Athimamula
 photo: /images/uploads/amogh-athimamula.png
-major: Ccomputer Science
+major: Computer Science
 classYear: "28"
 class: delta
 status: Active
