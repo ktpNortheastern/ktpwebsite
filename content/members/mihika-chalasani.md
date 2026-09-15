@@ -1,6 +1,6 @@
 ---
 name: Mihika Chalasani
-photo: /images/uploads/mihika-chalasani.png
+photo: /images/uploads/mihika-chalasani.jpg
 major: Computer Science
 classYear: "28"
 class: executive-board
