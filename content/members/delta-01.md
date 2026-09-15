@@ -1,7 +1,7 @@
 ---
 name: Phoebe Tan
 photo: /images/uploads/delta-01.png
-major: CS
+major: Computer Science
 classYear: "29"
 class: delta
 status: Active
