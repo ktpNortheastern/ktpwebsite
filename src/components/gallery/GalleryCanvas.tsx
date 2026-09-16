@@ -9,6 +9,7 @@ import GalleryLightbox from "@/components/gallery/GalleryLightbox";
 import GalleryIntro from "@/components/gallery/GalleryIntro";
 import {
   SLOTS,
+  ADJACENCY,
   CONNECTOR_PATHS,
   CONNECTOR_ENDPOINTS,
   PLANE_W,
@@ -227,6 +228,21 @@ export default function GalleryCanvas({ items }: { items: GalleryEntry[] }) {
     else instance.enable();
   }, [openEntry]);
 
+  // A connector (and its endpoint dots) only makes sense between two slots
+  // that both actually have a photo — otherwise it's a line/dot pointing at
+  // an empty grid square, same problem as the empty-container bug above.
+  const visibleEdgeIndices: number[] = [];
+  const visibleEndpointIds = new Set<number>();
+  if (assignment) {
+    ADJACENCY.forEach(([a, b], i) => {
+      if (assignment.has(a) && assignment.has(b)) {
+        visibleEdgeIndices.push(i);
+        visibleEndpointIds.add(a);
+        visibleEndpointIds.add(b);
+      }
+    });
+  }
+
   return (
     <div ref={viewportRef} className="relative h-full w-full overflow-hidden bg-navy">
       <div
@@ -239,18 +255,24 @@ export default function GalleryCanvas({ items }: { items: GalleryEntry[] }) {
         style={{ width: PLANE_W, height: PLANE_H }}
       >
         <svg width={PLANE_W} height={PLANE_H} className="pointer-events-none absolute left-0 top-0">
-          {CONNECTOR_PATHS.map((d, i) => (
-            <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth={1} />
+          {visibleEdgeIndices.map((i) => (
+            <path
+              key={i}
+              d={CONNECTOR_PATHS[i]}
+              fill="none"
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth={1}
+            />
           ))}
-          {CONNECTOR_ENDPOINTS.map((slot) => (
+          {CONNECTOR_ENDPOINTS.filter((slot) => visibleEndpointIds.has(slot.id)).map((slot) => (
             <circle key={slot.id} cx={slot.x} cy={slot.y} r={2.5} fill="rgba(255,255,255,0.4)" />
           ))}
         </svg>
-        {SLOTS.map((slot) =>
-          visibleIds.has(slot.id) ? (
-            <GalleryNode key={slot.id} slot={slot} entry={assignment?.get(slot.id)} />
-          ) : null,
-        )}
+        {SLOTS.map((slot) => {
+          const entry = assignment?.get(slot.id);
+          if (!entry || !visibleIds.has(slot.id)) return null;
+          return <GalleryNode key={slot.id} slot={slot} entry={entry} />;
+        })}
       </div>
       <GalleryIntro />
       <p className="pointer-events-none absolute inset-x-0 bottom-4 z-30 text-center font-mono text-xs text-white/50">
