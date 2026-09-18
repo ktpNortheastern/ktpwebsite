@@ -1,6 +1,6 @@
 ---
 name: Phoebe Tan
-photo: /images/uploads/delta-01.png
+photo: /images/uploads/phoebe-tan.jpg
 major: Computer Science
 classYear: "29"
 class: delta
