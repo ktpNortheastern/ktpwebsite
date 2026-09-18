@@ -1,4 +1,3 @@
-import PlaceholderImage from "@/components/ui/PlaceholderImage";
 import ScrambleText from "@/components/motion/ScrambleText";
 
 // One entry per paragraph rather than one big whitespace-pre-line string —
@@ -30,7 +29,12 @@ export default function PresidentialWelcome() {
           leading-snug + text-sm (down from leading-relaxed/text-[15px]):
           the full letter overflowed a 1080p viewport at the looser
           spacing, needing an extra scroll just to clear one section. */}
-      <PlaceholderImage n={1} className="h-[260px] w-full shrink-0 md:h-auto md:w-[380px]" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/uploads/presidential-welcome.jpg"
+        alt="Eleanor Meltzer and Andrew Rettig, Omega Chapter Presidents"
+        className="h-[260px] w-full shrink-0 object-cover object-[50%_35%] md:h-auto md:w-[380px]"
+      />
       <div className="md:max-w-[622px]">
         <ScrambleText
           as="h2"
