@@ -1,6 +1,6 @@
 ---
 name: Christopher Tighe III
-photo: /images/uploads/christopher-tighe-iii.png
+photo: /images/uploads/christopher-tighe-iii.jpg
 major: Physics
 classYear: "29"
 class: delta
