@@ -2,7 +2,7 @@
 name: Piper Boulden
 photo: /images/uploads/piper-boulden.png
 major: Mechanical engineering
-classYear: "29"
+classYear: "28"
 class: delta
 status: Active
 pastRole: AVP Philanthropy
